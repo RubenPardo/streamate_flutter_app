@@ -62,22 +62,24 @@ void main() {
 
   });
 
-    test("Login - le pasan una url mal formada",() async {
-
-    String url = "https://dumyurl?co";
-
-      when(() => serviceLocator<TwitchAuthRepository>().getTokenDataRemote(
-            any(),
-          )).thenAnswer((invocation) => Future.value(TokenData.empty()));
-      when(() => serviceLocator<TwitchAuthRepository>().saveTokenDataLocal(any()),).thenAnswer((invocation) => Future.value());
-
-      var result = (await loginUseCase.logIn(url)).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool
-      
-      // si va bien tiene que devolver un valor left y un error
-      expect(result is MyError, true); 
-
-
-  });
+  test("Login - le pasan una url mal formada",() async { 
+ 
+    String url = "https://dumyurl?co"; 
+ 
+      when(() => serviceLocator<TwitchAuthRepository>().getTokenDataRemote( 
+            any(), 
+          )).thenAnswer((invocation) => Future.value(TokenData.empty())); 
+      when(() => serviceLocator<TwitchAuthRepository>().saveTokenDataLocal(any()),).thenAnswer((invocation) => Future.value()); 
+ 
+      var result = (await loginUseCase.logIn(url)).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool 
+       
+      // si va bien tiene que devolver un valor left y un error 
+      expect(result is MyError, true);  
+ 
+ 
+  }); 
+ 
+ 
 
 
 

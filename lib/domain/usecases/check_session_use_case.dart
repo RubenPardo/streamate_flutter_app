@@ -36,8 +36,7 @@ class CheckSessionUseCase{
         }
       }else{
         // NO HAY TOKEN  ----------------------------------------------------------------
-        return const Left(MyError("Error al comprobar la sesion"));
-       // return const Right(false);
+        return const Right(false);
       }  
 
     }catch(e){
