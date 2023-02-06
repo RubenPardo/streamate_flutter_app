@@ -16,7 +16,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         
         on<AppStarted>( // ------------------------------------------------------------------
           (event,emit) async{
-            print("----------------------------------------------EVENT AppStarted");
             emit(AuthLoading());
             var result = await _comprobarSesionCasoUso.llamar();
             result.fold(
@@ -48,7 +47,6 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         on<LogIn>( // ------------------------------------------------------------------
           (event,emit) async{
             // event.objeto para obtener cosas
-            print("----------------------------------------------EVENT Login");
             emit(AuthLoading()); // ---------------------------> Loading
 
             var result = await _loginCasoUso.logIn(event.redirectUri);
