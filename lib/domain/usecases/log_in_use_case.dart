@@ -32,7 +32,7 @@ class LogInUseCase{
         print("TENEMOS TOKEN DATA");
           // Si se obtuvo un token de acceso, se persiste y se devuelve
         authRepository.saveTokenDataLocal(tokenData);
-        User user = await serviceLocator<TwitchAuthRepository>().getUserRemote(tokenData.accesToken);
+        User user = await serviceLocator<TwitchAuthRepository>().getUserRemote(tokenData.accessToken);
         
         return Right(user);
       }catch(e){

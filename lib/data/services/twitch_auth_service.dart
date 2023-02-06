@@ -2,19 +2,15 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:streamate_flutter_app/core/request.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
+import 'package:streamate_flutter_app/data/model/token_data.dart';
 import 'package:streamate_flutter_app/shared/cambiarAEnv.dart';
 import 'package:streamate_flutter_app/shared/strings.dart';
 
 
 abstract class TwitchAuthService{
   Future<Map<String, dynamic>> getTokenDataRemote(String authorizationCode);
-  Future<Map<String, dynamic>> getTokenDataLocal();
-  Future<void> saveTokenDataLocal(Map<String, dynamic> tokenData);
-  Future<void> clearTokenDataLocal();
-  Future<bool> isTokenExpired();
-  Future<bool> isTokenSavedLocal(); 
   Future<Map<String, dynamic>> getUserRemote(String accessToken);
-  Future<bool> updateToken(String accessToken);
+  Future<Map<String,dynamic>> updateToken(String accessToken);
   String getAutorizationUrl();
 }
 
@@ -87,97 +83,11 @@ class TwitchAuthServiceImpl extends TwitchAuthService{
     }
   }
 
-
-  /// getTokenDataLocal() -> [texto:texto]
-  /// 
-  /// Obtiene los datos del token guardados en sharedPreferences 
-  /// y los devuelve en map
-  ///  {
-  ///    'access_token': accessToken,
-  ///    'expires_in': expiresIn,
-  ///    'refresh_token': refreshToken,
-  ///  }
-  /// 
-  ///
-  @override
-  Future<Map<String, dynamic>> getTokenDataLocal() async {
-     
-    // Obtiene una instancia de SharedPreferences
-    SharedPreferences prefs = serviceLocator<SharedPreferences>();
-
-    // Obtiene los valores de acces_token, expires_in y refresh_token de las preferencias
-    final accessToken = prefs.getString('access_token');
-    final expiresIn = prefs.getInt('expires_in');
-    final refreshToken = prefs.getString('refresh_token');
-
-    // Si alguno de los valores es nulo, significa que no hay un token guardado
-    if (accessToken == null || expiresIn == null || refreshToken == null) {
-      return {};
-    }
-
-    // Devuelve los valores en un mapa
-    return {
-      'access_token': accessToken,
-      'expires_in': expiresIn,
-      'refresh_token': refreshToken,
-    };
-  }
-
-  /// [texto:texto] -> saveTokenDataLocal() -> 
-  // Función para persistir el token de acceso en el dispositivo
-  @override
-  Future<void> saveTokenDataLocal(Map<String, dynamic> tokenData) async {
-    //  ;
-    SharedPreferences prefs = serviceLocator<SharedPreferences>();
-    prefs.setString('access_token', tokenData['access_token']);
-    prefs.setInt('expires_in', tokenData['expires_in']);
-    prefs.setString('refresh_token', tokenData['refresh_token']);
-  }
-
-  /// clearTokenDataLocal()
-  /// Función para limpiar el token de acceso del dispositivo
-  @override
-  Future<void> clearTokenDataLocal() async {
-    
-    SharedPreferences prefs = serviceLocator<SharedPreferences>();
-    prefs.remove('access_token');
-    prefs.remove('expires_in');
-    prefs.remove('refresh_token');
-  }
-
-  ///
-  /// isTokenExpired -> T/F
-  ///
-  @override
-  Future<bool> isTokenExpired() async{
-    final tokenData = await getTokenDataLocal();
-    final expiry = DateTime.now().add(Duration(seconds: tokenData['expires_in']));
-    print("DESDE estaElTokenExpirado: expires_in: ${expiry.isBefore(DateTime.now())}");
-    if (expiry != null) {
-      return expiry.isBefore(DateTime.now());
-    }
-    return true;
-  }
-
-  /// isTokenSavedLocal() -> T/F
-  /// Comprobar si hay un token guardado en el almacenamiento interno del movil
-  @override
-  Future<bool> isTokenSavedLocal() async{
-    final tokenData = await getTokenDataLocal();
-    // si uno de estos datos no esta no hay token
-    if (tokenData['access_token'] == null || tokenData['expires_in'] == null || tokenData['refresh_token'] == null) {
-      return false;
-    }else{
-      return true;
-    }
-  }
-
-
-  /// Texto -> updateToken()
+  /// Texto -> updateToken() -> Map<String,dynamic>
   /// utilizar esta función en conjunto con la función isTokenExpired para 
   /// actualizar el token siempre que sea necesario antes de realizar una solicitud a la API de Twitch.
   @override
-  Future<bool> updateToken(String tokenParaActualizar) async {
+  Future<Map<String,dynamic>> updateToken(String tokenParaActualizar) async {
     // Prepara la solicitud
     //Uri url = Uri.parse('https://id.twitch.tv/oauth2/token');
     String url = '${baseUrlOath}oauth2/token?client_id=$CLIENT_ID&client_secret=$CLIENT_SECRET&grant_type=refresh_token&refresh_token=$tokenParaActualizar';
@@ -195,9 +105,8 @@ class TwitchAuthServiceImpl extends TwitchAuthService{
       // Si la solicitud es exitosa, actualiza el token de acceso y la fecha de expiración
      
       serviceLocator<Request>().updateAuthorization(response.data['access_token']); // actualizar el token en los headers del objeto dio
-      // persist the new token 
-      saveTokenDataLocal(response.data);
-      return true;
+      // persist the new token ;
+      return response.data;
     } else {
       // Si la solicitud falla, lanza una excepción
       throw Exception('Error al actualizar el token de acceso');

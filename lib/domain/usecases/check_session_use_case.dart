@@ -22,18 +22,24 @@ class CheckSessionUseCase{
           // TOKEN AUTORIZADO ----------------------------------------------------------------
           // TODO borrar
           TokenData tokenData = await authRepository.getTokenDataLocal();
-          print("Token: ${tokenData.accesToken}");
-          User user = await serviceLocator<TwitchAuthRepository>().getUserRemote(tokenData.accesToken);
+          print("Token: ${tokenData.accessToken}");
+          User user = await serviceLocator<TwitchAuthRepository>().getUserRemote(tokenData.accessToken);
           print("Usario: $user");
           return Right(user);
         }else{
           print("Token expirado");
           // TOKEN EXPIRADO ----------------------------------------------------------------
           // el token ha expirado hay que actualizarlo
-          TokenData tokenData = await authRepository.getTokenDataLocal();
-          bool seActualizo = await authRepository.updateToken(tokenData.refresh_token);
+          TokenData tokenData = await authRepository.getTokenDataLocal(); // obtenemos el token guardado
+          TokenData newTokenData = await authRepository.updateToken(tokenData.refreshToken); // lo actualizamos
+          authRepository.saveTokenDataLocal(newTokenData); // y lo guardamos
+
+          if(newTokenData.accessToken != ""){
+            // TODO si no hay acces token es que no se pudo actualizar 
+          }
+
           // TODO borrar
-          User user = await serviceLocator<TwitchAuthRepository>().getUserRemote(tokenData.accesToken);
+          User user = await serviceLocator<TwitchAuthRepository>().getUserRemote(newTokenData.accessToken);
 
           return Right(user);
 

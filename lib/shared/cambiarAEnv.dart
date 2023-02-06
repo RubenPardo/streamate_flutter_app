@@ -1,3 +1,3 @@
-const String CLIENT_ID = "rdjr8yr3xn2bxgoy0ooa4l0uz8znx6";
-const String CLIENT_SECRET = "s8qbf8dazrfkytbhn6axem0hq3qhdp";
-const String REDIRECT_URI = "http://localhost";
+const String CLIENT_ID = "zjtf9xhgcafnf63gwfccr5ins2w8qp";
+const String CLIENT_SECRET = "31y7gx3bwiigi8jmkil01mbdpurzdj";
+const String REDIRECT_URI = "https://localhost";
