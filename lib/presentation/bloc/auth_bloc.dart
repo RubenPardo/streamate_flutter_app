@@ -26,12 +26,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               },
               (autorizado){
                 
-                emit(AuthAuthenticated(user: autorizado));
-                /*if(autorizado){
+                if(autorizado){
                   emit(AuthAuthenticated()); // -------------------------> Autenticado
                 }else{
                   emit(AuthUnauthenticated()); // -----------------------> No autenticado
-                }*/
+                }
               }
             );
           }
@@ -60,14 +59,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
               }, 
               (autenticado){
                 
-                // TODO borrar
-                emit(AuthAuthenticated(user: autenticado));
-
-                /*if(autenticado){
+                if(autenticado){
                   emit(AuthAuthenticated());// ------------> Autenticado
                 }else{
                   emit(AuthUnauthenticated());// ------------> Autenticado
-                }*/
+                }
                 
               }
             );

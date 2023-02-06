@@ -16,7 +16,7 @@ class LogInUseCase{
   /// 
   /// Iniciar Sesion un usuario dado el url de redireccionamiento de OAuth2.0
   ///
-  Future<Either<MyError, User>> logIn(String redirectUrl) async {
+  Future<Either<MyError, bool>> logIn(String redirectUrl) async {
 
     TwitchAuthRepository authRepository = serviceLocator<TwitchAuthRepository>();
 
@@ -29,15 +29,18 @@ class LogInUseCase{
     if (authorizationCode != null) {
       try{
         TokenData tokenData = await authRepository.getTokenDataRemote(authorizationCode);
-        print("TENEMOS TOKEN DATA");
           // Si se obtuvo un token de acceso, se persiste y se devuelve
-        authRepository.saveTokenDataLocal(tokenData);
-        User user = await serviceLocator<TwitchAuthRepository>().getUserRemote(tokenData.accessToken);
+        if(tokenData.accessToken!=""){
+          authRepository.saveTokenDataLocal(tokenData);
+          return const Right(true); // --------------------------------------> logeado -> return true 
+        }else{
+          return const Left(MyError("Error al iniciar sesion")); // ------> hubo un problema -> retirn error
+        }
         
-        return Right(user);
+        
       }catch(e){
 
-        return Left(MyError("Error al iniciar sesion $e"));
+        return const Left(MyError("Error al iniciar sesion"));
       }
 
 

@@ -42,4 +42,8 @@ class TokenData{
     return TokenData(accessToken: "", expiresAt: 0, refreshToken: "");
   }
 
+  factory TokenData.dummyValido(){
+    return TokenData(accessToken: "1234", expiresAt: 3600, refreshToken: "5678");
+  }
+
 }

@@ -96,10 +96,10 @@ class _LogInScreenState extends State<LogInScreen> {
             return 
             // borrar -------------------------------------------------------------
             Center(
-              child: Row(
-                children: [
-                  Image.network(state.user.profileImageUrl),
-                  Text(state.user.name)
+              child:  Row(
+                children: const [
+                  //Image.network(state.user.profileImageUrl),
+                  Text("Logeado")
                 ],
               ) ,
             ); // NO hacer nada, hacerlo en el listener = cambiar de pagina

@@ -11,7 +11,7 @@ import 'package:streamate_flutter_app/domain/repositories/twitch_auth_repository
 class CheckSessionUseCase{
   
 
-  Future<Either<MyError, User>> llamar() async {
+  Future<Either<MyError, bool>> llamar() async {
     TwitchAuthRepository authRepository = serviceLocator<TwitchAuthRepository>();
     
     try{
@@ -20,12 +20,9 @@ class CheckSessionUseCase{
         if(!await authRepository.isTokenExpired()){
           print("Token autorizado");
           // TOKEN AUTORIZADO ----------------------------------------------------------------
-          // TODO borrar
-          TokenData tokenData = await authRepository.getTokenDataLocal();
-          print("Token: ${tokenData.accessToken}");
-          User user = await serviceLocator<TwitchAuthRepository>().getUserRemote(tokenData.accessToken);
-          print("Usario: $user");
-          return Right(user);
+          //print("Token: ${tokenData.accessToken}");
+          //User user = await serviceLocator<TwitchAuthRepository>().getUserRemote(tokenData.accessToken);
+          return const Right(true);
         }else{
           print("Token expirado");
           // TOKEN EXPIRADO ----------------------------------------------------------------
@@ -34,20 +31,12 @@ class CheckSessionUseCase{
           TokenData newTokenData = await authRepository.updateToken(tokenData.refreshToken); // lo actualizamos
           authRepository.saveTokenDataLocal(newTokenData); // y lo guardamos
 
-          if(newTokenData.accessToken != ""){
-            // TODO si no hay acces token es que no se pudo actualizar 
-          }
-
-          // TODO borrar
-          User user = await serviceLocator<TwitchAuthRepository>().getUserRemote(newTokenData.accessToken);
-
-          return Right(user);
+          return Right(newTokenData.accessToken != ""); /// si el token esta vacío ha habido un error
 
         }
       }else{
-          print("no hay Token ");
         // NO HAY TOKEN  ----------------------------------------------------------------
-        return const Left(MyError("Error al comprobar la sesion: BORRAR ESTO"));
+        return const Left(MyError("Error al comprobar la sesion"));
        // return const Right(false);
       }  
 

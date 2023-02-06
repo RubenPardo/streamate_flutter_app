@@ -4,8 +4,6 @@ abstract class AuthState {}
 
 class AuthUninitialized extends AuthState{}
 class AuthAuthenticated extends AuthState{
-  final User user;/// borrar- ----------------------------------
-  AuthAuthenticated({required this.user});
 }
 class AuthAutorizacion extends AuthState{
   final String urlAutorizacion;
