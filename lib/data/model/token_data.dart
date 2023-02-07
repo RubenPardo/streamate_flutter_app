@@ -2,7 +2,7 @@
 /// Clase que representa los datos del token de Oauth 2.0 de twitch
 /// atributos:
 /// - el token de acceso
-/// - fecha de cuando expira el token
+/// - fecha de cuando expira el token en millisecondsSinceEpoch
 /// - y el token para actualizar el token de acceso
 class TokenData{
 
@@ -33,7 +33,7 @@ class TokenData{
     String refreshToken = apiResponseJson['refresh_token']  ?? "";
 
     DateTime expiresAtDT = DateTime.now().add(Duration(seconds: apiResponseJson['expires_in'] ?? 0));
-    int expiresAt = expiresAtDT.millisecondsSinceEpoch ~/ 1000;
+    int expiresAt = expiresAtDT.millisecondsSinceEpoch;
 
     return TokenData(accessToken: accesToken, expiresAt: expiresAt, refreshToken:refreshToken); 
   }

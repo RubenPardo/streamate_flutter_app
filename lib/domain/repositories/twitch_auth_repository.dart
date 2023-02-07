@@ -67,6 +67,7 @@ class TwitchAuthRepositoryImpl extends TwitchAuthRepository{
   Future<void> saveTokenDataLocal(TokenData tokenData) async {
     //  ;
     SharedPreferences prefs = serviceLocator<SharedPreferences>();
+    print("SE VA A GUARDAR: ${tokenData.toMap()}");
     prefs.setString('access_token', tokenData.accessToken);
     prefs.setInt('expires_at', tokenData.expiresAt);
     prefs.setString('refresh_token', tokenData.refreshToken);

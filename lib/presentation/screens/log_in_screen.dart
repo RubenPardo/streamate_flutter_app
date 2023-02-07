@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:streamate_flutter_app/core/utils.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_sate.dart';
+import 'package:streamate_flutter_app/presentation/screens/home_screen.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+
+import 'login_in_webview_screen.dart';
 
 class LogInScreen extends StatefulWidget {
   const LogInScreen({super.key, required this.title});
@@ -46,40 +50,47 @@ class _LogInScreenState extends State<LogInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(title: const Text("Login"),), // TODO cambiar a algo mas generico
       body: BlocConsumer<AuthBloc, AuthState>(
         listener: (context, state) { 
           /// para enviar mensajes como el snack bar o cambiar de ruta
           /// cuando cambia el estado
           
           if (state is AuthError) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      state.mensaje,
-                    ),
-                  ),
-                );
-                print("ERROR: -----------: ${state.mensaje}");
+                
+                Utils.showSnackBar(context,state.mensaje);
           }
           else if (state is AuthAuthenticated) {
                 //AutoRouter.of(context).pushNamed('/home-page');
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text(
-                      'Logeado de puta madre',
-                    ),
-                  ),
-                );
+                // TODO cambiar a por el autorouter
+                Navigator.pushReplacement(context, MaterialPageRoute(
+                    builder: (context) =>  const HomeScreen(),
+                ));
+                Utils.showSnackBar(context,"Logeado");
           }else if(state is AuthAutorizacion){
-            print("${state.urlAutorizacion}");
-            _webViewController.loadRequest(Uri.parse(state.urlAutorizacion));
+
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => LoginWebViewScreen(url: state.urlAutorizacion),
+              ),
+            ).then((redirectUri) {
+              if (redirectUri!=null && redirectUri!="") {
+                // Obtenemos autorizacion ----> empezar con el login
+                context.read<AuthBloc>().add(LogIn(redirectUri: redirectUri));
+
+              } else {
+                // Autorizacion cancelada o fallida ---> 
+                Utils.showSnackBar(context,"Login cancelado");
+              }
+            });
           }
         },
 
         builder: (context, state){
           /// para cambiar la vista
           /// cuando cambia el estado
-          if (state is AuthUninitialized || state is AuthUnauthenticated) { // ------------------------> No inicializado
+          if (state is AuthUninitialized || state is AuthUnauthenticated || state is AuthAutorizacion) { // ------------------------> No inicializado
             return Center(
               child: ElevatedButton(
               onPressed: () {
@@ -92,63 +103,11 @@ class _LogInScreenState extends State<LogInScreen> {
                   child: CircularProgressIndicator(),
                 ); 
           }
-          else if(state is AuthAuthenticated){ // -----------------------> Autenticado
-            return 
-            // borrar -------------------------------------------------------------
-            Center(
-              child:  Row(
-                children: const [
-                  //Image.network(state.user.profileImageUrl),
-                  Text("Logeado")
-                ],
-              ) ,
-            ); // NO hacer nada, hacerlo en el listener = cambiar de pagina
-          }
-          else if(state is AuthAutorizacion){ // ------------------------> Autorizacion
-            return _dialogWebView(state.urlAutorizacion);
-          }
           else{
             return  const Center();
           }
         },
      ),
-    );
-  }
-
-
-
-  Widget _dialogWebView(String url){
-    return /*AlertDialog(
-      backgroundColor: Colors.transparent,
-      contentPadding: const EdgeInsets.all(0),
-      content: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child:*/ Container(
-          color: Theme.of(context).dialogBackgroundColor,
-          width: double.infinity,
-          height: MediaQuery.of(context).size.height * .8,
-          child: Center(
-            child:Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    IconButton(
-                      icon: const Icon(Icons.close_rounded),
-                      onPressed: () {
-                        Navigator.of(context).pop(null);
-                      },
-                    )
-                  ],
-                ),
-                Expanded(
-                  child: WebViewWidget(
-                    controller: _webViewController,
-                  ),
-                ),
-              ],
-            ),
-          )
     );
   }
 }

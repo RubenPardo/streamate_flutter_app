@@ -6,6 +6,7 @@ import 'package:streamate_flutter_app/domain/repositories/twitch_auth_repository
 import 'package:streamate_flutter_app/domain/usecases/check_session_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_user_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/log_in_use_case.dart';
+import 'package:streamate_flutter_app/domain/usecases/log_out_use_case.dart';
 
 
 final serviceLocator = GetIt.instance;
@@ -16,6 +17,7 @@ Future<void> setUpServiceLocator() async {
   serviceLocator.registerFactory<LogInUseCase>(() => LogInUseCase());
   serviceLocator.registerFactory<GetUserUseCase>(() => GetUserUseCase());
   serviceLocator.registerFactory<CheckSessionUseCase>(() => CheckSessionUseCase());
+  serviceLocator.registerFactory<LogOutUseCase>(() => LogOutUseCase());
 
   //datasource
   serviceLocator.registerFactory<TwitchAuthService>(
