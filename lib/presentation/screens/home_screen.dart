@@ -6,6 +6,8 @@ import 'package:streamate_flutter_app/presentation/bloc/auth_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_sate.dart';
 import 'package:streamate_flutter_app/presentation/screens/log_in_screen.dart';
+import 'package:streamate_flutter_app/shared/texto_para_localizar.dart';
+import 'package:streamate_flutter_app/shared/widgets/app_bar.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -42,7 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Home"),),// TODO cambiar appbar
+      appBar: buildAppBar(appTitle,bottom: Row(mainAxisAlignment: MainAxisAlignment.center,children: [Text("Viewers: 1000"),Text("LIVE ON 00:15:34")],)),
       body: Center(
       child: Column(
         children: [

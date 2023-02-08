@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_bloc.dart';
 import 'package:streamate_flutter_app/presentation/screens/log_in_screen.dart';
+import 'package:streamate_flutter_app/shared/colors.dart';
+import 'package:streamate_flutter_app/shared/styles.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -17,9 +19,7 @@ class App extends StatelessWidget {
       ],
       child: MaterialApp(
         title: 'StreaMate',
-        theme: ThemeData(
-          primarySwatch: Colors.blue,
-        ),
+        theme: themeData,
         home: const LogInScreen(title: 'StreaMate'), // TODO cambiar a una splash screen que chequee
       )
     );
