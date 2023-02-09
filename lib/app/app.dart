@@ -20,6 +20,7 @@ class App extends StatelessWidget {
       child: MaterialApp(
         title: 'StreaMate',
         theme: themeData,
+        debugShowCheckedModeBanner: false,
         home: const LogInScreen(title: 'StreaMate'), // TODO cambiar a una splash screen que chequee
       )
     );

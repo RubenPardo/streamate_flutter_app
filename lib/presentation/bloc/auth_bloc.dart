@@ -19,7 +19,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         on<AppStarted>( // ------------------------------------------------------------------
           (event,emit) async{
             emit(AuthLoading());
-            var result = await _comprobarSesionCasoUso.llamar();
+            var result = await _comprobarSesionCasoUso.call();
             result.fold(
               (error){
                 emit(AuthError(mensaje: error.message));// ----------> Error al comprobar sesion
@@ -51,7 +51,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             // event.objeto para obtener cosas
             emit(AuthLoading()); // ---------------------------> Loading
 
-            var result = await _loginCasoUso.logIn(event.redirectUri);
+            var result = await _loginCasoUso.call(event.redirectUri);
             result.fold(
               (error){
                 emit(AuthError(mensaje: error.message));// ----------> Error
@@ -76,7 +76,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           (event,emit) async{
             print("----------------------------------------------EVENT Logut");
             // event.objeto para obtener cosas
-            await _logoutUseCase.llamar();
+            await _logoutUseCase.call();
             emit(AuthUnauthenticated());// -----------> No autenticado
           }
 

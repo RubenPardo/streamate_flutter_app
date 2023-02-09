@@ -3,6 +3,7 @@ import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:streamate_flutter_app/data/services/twitch_auth_service.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_bloc.dart';
 import 'package:streamate_flutter_app/shared/colors.dart';
+import 'package:streamate_flutter_app/shared/texto_para_localizar.dart';
 import 'package:streamate_flutter_app/shared/widgets/app_bar.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
@@ -79,10 +80,14 @@ class _LoginWebViewScreenState extends State<LoginWebViewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar("Titulo",), // TODO cambiar a algo mas generico
+      appBar: buildAppBar(iniciarSesion,), // TODO cambiar a algo mas generico
       body: _isLoading 
         ? const Center(child: CircularProgressIndicator(),)
-        : Container(
+        : _urlAnterior == "https://id.twitch.tv/oauth2/authorize" 
+          ? Container(
+              // TODO saber que poner aqui
+          )
+          : Container(
           color: Theme.of(context).dialogBackgroundColor,
           width: double.infinity,
           height: MediaQuery.of(context).size.height,

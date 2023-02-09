@@ -10,7 +10,7 @@ class LogOutUseCase{
   /// 
   /// Iniciar Sesion un usuario dado el url de redireccionamiento de OAuth2.0
   ///
-  Future<Either<MyError, bool>> llamar() async {
+  Future<Either<MyError, bool>> call() async {
 
     TwitchAuthRepository authRepository = serviceLocator<TwitchAuthRepository>();
     authRepository.clearTokenDataLocal(); 

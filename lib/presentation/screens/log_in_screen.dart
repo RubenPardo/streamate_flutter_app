@@ -47,16 +47,15 @@ class _LogInScreenState extends State<LogInScreen> {
           /// cuando cambia el estado
           
           if (state is AuthError) {
-            
-            _isError = true;
-            _messageError = state.mensaje;
-          
+            if(mounted){
+              _isError = true;
+              _messageError = state.mensaje;
+              
+            }
             //Utils.showSnackBar(context,state.mensaje);
           }else if(state is AuthLoading){
-           /* setState(() {
               _isError = false;
               _messageError = "";
-            });*/
           }
           else if (state is AuthAuthenticated) {
             //AutoRouter.of(context).pushNamed('/home-page');
@@ -64,7 +63,7 @@ class _LogInScreenState extends State<LogInScreen> {
             Navigator.pushReplacement(context, MaterialPageRoute(
                 builder: (context) =>  const HomeScreen(),
             ));
-            Utils.showSnackBar(context,"Logeado");
+           
           }else if(state is AuthAutorizacion){
 
             Navigator.push(
@@ -73,16 +72,15 @@ class _LogInScreenState extends State<LogInScreen> {
                 builder: (context) => LoginWebViewScreen(url: state.urlAutorizacion),
               ),
             ).then((redirectUri) {
-              print("2");
+              
               if (redirectUri!=null && redirectUri!="") {
-                print("2.1");
+                
                 // Obtenemos autorizacion ----> empezar con el login
                 context.read<AuthBloc>().add(LogIn(redirectUri: redirectUri));
 
               } else {
-                print("2.2");
                 // Autorizacion cancelada o fallida ---> 
-                Utils.showSnackBar(context,"Login cancelado");
+               
               }
             });
           }
@@ -112,23 +110,34 @@ class _LogInScreenState extends State<LogInScreen> {
       children: [
         const Image(image: AssetImage("assets/images/item_fondo.png",)),
         Container(
-          padding: EdgeInsets.only(left: 32,right: 32,top: 64,bottom: MediaQuery.of(context).size.height/2.5),
+          padding: EdgeInsets.only(left: 32,right: 32,top: 64,bottom: MediaQuery.of(context).size.height/3),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              // Titulo ------------------------------------------------------------------
               Text(appTitle,style: Theme.of(context).textTheme.titleLarge,),
-              
-               Padding(padding: const EdgeInsets.all(32), 
-                    child: Text(loginDescription, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge,),),
+
+              // Texto ----------------------------------------------             
+             Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 32), 
+              child: Column(
+                children: [
+                  Text(loginDescription, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge,),
+                  const SizedBox(height: 16,),
+                  Text(loginBodyDescription, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium,),
                     
-                    LargePrimaryButton(
-                      theresError: _isError,
-                      messageError: _messageError,
-                      onPressed: () {
-                        context.read<AuthBloc>().add(Autorizarse()); // Empezar Login
-                      }
-                    )
+                ],
+              ),
+             ),
+              // BOTON -----------------------------------------------------------------
+              LargePrimaryButton(
+                theresError: _isError,
+                messageError: _messageError,
+                onPressed: () {
+                  context.read<AuthBloc>().add(Autorizarse()); // Empezar Login
+                }
+              )
             ]
           ),
         ),

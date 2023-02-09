@@ -32,8 +32,9 @@ class LargePrimaryButton extends StatelessWidget {
             ),
           ),
           theresError 
-            ? Column(children: [const SizedBox(height: 8),Text(messageError, style: textError,)],) 
+            ? Column(children: [const SizedBox(height: 10),Text(messageError, style: textError,)],) 
             : Container()
+          
         ],
       )
     );

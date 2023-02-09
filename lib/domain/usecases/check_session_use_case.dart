@@ -11,7 +11,7 @@ import 'package:streamate_flutter_app/domain/repositories/twitch_auth_repository
 class CheckSessionUseCase{
   
 
-  Future<Either<MyError, bool>> llamar() async {
+  Future<Either<MyError, bool>> call() async {
     TwitchAuthRepository authRepository = serviceLocator<TwitchAuthRepository>();
     
     try{

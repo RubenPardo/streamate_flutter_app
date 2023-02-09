@@ -16,7 +16,7 @@ class LogInUseCase{
   /// 
   /// Iniciar Sesion un usuario dado el url de redireccionamiento de OAuth2.0
   ///
-  Future<Either<MyError, bool>> logIn(String redirectUrl) async {
+  Future<Either<MyError, bool>> call(String redirectUrl) async {
 
     TwitchAuthRepository authRepository = serviceLocator<TwitchAuthRepository>();
 

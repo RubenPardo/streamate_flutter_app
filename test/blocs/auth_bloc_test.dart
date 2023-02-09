@@ -55,7 +55,7 @@ void main() {
       Either<MyError,bool> valorRetornoUseCase = const Right(true);
 
       // stub
-      when(() => serviceLocator<CheckSessionUseCase>().llamar(),).thenAnswer((invocation) => Future.value(valorRetornoUseCase));
+      when(() => serviceLocator<CheckSessionUseCase>().call(),).thenAnswer((invocation) => Future.value(valorRetornoUseCase));
       
       // ejecucion
       authBloc.add(AppStarted());
@@ -73,7 +73,7 @@ void main() {
       Either<MyError,bool> valorRetornoUseCase = const Right(true);
 
       // stub
-      when(() => serviceLocator<CheckSessionUseCase>().llamar(),).thenAnswer((invocation) => Future.value(valorRetornoUseCase));
+      when(() => serviceLocator<CheckSessionUseCase>().call(),).thenAnswer((invocation) => Future.value(valorRetornoUseCase));
       
       // ejecucion
       authBloc.add(AppStarted());
@@ -89,7 +89,7 @@ void main() {
       Either<MyError,bool> valorRetornoUseCase = const Left(MyError("error"));
 
       // stub
-      when(() => serviceLocator<CheckSessionUseCase>().llamar(),).thenAnswer((inv)=>Future.value(valorRetornoUseCase));
+      when(() => serviceLocator<CheckSessionUseCase>().call(),).thenAnswer((inv)=>Future.value(valorRetornoUseCase));
       
       // ejecucion
       authBloc.add(AppStarted());
@@ -110,7 +110,7 @@ void main() {
       Either<MyError,bool> valorRetornoUseCase = const Right(true);
 
       // stub
-      when(() => serviceLocator<LogInUseCase>().logIn(any()),).thenAnswer((inv)=>Future.value(valorRetornoUseCase));
+      when(() => serviceLocator<LogInUseCase>().call(any()),).thenAnswer((inv)=>Future.value(valorRetornoUseCase));
       
       // ejecucion
       authBloc.add(LogIn(redirectUri: uri));
@@ -119,7 +119,7 @@ void main() {
       await expectLater(authBloc.stream,emitsInOrder([loading, authenticated]));
       
       // se llama al caso de uso con la uri
-     verify(() => serviceLocator<LogInUseCase>().logIn(uri),).called(1);
+     verify(() => serviceLocator<LogInUseCase>().call(uri),).called(1);
 
       
     });
@@ -130,7 +130,7 @@ void main() {
       String uri = "1234";
 
       // stub
-      when(() => serviceLocator<LogInUseCase>().logIn(any()),).thenAnswer((inv)=>Future.value(valorRetornoUseCase));
+      when(() => serviceLocator<LogInUseCase>().call(any()),).thenAnswer((inv)=>Future.value(valorRetornoUseCase));
       
       // ejecucion
       authBloc.add(LogIn(redirectUri: uri));
@@ -139,7 +139,7 @@ void main() {
       await expectLater(authBloc.stream,emitsInOrder([loading, unAuthenticated]));
 
       // se llama al caso de uso con la uri
-     verify(() => serviceLocator<LogInUseCase>().logIn(uri),).called(1);
+     verify(() => serviceLocator<LogInUseCase>().call(uri),).called(1);
 
       
     });
@@ -150,7 +150,7 @@ void main() {
       String uri = "1234";
 
       // stub
-      when(() => serviceLocator<LogInUseCase>().logIn(any()),).thenAnswer((inv)=>Future.value(valorRetornoUseCase));
+      when(() => serviceLocator<LogInUseCase>().call(any()),).thenAnswer((inv)=>Future.value(valorRetornoUseCase));
       
       // ejecucion
       authBloc.add(LogIn(redirectUri: uri));
@@ -159,7 +159,7 @@ void main() {
       await expectLater(authBloc.stream,emitsInOrder([loading, error, unAuthenticated]));
 
       // se llama al caso de uso con la uri
-     verify(() => serviceLocator<LogInUseCase>().logIn(uri),).called(1);
+     verify(() => serviceLocator<LogInUseCase>().call(uri),).called(1);
 
       
     });

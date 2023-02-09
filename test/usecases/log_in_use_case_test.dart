@@ -32,7 +32,7 @@ void main() {
           )).thenAnswer((invocation) => Future.value(TokenData.dummyValido()));
       when(() => serviceLocator<TwitchAuthRepository>().saveTokenDataLocal(any()),).thenAnswer((invocation) => Future.value());
 
-      var result = (await loginUseCase.logIn(url)).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool
+      var result = (await loginUseCase.call(url)).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool
       
       // si va bien tiene que devolver un valor right y true
       expect(result, true); 
@@ -54,7 +54,7 @@ void main() {
           )).thenAnswer((invocation) => Future.value(TokenData.empty()));
       when(() => serviceLocator<TwitchAuthRepository>().saveTokenDataLocal(any()),).thenAnswer((invocation) => Future.value());
 
-      var result = (await loginUseCase.logIn(url)).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool
+      var result = (await loginUseCase.call(url)).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool
       
       // si va bien tiene que devolver un valor left y un error
       expect(result is MyError, true); 
@@ -71,7 +71,7 @@ void main() {
           )).thenAnswer((invocation) => Future.value(TokenData.empty())); 
       when(() => serviceLocator<TwitchAuthRepository>().saveTokenDataLocal(any()),).thenAnswer((invocation) => Future.value()); 
  
-      var result = (await loginUseCase.logIn(url)).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool 
+      var result = (await loginUseCase.call(url)).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool 
        
       // si va bien tiene que devolver un valor left y un error 
       expect(result is MyError, true);  

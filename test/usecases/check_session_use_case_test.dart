@@ -28,7 +28,7 @@ void main() {
       when(() => serviceLocator<TwitchAuthRepository>().isTokenSavedLocal()).thenAnswer((invocation) => Future.value(false));
       
 
-      var result = (await checkSessionUseCase.llamar()).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool 
+      var result = (await checkSessionUseCase.call()).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool 
       
       // si no hay token guardado devuelve un false
       expect(result, false);
@@ -46,7 +46,7 @@ void main() {
     when(() => serviceLocator<TwitchAuthRepository>().saveTokenDataLocal(any()),).thenAnswer((invocation) => Future.value());
 
     // si esta expirado, se obtendrá el token de local, lo actualizará y lo guardará en local
-    var result = (await checkSessionUseCase.llamar()).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool 
+    var result = (await checkSessionUseCase.call()).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool 
     
     // si hay token guardado expirado y al pedirlo da un token valido devuelve un true
     expect(result, true);
@@ -62,7 +62,7 @@ void main() {
     when(() => serviceLocator<TwitchAuthRepository>().saveTokenDataLocal(any()),).thenAnswer((invocation) => Future.value());
 
     // si esta expirado, se obtendrá el token de local, lo actualizará y lo guardará en local
-    var result = (await checkSessionUseCase.llamar()).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool 
+    var result = (await checkSessionUseCase.call()).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool 
     
     // si hay token guardado expirado y al pedirlo da un token no valido devuelve un false
     expect(result, false);
@@ -73,7 +73,7 @@ void main() {
     when(() => serviceLocator<TwitchAuthRepository>().isTokenExpired()).thenAnswer((invocation) => Future.value(false));
       
 
-    var result = (await checkSessionUseCase.llamar()).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool 
+    var result = (await checkSessionUseCase.call()).fold((error) => error,(loged)=>loged); // result puede ser left de tipo MyError o right de tipo Bool 
       
     // si no hay token guardado devuelve un false
     expect(result, true);
