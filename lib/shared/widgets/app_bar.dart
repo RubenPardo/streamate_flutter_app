@@ -17,14 +17,13 @@ PreferredSizeWidget _buildBottom(Widget bottom) {
       preferredSize: const Size.fromHeight(56),
       child: SizedBox(
         height: 56,
-        child: Expanded(
-          child: Container(
+        child:  Container(
             padding: const EdgeInsets.all(8),
             width: double.maxFinite,
             color: MyColors.backgroundColorSecondary,
             child: bottom,
           ),
-        ),
+        
       ),
     );
 }

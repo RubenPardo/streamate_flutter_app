@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:streamate_flutter_app/core/utils.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_sate.dart';
 import 'package:streamate_flutter_app/presentation/screens/home_screen.dart';
-import 'package:streamate_flutter_app/shared/colors.dart';
-import 'package:streamate_flutter_app/shared/styles.dart';
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart';
 import 'package:streamate_flutter_app/shared/widgets/large_primary_button.dart';
-import 'package:webview_flutter/webview_flutter.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'login_in_webview_screen.dart';
 
 class LogInScreen extends StatefulWidget {

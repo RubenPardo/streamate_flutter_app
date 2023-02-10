@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
-import 'package:streamate_flutter_app/data/services/twitch_auth_service.dart';
+import 'package:streamate_flutter_app/data/services/twitch_api_service.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_bloc.dart';
 import 'package:streamate_flutter_app/shared/colors.dart';
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart';
@@ -39,7 +39,7 @@ class _LoginWebViewScreenState extends State<LoginWebViewScreen> {
   void _inicializarWebView(){
     // inicializamos el controlador del web view
     // con un callback de onPageFinished, de aqui podemos obtener el codigo del usuario
-    String urlAutorizacion = serviceLocator<TwitchAuthService>().getAutorizationUrl();
+    String urlAutorizacion = serviceLocator<TwitchApiService>().getAutorizationUrl();
 
     _webViewController = WebViewController();
     _webViewController.setJavaScriptMode(JavaScriptMode.unrestricted);

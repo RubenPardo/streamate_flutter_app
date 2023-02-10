@@ -53,4 +53,11 @@ class Request {
   Future<Response> post(String path, {Object? data}) async {
     return await _dio.post(path, data: data);
   }
+  Future<Response> delete(String path) async {
+    return await _dio.delete(path);
+  }
+
+  Future<Response> patch(String path,{Object? data}) async {
+    return await _dio.patch(path,data: data);
+  }
 }

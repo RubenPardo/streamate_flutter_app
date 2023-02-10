@@ -37,6 +37,11 @@ const TextStyle textStyleButton = TextStyle(
   fontSize: 20
 );
 
+const TextStyle textStyleChat = TextStyle(
+  fontFamily: 'Roobert',
+  color: MyColors.textoSobreOscuro,
+  fontSize: 18
+);
 
 const TextStyle textError = TextStyle(
   fontWeight: FontWeight.bold,

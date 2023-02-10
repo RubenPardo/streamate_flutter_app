@@ -6,13 +6,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:streamate_flutter_app/core/request.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:streamate_flutter_app/data/model/token_data.dart';
-import 'package:streamate_flutter_app/data/services/twitch_auth_service.dart';
+import 'package:streamate_flutter_app/data/services/twitch_api_service.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_auth_repository.dart';
 
 
 // creamos los mocks que se van a usar en los tests
 class MockRequest extends Mock implements Request{}
-class MockTwitchAuthService extends Mock implements TwitchAuthServiceImpl{}
+class MockTwitchAuthService extends Mock implements TwitchApiServiceImpl{}
 class MockTwitchAuthRepository extends Mock implements TwitchAuthRepositoryImpl{}
 
 void main() {
@@ -23,7 +23,7 @@ void main() {
       // hay que registrar de nuevo todas las dependencias que vayamos a usar y las que queramos mockear hay que pasarles la clase
       // creada con el build_runner, no podemos llamar al setup para qye añada todas porque sino dará error de duplicados
       serviceLocator.registerSingleton<Request>(MockRequest());
-      serviceLocator.registerSingleton<TwitchAuthService>(MockTwitchAuthService());
+      serviceLocator.registerSingleton<TwitchApiService>(MockTwitchAuthService());
       final sharedPreferences = await SharedPreferences.getInstance();
       serviceLocator.registerFactory<SharedPreferences>(() => sharedPreferences);
     }
@@ -52,7 +52,7 @@ void main() {
         TokenData tokenDataEsperado = TokenData(accessToken: "access_token",refreshToken: "refresh_token",expiresAt: expiresAtEsperado);
         
         // mockeamos la respuesta del servicio
-        when(() => serviceLocator<TwitchAuthService>().getTokenDataRemote(
+        when(() => serviceLocator<TwitchApiService>().getTokenDataRemote(
             any(),
           )).thenAnswer((invocation) => Future.value({
           'access_token': 'access_token',
@@ -78,7 +78,7 @@ void main() {
         TokenData tokenDataEsperado = TokenData.empty();
         
         // mockeamos la respuesta del servicio
-        when(() => serviceLocator<TwitchAuthService>().getTokenDataRemote(
+        when(() => serviceLocator<TwitchApiService>().getTokenDataRemote(
             any(),
           )).thenThrow((invocation) => Exception());
 
@@ -102,7 +102,7 @@ void main() {
         TokenData tokenDataEsperado = TokenData(accessToken: "access_token",refreshToken: "refresh_token",expiresAt: expiresAtEsperado);
         
         // mockeamos la respuesta del servicio
-        when(() => serviceLocator<TwitchAuthService>().updateToken(
+        when(() => serviceLocator<TwitchApiService>().updateToken(
             any(),
           )).thenAnswer((invocation) => Future.value({
           'access_token': 'access_token',
@@ -128,7 +128,7 @@ void main() {
         TokenData tokenDataEsperado = TokenData.empty();
         
         // mockeamos la respuesta del servicio
-        when(() => serviceLocator<TwitchAuthService>().updateToken(
+        when(() => serviceLocator<TwitchApiService>().updateToken(
             any(),
           )).thenThrow((invocation) => Exception());
 

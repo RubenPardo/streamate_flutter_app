@@ -1,9 +1,10 @@
 
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:streamate_flutter_app/core/request.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:streamate_flutter_app/data/model/token_data.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
-import 'package:streamate_flutter_app/data/services/twitch_auth_service.dart';
+import 'package:streamate_flutter_app/data/services/twitch_api_service.dart';
 
 
 
@@ -26,7 +27,7 @@ abstract class TwitchAuthRepository{
 /// Clase que sirve de abstraccion para nuestra aplicación de la clase TwitchAuthService
 class TwitchAuthRepositoryImpl extends TwitchAuthRepository{
 
-  final TwitchAuthService _authService = serviceLocator<TwitchAuthService>();
+  final TwitchApiService _authService = serviceLocator<TwitchApiService>();
 
 
   
@@ -58,11 +59,13 @@ class TwitchAuthRepositoryImpl extends TwitchAuthRepository{
     }
 
     // Devuelve los valores en un mapa
-    return TokenData(accessToken: accessToken,expiresAt: expiresAt,refreshToken: refreshToken);
+    TokenData tokenData = TokenData(accessToken: accessToken,expiresAt: expiresAt,refreshToken: refreshToken);
+    serviceLocator<Request>().updateAuthorization(tokenData.accessToken);
+    return tokenData;
   }
 
   /// TokenData -> saveTokenDataLocal() -> 
-  // Función para persistir el token de acceso en el dispositivo
+  /// Función para persistir el token de acceso en el dispositivo
   @override
   Future<void> saveTokenDataLocal(TokenData tokenData) async {
     //  ;
@@ -84,7 +87,6 @@ class TwitchAuthRepositoryImpl extends TwitchAuthRepository{
     prefs.remove('refresh_token');
   }
 
-  ///
   /// isTokenExpired -> T/F
   ///
   @override
@@ -107,7 +109,7 @@ class TwitchAuthRepositoryImpl extends TwitchAuthRepository{
   }
 
 
-
+  /// Texto -> getTokenDataRemote() -> TokenData
   @override
   Future<TokenData> getTokenDataRemote(String authorizationCode) async{
 
@@ -124,14 +126,17 @@ class TwitchAuthRepositoryImpl extends TwitchAuthRepository{
 
   @override
   Future<User> getUserRemote(String accessToken) async{
-    return User(await _authService.getUserRemote(accessToken));
+    return User((await _authService.getUsers(accessToken))[0]);
   }
   
+  /// getAutorizationUrl() -> String
   @override
   String getAutorizationUrl() {
     return _authService.getAutorizationUrl();
   }
   
+
+  /// Texto -> updateToken() -> TokenData
   @override
   Future<TokenData> updateToken(String tokenParaActualizar) async {
     TokenData tokenData;

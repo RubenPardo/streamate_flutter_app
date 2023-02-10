@@ -2,6 +2,7 @@ class User{
 
   
   
+  late final String id;
   late final String name;
   late final String login;
   late final String description;
@@ -23,6 +24,7 @@ class User{
   /// }
   ///
   User(Map<String,dynamic> data){
+    id = data["id"] ?? "";
     name = data['display_name'] ?? "";
     login = data['login'] ?? "";
     profileImageUrl = data['profile_image_url'] ?? "";

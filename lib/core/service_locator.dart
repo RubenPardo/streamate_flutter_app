@@ -1,7 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:streamate_flutter_app/core/request.dart';
-import 'package:streamate_flutter_app/data/services/twitch_auth_service.dart';
+import 'package:streamate_flutter_app/data/services/twitch_api_service.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_auth_repository.dart';
 import 'package:streamate_flutter_app/domain/usecases/check_session_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_user_use_case.dart';
@@ -20,8 +20,8 @@ Future<void> setUpServiceLocator() async {
   serviceLocator.registerFactory<LogOutUseCase>(() => LogOutUseCase());
 
   //datasource
-  serviceLocator.registerFactory<TwitchAuthService>(
-      () => TwitchAuthServiceImpl());
+  serviceLocator.registerFactory<TwitchApiService>(
+      () => TwitchApiServiceImpl());
 
   //repositories
   serviceLocator
