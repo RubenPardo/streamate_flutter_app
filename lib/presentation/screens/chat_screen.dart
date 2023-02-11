@@ -7,6 +7,7 @@ import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:streamate_flutter_app/data/model/token_data.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
 import 'package:streamate_flutter_app/data/services/twitch_api_service.dart';
+import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository.dart';
 import 'package:streamate_flutter_app/shared/styles.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -47,7 +48,7 @@ class _ChatScreenState extends State<ChatScreen> {
     //_channel?.sink.add('CAP REQ :twitch.tv/tags twitch.tv/commands');
     _channel?.sink.add('PASS oauth:${widget.token.accessToken}');
     //_channel?.sink.add('NICK ${user.login}');
-    _channel?.sink.add('NICK justinfan888${widget.user.login}');
+    _channel?.sink.add('NICK ${widget.user.login}');
     _channel?.sink.add('JOIN #${widget.user.login}',);
     _channel?.sink.add('CAP REQ :twitch.tv/commands twitch.tv/tags',); // con esto obtenemos mas informacion en los mensjaes
     
@@ -118,12 +119,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> pruebas() async{
     
-    //User elTostadas = User((await serviceLocator<TwitchApiService>().getUsers(loginNames: ["ibai"],widget.token.accessToken))[0]);
-    print(await serviceLocator<TwitchApiService>().updateChatSetting(widget.user.id,["follower_mode","follower_mode_duration"],["true","300"]));
+    
+    //print(await serviceLocator<TwitchApiService>().updateChatSetting(widget.user.id,["follower_mode","follower_mode_duration"],["true","300"]));
     //print(await serviceLocator<TwitchApiService>().getUserColor(elTostadas.id));
     //print(await serviceLocator<TwitchApiService>().banUser(widget.user.id,elTostadas.id,duration: 300)); // okay
     //print(await serviceLocator<TwitchApiService>().unBanUser(widget.user.id,elTostadas.id)); // okay
-    //print(await serviceLocator<TwitchApiService>().getChannelBadges(elTostadas.id)); //okay
+    //okay
     //print(await serviceLocator<TwitchApiService>().getGlobalBadges()); // okay
     //print(await serviceLocator<TwitchApiService>().getGlobalEmotes()); // okay
     //print(await serviceLocator<TwitchApiService>().getChannelEmotes(elTostadas.id)); // okay
@@ -140,8 +141,7 @@ class _ChatScreenState extends State<ChatScreen> {
     // TODO: implement initState
     super.initState();
     pruebas();
-    //connectToChat();
-    //connectToModChat();
+    connectToChat();
   }
 
   @override

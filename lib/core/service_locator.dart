@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:streamate_flutter_app/core/request.dart';
 import 'package:streamate_flutter_app/data/services/twitch_api_service.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_auth_repository.dart';
+import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository.dart';
 import 'package:streamate_flutter_app/domain/usecases/check_session_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_user_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/log_in_use_case.dart';
@@ -26,6 +27,8 @@ Future<void> setUpServiceLocator() async {
   //repositories
   serviceLocator
       .registerFactory<TwitchAuthRepository>(() => TwitchAuthRepositoryImpl());
+  serviceLocator
+      .registerFactory<TwitchChatRepository>(() => TwitchChatRepositoryImpl());
 
   //external
   final sharedPreferences = await SharedPreferences.getInstance();

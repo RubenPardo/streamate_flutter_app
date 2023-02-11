@@ -6,7 +6,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:streamate_flutter_app/data/model/token_data.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
+import 'package:streamate_flutter_app/data/services/twitch_api_service.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_auth_repository.dart';
+import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_sate.dart';
@@ -47,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState(){
     
 
-    // TODO: implement initState
+
     super.initState();
     myBloc = context.read<AuthBloc>();
     mSub = myBloc.stream.listen((stateAuth) {
@@ -66,9 +68,11 @@ class _HomeScreenState extends State<HomeScreen> {
     
   }
 
+  
+
   void initBotom()async{
     TokenData tokenData = await serviceLocator<TwitchAuthRepository>().getTokenDataLocal();
-    User user = await serviceLocator<TwitchAuthRepository>().getUserRemote(tokenData.accessToken);
+    User user = await serviceLocator<TwitchAuthRepository>().getUserRemote(tokenData.accessToken);   
     _tabsBottomNavigator = [
       [Center(
             child: Column(
