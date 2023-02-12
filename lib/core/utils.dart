@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:streamate_flutter_app/data/model/irc_message.dart';
 
 class Utils{
 
@@ -10,6 +11,27 @@ class Utils{
                     ),
                   ),
                 );
+  }
+
+
+  /// Texto -> parseTextToIRCCOmmand() -> IRCCommand
+  /// 
+  static IRCCommand parseTextToIRCCOmmand(String commandStr){
+    IRCCommand command;
+    switch(commandStr) {
+      case "PRIVMSG":
+        command = IRCCommand.privateMessage;
+        break;
+      case "NOTICE":
+        command = IRCCommand.notice;
+        break;
+      case "ROOMSTATE":
+        command = IRCCommand.roomState;
+        break;
+      default:
+       command = IRCCommand.none;
+    }
+    return command;
   }
 
 }

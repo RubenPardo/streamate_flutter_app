@@ -37,7 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _isLoading = true;
 
-  //static late List<List<dynamic>> _tabsBottomNavigator;
+  static late List<List<dynamic>> _tabsBottomNavigator;
 
   void _onItemTapped(int index) {
     setState(() {
@@ -74,10 +74,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initBotom()async{
     TokenData tokenData = await serviceLocator<TwitchAuthRepository>().getTokenDataLocal();
     user = await serviceLocator<TwitchAuthRepository>().getUserRemote(tokenData.accessToken);   
-    /*_tabsBottomNavigator = [
-      [SingleChildScrollView(
-        physics: ScrollPhysics(),
-            child: Column(
+    _tabsBottomNavigator = [
+      [Column(
               children: [
                 const Text("LOGEADO"),
                 ElevatedButton(
@@ -97,11 +95,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   )
               ],
             ),
-          ), Icon(Icons.abc), "ALGO"],
+          Icon(Icons.abc), "ALGO"],
         [ ChatScreen(token: tokenData,user: user,), Icon(Icons.chat), "Chat"],
         
       ];
-*/
+
       setState(() {
         _isLoading = false;
       });
@@ -111,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(appTitle,bottom: Row(mainAxisAlignment: MainAxisAlignment.center,children: [Text("Viewers: 1000"),Text("LIVE ON 00:15:34")],)),
-      /*bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: BottomNavigationBar(
         onTap: _onItemTapped,
         currentIndex: _selectedIndex,
         items: _tabsBottomNavigator.map((e) => BottomNavigationBarItem(
@@ -119,39 +117,11 @@ class _HomeScreenState extends State<HomeScreen> {
             label: e[2],
           ),
         ).toList(),
-      )*/
-      floatingActionButton: FloatingActionButton(
-        onPressed: _pruebas,
       ),
-      body: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: emotes.length,
-                    itemBuilder: (context, index) {
-                      return Image.network(emotes[index].networkUrl);
-                    },
-                  ),/*SingleChildScrollView(
-        physics: ScrollPhysics(),
-            child: Column(
-              children: [
-                const Text("LOGEADO"),
-                ElevatedButton(
-                  onPressed: _cerrarSesion, 
-                  child: const Text("Cerrar sesión")
-                ),
-                ElevatedButton(
-                  onPressed: _pruebas, 
-                  child: const Text("Probar")
-                ),
-                 ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: emotes.length,
-                    itemBuilder: (context, index) {
-                      return Image.network(emotes[index].networkUrl);
-                    },
-                  )
-              ],
-            ),
-          )*///_tabsBottomNavigator[_selectedIndex][0],
+      /*floatingActionButton: FloatingActionButton(
+        onPressed: _pruebas,
+      ),*/
+      body: _tabsBottomNavigator[_selectedIndex][0],
     );
   }
 

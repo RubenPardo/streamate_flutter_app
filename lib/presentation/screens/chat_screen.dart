@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
+import 'package:streamate_flutter_app/data/model/irc_message.dart';
 import 'package:streamate_flutter_app/data/model/token_data.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
 import 'package:streamate_flutter_app/data/services/twitch_api_service.dart';
@@ -11,7 +12,6 @@ import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository
 import 'package:streamate_flutter_app/shared/styles.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import 'irce.dart';
 
 class ChatScreen extends StatefulWidget {
 
@@ -31,8 +31,6 @@ class _ChatScreenState extends State<ChatScreen> {
   StreamSubscription? _channelListener;
   var _backoffTime = 0;
   var _retries = 0;
-   /// The periodic timer used for batching chat message re-renders.
-  late final Timer _messageBufferTimer;
 
   /// The list of chat messages to add once autoscroll is resumed.
   /// This is used as an optimization to prevent the list from being updated/shifted while the user is scrolling.
@@ -42,19 +40,12 @@ class _ChatScreenState extends State<ChatScreen> {
 
   Future<void> connectToChat( ) async {
 
-    print("CONNECT TO CHAT");
-    _channel?.sink.close(1001);
-    _channel = WebSocketChannel.connect(Uri.parse('wss://irc-ws.chat.twitch.tv:443/irc'));
-    //_channel?.sink.add('CAP REQ :twitch.tv/tags twitch.tv/commands');
-    _channel?.sink.add('PASS oauth:${widget.token.accessToken}');
-    //_channel?.sink.add('NICK ${user.login}');
-    _channel?.sink.add('NICK ${widget.user.login}');
-    _channel?.sink.add('JOIN #${widget.user.login}',);
-    _channel?.sink.add('CAP REQ :twitch.tv/commands twitch.tv/tags',); // con esto obtenemos mas informacion en los mensjaes
+    print("Connect chat");
+    Stream<dynamic> ircChatStream = serviceLocator<TwitchChatRepository>().connectChat(widget.token.accessToken, widget.user.login);
     
 
      // Listen for new messages and forward them to the handler.
-    _channelListener = _channel?.stream.listen(
+    _channelListener = ircChatStream.listen(
       (data) => _handleIRCData(data.toString()),
       onError: (error) => debugPrint('Chat error: ${error.toString()}'),
       onDone: () async {
@@ -65,7 +56,7 @@ class _ChatScreenState extends State<ChatScreen> {
           // Add notice that chat was disconnected and then wait the backoff time before reconnecting.
           final notice =
               'Disconnected from chat, waiting $_backoffTime ${_backoffTime == 1 ? 'second' : 'seconds'} before reconnecting...';
-          _messageBuffer.add(IRCMessage.createNotice(message: notice));
+          //_messageBuffer.add(IRCMessage.createNotice(message: notice));
         }
 
         await Future.delayed(Duration(seconds: _backoffTime));
@@ -75,47 +66,13 @@ class _ChatScreenState extends State<ChatScreen> {
 
         // Increment the retry count and attempt the reconnect.
         _retries++;
-        _messageBuffer.add(IRCMessage.createNotice(message: 'Reconnecting to chat (attempt $_retries)...'));
+        //_messageBuffer.add(IRCMessage.createNotice(message: 'Reconnecting to chat (attempt $_retries)...'));
         _channelListener?.cancel();
         connectToChat();
       },
     );
   }
 
-
-  late WebSocket _socket;
-
-
-
-    Future<void> connectToModChat() async {
-      print("connect");
-
-      _socket = await WebSocket.connect('wss://irc-ws.chat.twitch.tv:443/irc');
-      _socket.add('PASS oauth:${widget.token.accessToken}');
-      _socket.add('NICK ${widget.user.login}');
-      _socket.add('JOIN #${widget.user.login}');
-      _socket.listen(_onMessage);
-    }
-    void _onMessage(dynamic message) {
-      print("ON MESSAGE");
-      if (message is String) {
-        final parts = message.split(':');
-        if (parts.length > 2) {
-          final user = parts[1].split('!')[0];
-          final messageC = parts.sublist(2).join(':');
-          // Ahora puedes procesar el mensaje y el usuario
-          // y mostrarlo en la pantalla junto con los iconos de roles.
-          //var userRoleIcon = await getUserRolesIcon(user);
-          if(mounted){
-            setState(() {
-            _listChat.add(message);
-          });
-          }else{
-            _listChat.add(message);
-          }
-        }
-      }
-    }
 
   Future<void> pruebas() async{
     
@@ -158,8 +115,11 @@ class _ChatScreenState extends State<ChatScreen> {
   }
   
   _handleIRCData(String mensaje)async {
+    print("mensaje:--------------------------------- ${IRCMessage.fromIRCData(mensaje)}");
+  
     if(mounted){
       setState(() {
+        
       _listChat.add(mensaje);
     });
     }else{

@@ -126,7 +126,7 @@ class TwitchAuthRepositoryImpl extends TwitchAuthRepository{
 
   @override
   Future<User> getUserRemote(String accessToken) async{
-    return User((await _authService.getUsers(accessToken))[0]);
+    return User.fromApi((await _authService.getUsers(accessToken))[0]);
   }
   
   /// getAutorizationUrl() -> String

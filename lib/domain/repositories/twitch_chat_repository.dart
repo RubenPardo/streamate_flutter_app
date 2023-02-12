@@ -3,12 +3,14 @@ import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:streamate_flutter_app/data/model/badge.dart';
 import 'package:streamate_flutter_app/data/model/chat_settings.dart';
 import 'package:streamate_flutter_app/data/model/emote.dart';
+import 'package:streamate_flutter_app/data/services/twitch_irc_service.dart';
 
 import '../../data/services/twitch_api_service.dart';
 
+/// Repositorio que tiene las funcionalidades del chat de twitch
+/// accede a los servicios de api y irc
 abstract class TwitchChatRepository{
-  void connectChat();
-  void closeChat();
+  Stream<dynamic> connectChat(String accessToken, String loginName);
   ChatSettings getChatSettings(String idBroadcaster);
   bool deleteMessage(String idBroadcaster, String idMessage);
   Future<List<Badge>> getGlobalBadges();
@@ -20,16 +22,13 @@ abstract class TwitchChatRepository{
 class TwitchChatRepositoryImpl extends TwitchChatRepository{
 
   final TwitchApiService _apiService = serviceLocator<TwitchApiService>();
+  final TwitchIRCService _ircService = serviceLocator<TwitchIRCService>();
 
   @override
-  void connectChat() {
-  // implementación para conectar al chat
+  Stream<dynamic> connectChat(String accessToken, String loginName) {
+    return _ircService.connectChat(accessToken, loginName);
   }
 
-  @override
-  void closeChat() {
-  // implementación para cerrar la conexión del chat
-  }
 
   @override
   ChatSettings getChatSettings(String idBroadcaster) {

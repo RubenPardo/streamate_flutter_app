@@ -3,14 +3,17 @@ class User{
   
   
   late final String id;
-  late final String name;
+  late final String displayName;
+  late final String broadcasterType;
+  late final String colorUser;
+  late final String offlineImageUrl;
+  late final int viewCount;
   late final String login;
   late final String description;
   late final String profileImageUrl;
- /* late final String urlOfflineImagen;
   late final String email;
-  late final String cuentaCreadaEn;
-*/
+  late final String createdAt;
+
   ///
   ///
   /// Ejemplo de datos:
@@ -23,12 +26,48 @@ class User{
   /// created_at: 2018-06-10T08:08:36Z
   /// }
   ///
-  User(Map<String,dynamic> data){
-    id = data["id"] ?? "";
-    name = data['display_name'] ?? "";
-    login = data['login'] ?? "";
-    profileImageUrl = data['profile_image_url'] ?? "";
-    description = data['description'] ?? "";
+  User(this.id,this.displayName,this.login,this.email,this.profileImageUrl,
+  this.offlineImageUrl,this.broadcasterType,this.description,this.colorUser,
+  this.createdAt,this.viewCount);
+
+  factory User.fromApi(Map<String,dynamic> data){
+    return User(
+      data['id'] ?? "",
+      data['display_name'] ?? "",
+      data['login'] ?? "",
+      data['email'] ?? "",
+      data['profile_image_url'] ?? "",
+      data['offline_image_url'] ?? "",
+      data['broadcaster_type'] ?? "",
+      data['description'] ?? "",
+      data['color'] ?? "",
+      data['created_at'] ?? "",
+      data['view_count'] ?? 0,
+    );
+  }
+
+  factory User.fromIRC(String id, String displayName,String color){
+    return User(
+      id,
+      displayName,
+      "",
+      "",
+      "",
+      "",
+      "",
+      "",
+      color,
+      "",
+      0,
+    );
+  }
+
+  @override
+  String toString() {
+    // TODO: implement toString
+    return "User[id:$id, name:$displayName, login:$login, email:$email, profilaImage: $profileImageUrl, "
+    "offilneImage: $offlineImageUrl, broadcasterType: $broadcasterType, description: $description, color: $colorUser, "
+    "createdAt: $createdAt], viewCount: $viewCount";
   }
 
 }
