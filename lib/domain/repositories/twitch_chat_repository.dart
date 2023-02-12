@@ -13,8 +13,8 @@ abstract class TwitchChatRepository{
   bool deleteMessage(String idBroadcaster, String idMessage);
   Future<List<Badge>> getGlobalBadges();
   Future<List<Badge>> getChannelBadges(String idBroadcaster);
-  List<Emote> getGlobalEmotes();
-  List<Emote> getChannelEmotes(String idBroadcaster);
+  Future<List<Emote>> getGlobalEmotes();
+  Future<List<Emote>> getChannelEmotes(String idBroadcaster);
 }
 
 class TwitchChatRepositoryImpl extends TwitchChatRepository{
@@ -64,14 +64,22 @@ class TwitchChatRepositoryImpl extends TwitchChatRepository{
   }
 
   @override
-  List<Emote> getGlobalEmotes() {
-  // implementación para obtener los emoticonos globales
-  throw UnimplementedError();
+  Future<List<Emote>> getGlobalEmotes() async{
+    List<Emote> emotes = [];
+    var listEmoteData = await _apiService.getGlobalEmotes();
+    for(dynamic emoteData in listEmoteData){
+      emotes.add(Emote.fromApi(emoteData));
+    }
+    return emotes;
   }
 
   @override
-  List<Emote> getChannelEmotes(String idBroadcaster) {
-  // implementación para obtener los emoticonos del canal
-  throw UnimplementedError();
+  Future<List<Emote>> getChannelEmotes(String idBroadcaster) async{
+    List<Emote> emotes = [];
+    var listEmoteData = await _apiService.getChannelEmotes(idBroadcaster);
+    for(dynamic emoteData in listEmoteData){
+      emotes.add(Emote.fromApi(emoteData));
+    }
+    return emotes;
   }
 }
