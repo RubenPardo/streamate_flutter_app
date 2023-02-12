@@ -1,4 +1,5 @@
 import 'package:streamate_flutter_app/core/utils.dart';
+import 'package:streamate_flutter_app/data/model/chat_settings.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
 
 /// Clase que representa un mensaje IRC del chat de twitch
@@ -31,7 +32,7 @@ class IRCMessage{
         case IRCCommand.clearMessage:
           return IRCMessage("",IRCCommand.none);
         case IRCCommand.notice:
-          return IRCMessage("",IRCCommand.none);
+          return NoticeMessage.fromIRCData(data);
         case IRCCommand.userNotice:
          return IRCMessage("",IRCCommand.none);
         case IRCCommand.roomState:
@@ -50,9 +51,16 @@ class IRCMessage{
     
     
   }
+
+  @override
+  String toString() {
+    return "IRC [message: $message, command: $command]";
+  }
  
 }
 
+/// estos mensajes se usarán para avisar a la aplicación que ha cambiado 
+/// los ajustes del chat, estos no se pintan en el chat
 class RoomStateMessage extends IRCMessage{
 
   late ChatSettingType chatSettingType;
@@ -97,17 +105,29 @@ class RoomStateMessage extends IRCMessage{
 
    @override
   String toString() {
-    return "IRCMessage [ chatSetting:$chatSettingType command:$command, value: $value]";
+    return "ROOMSTATE [ chatSetting:$chatSettingType command:$command, value: $value]";
   }
 
 }
 
-enum ChatSettingType {
-  followersOnly,
-  emoteOnly,
-  slow, none
-}
+// avisos que salen en el chat al producirse un cambio
+class NoticeMessage extends IRCMessage{
+  NoticeMessage({required String message}):super(message,IRCCommand.notice);
 
+  factory NoticeMessage.fromIRCData(String data){
+    //@msg-id=followers_on :tmi.twitch.tv NOTICE #ruben_pardo_2 :This room is now in 1 hour followers-only mode.
+    // TODO averiguar como pasarlo al español
+    List<String> dataSplit = data.split(":");
+    String message = dataSplit[dataSplit.length-1];
+    return NoticeMessage(message: message);
+  }
+  
+  @override
+  String toString() {
+    return "NOTICE [message: $message, command: $command]";
+  }
+}
+/// mensajes normales que se pintarán en el chat
 class PrivateMessage extends IRCMessage{
   late String id;
   /// guardar el id del set y el id del emblema {setId:"",id:""}
@@ -158,8 +178,7 @@ class PrivateMessage extends IRCMessage{
 
    @override
   String toString() {
-    // TODO: implement toString
-    return "IRCMessage [id:$id, badges:$idSetIdbadges, msg:$message, isFirst:$isFirstMessage command:$command, parentName: $userReply, msgReply: $messageReply, user: $user]";
+    return "PRIVMSG [id:$id, badges:$idSetIdbadges, msg:$message, isFirst:$isFirstMessage command:$command, parentName: $userReply, msgReply: $messageReply, user: $user]";
   }
 
 
