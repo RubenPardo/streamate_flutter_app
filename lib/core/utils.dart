@@ -28,6 +28,12 @@ class Utils{
       case "ROOMSTATE":
         command = IRCCommand.roomState;
         break;
+      case "USERNOTICE":
+        command = IRCCommand.userNotice;
+        break;
+      case "USERSTATE":
+        command = IRCCommand.userState;
+        break;
       default:
        command = IRCCommand.none;
     }

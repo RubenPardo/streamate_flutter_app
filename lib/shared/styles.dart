@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'colors.dart';
+import 'extension_color.dart';
 
 const TextStyle _textStyleTitleApp = TextStyle(
   fontWeight: FontWeight.bold,
@@ -42,6 +43,15 @@ const TextStyle textStyleChat = TextStyle(
   color: MyColors.textoSobreOscuro,
   fontSize: 18
 );
+
+TextStyle textStyleChatName(String color){
+  return TextStyle(
+    color: HexColor.fromHex(color),
+    fontFamily: 'Roobert',
+    fontWeight: FontWeight.bold,
+    fontSize: 20
+  ); 
+}
 
 const TextStyle textError = TextStyle(
   fontWeight: FontWeight.bold,

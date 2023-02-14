@@ -1,8 +1,9 @@
 
 import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:streamate_flutter_app/data/model/badge.dart';
-import 'package:streamate_flutter_app/data/model/chat_settings.dart';
+import 'package:streamate_flutter_app/data/model/chat_setting.dart';
 import 'package:streamate_flutter_app/data/model/emote.dart';
+import 'package:streamate_flutter_app/data/model/irc_message.dart';
 import 'package:streamate_flutter_app/data/services/twitch_irc_service.dart';
 
 import '../../data/services/twitch_api_service.dart';
@@ -10,8 +11,8 @@ import '../../data/services/twitch_api_service.dart';
 /// Repositorio que tiene las funcionalidades del chat de twitch
 /// accede a los servicios de api y irc
 abstract class TwitchChatRepository{
-  Stream<dynamic> connectChat(String accessToken, String loginName);
-  ChatSettings getChatSettings(String idBroadcaster);
+  Stream<IRCMessage> connectChat(String accessToken, String loginName);
+  Future<List<ChatSetting>> getChatSettings(String idBroadcaster);
   bool deleteMessage(String idBroadcaster, String idMessage);
   Future<List<Badge>> getGlobalBadges();
   Future<List<Badge>> getChannelBadges(String idBroadcaster);
@@ -24,16 +25,19 @@ class TwitchChatRepositoryImpl extends TwitchChatRepository{
   final TwitchApiService _apiService = serviceLocator<TwitchApiService>();
   final TwitchIRCService _ircService = serviceLocator<TwitchIRCService>();
 
+
+  // Texto, Texto -> conncetChat() -> Stream<IRCMessage>
   @override
-  Stream<dynamic> connectChat(String accessToken, String loginName) {
-    return _ircService.connectChat(accessToken, loginName);
+  Stream<IRCMessage> connectChat(String accessToken, String loginName) {
+    return _ircService.connectChat(accessToken, loginName).map((data) => IRCMessage.fromIRCData(data));
   }
 
 
   @override
-  ChatSettings getChatSettings(String idBroadcaster) {
-  // implementación para obtener la configuración del chat
-    throw UnimplementedError();
+  Future<List<ChatSetting>> getChatSettings(String idBroadcaster) async{
+    print("GET CHAT SETTING: ${_apiService.getChatSettings(idBroadcaster)}");
+
+    return []; 
   }
 
   @override

@@ -1,5 +1,5 @@
 import 'package:streamate_flutter_app/core/utils.dart';
-import 'package:streamate_flutter_app/data/model/chat_settings.dart';
+import 'package:streamate_flutter_app/data/model/chat_setting.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
 
 /// Clase que representa un mensaje IRC del chat de twitch
@@ -13,7 +13,6 @@ class IRCMessage{
 
 
   factory IRCMessage.fromIRCData(String data){
-    print(data);
     // averiguar que tipo de mensaje es
     final parts = data.split(" ");
     // comprobamos que no sea un PING
@@ -28,19 +27,27 @@ class IRCMessage{
           final msgSplit = data.split(":");
           return PrivateMessage.fromIRCData(parts[0],msgSplit[msgSplit.length-1]);
         case IRCCommand.clearChat:
-          return IRCMessage("", IRCCommand.none);
+        // TODO mapear 
+          return IRCMessage("", IRCCommand.clearChat);
         case IRCCommand.clearMessage:
-          return IRCMessage("",IRCCommand.none);
+           // TODO mapear 
+          return IRCMessage("",IRCCommand.clearMessage);
         case IRCCommand.notice:
           return NoticeMessage.fromIRCData(data);
         case IRCCommand.userNotice:
-         return IRCMessage("",IRCCommand.none);
+          //IRC [message: @badge-info=;badges=moderator/1,partner/1;color=#54BC75;display-name=Moobot;emotes=;flags=;id=feabeb1b-7e7f-4fc9-92fe-365f841671df;login=moobot;mod=1;msg-id=announcement;msg-param-color=PRIMARY;room-id=83232866;subscriber=0;system-msg=;tmi-sent-ts=1676308167959;user-id=1564983;user-type=mod :tmi.twitch.tv USERNOTICE #ibai :Si queréis apuntaros como jugadoras de la Queens League: https://www.infojobs.net/barcelona/deportista-profesional-para-queens-league/of-i0177a442274e8384b5890ba28d5856
+          //@badge-info=subscriber/15;badges=subscriber/12,premium/1;color=#0000FF;display-name=cultuayaax;emotes=;flags=;id=ef849818-825a-46e5-bed9-b39c89a7d6c8;login=cultuayaax;mod=0;msg-id=resub;msg-param-cumulative-months=15;msg-param-months=0;msg-param-multimonth-duration=0;msg-param-multimonth-tenure=0;msg-param-should-share-streak=0;msg-param-sub-plan-name=Channel\sSubscription\s(ibaailvp);msg-param-sub-plan=Prime;msg-param-was-gifted=false;room-id=83232866;subscriber=1;system-msg=cultuayaax\ssubscribed\swith\sPrime.\sThey've\ssubscribed\sfor\s15\smonths!;tmi-sent-ts=1676308226752;user-id=473618573;user-type= :tmi.twitch.tv USERNOTICE #ibai :Vamooos KOI
+          // se diferencia en msg-id = anouncment, resub, sub
+          // TODO mapear user notice
+         return IRCMessage("",IRCCommand.userNotice);
         case IRCCommand.roomState:
          return RoomStateMessage.fromIRCData(data);  
         case IRCCommand.userState:
-          return IRCMessage("",IRCCommand.none);
+        // TODO mapear 
+          return IRCMessage("",IRCCommand.userState);
         case IRCCommand.globalUserState:
-          return IRCMessage("",IRCCommand.none);
+        // TODO mapear 
+          return IRCMessage("",IRCCommand.globalUserState);
         default:
           return IRCMessage("",IRCCommand.none);
       }
@@ -63,13 +70,10 @@ class IRCMessage{
 /// los ajustes del chat, estos no se pintan en el chat
 class RoomStateMessage extends IRCMessage{
 
-  late ChatSettingType chatSettingType;
-  // en el caso de emote only 0 o -1,
-  // follower only seran los minutos o -1
-  // slow sera los segundos y desactivado es 0
-  late String value;
+  late ChatSetting chatSetting;
 
-  RoomStateMessage(this.chatSettingType,this.value) : super("",IRCCommand.roomState);
+
+  RoomStateMessage(this.chatSetting) : super("",IRCCommand.roomState);
 
   factory RoomStateMessage.fromIRCData(String data){
 
@@ -81,31 +85,31 @@ class RoomStateMessage extends IRCMessage{
       //@emote-only=0;room-id=878422216 :tmi.twitch.tv ROOMSTATE #ruben_pardo_2
       // obtenemos el valor despues del =
       String value = splitData[0].split("=")[1];
-      return RoomStateMessage(ChatSettingType.emoteOnly, value);
+      return RoomStateMessage(ChatSetting(ChatSettingType.emoteOnly, value));
 
     }else if(data.contains("followers-only")){
       // solo seguidores
       // followers-only indica minutos, -1 es desactivado
       //@followers-only=-1;room-id=878422216 :tmi.twitch.tv ROOMSTATE #ruben_pardo_2
       String value = splitData[0].split("=")[1];
-      return RoomStateMessage(ChatSettingType.followersOnly, value);
+      return RoomStateMessage(ChatSetting(ChatSettingType.followersOnly, value));
 
     }else if(data.contains("slow")){
       // modo lento
       // slow = segundos
       //@room-id=878422216;slow=0 :tmi.twitch.tv ROOMSTATE #ruben_pardo_2
       String value = splitData[1].split("=")[1];
-      return RoomStateMessage(ChatSettingType.slow, value);
+      return RoomStateMessage(ChatSetting(ChatSettingType.slow, value));
 
     }else{
       // otro tipo que por ahora no nos interesa
-      return RoomStateMessage(ChatSettingType.none, "-1");
+      return RoomStateMessage(ChatSetting(ChatSettingType.none, "-1"));
     }
   }
 
    @override
   String toString() {
-    return "ROOMSTATE [ chatSetting:$chatSettingType command:$command, value: $value]";
+    return "ROOMSTATE [ chatSetting:$chatSetting command:$command]";
   }
 
 }

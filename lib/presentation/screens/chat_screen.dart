@@ -3,12 +3,16 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:streamate_flutter_app/data/model/irc_message.dart';
 import 'package:streamate_flutter_app/data/model/token_data.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
 import 'package:streamate_flutter_app/data/services/twitch_api_service.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository.dart';
+import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
+import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
+import 'package:streamate_flutter_app/presentation/bloc/chat_state.dart';
 import 'package:streamate_flutter_app/shared/styles.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -27,7 +31,6 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
 
 
-  WebSocketChannel? _channel;
   StreamSubscription? _channelListener;
   var _backoffTime = 0;
   var _retries = 0;
@@ -37,7 +40,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final _messageBuffer = <IRCMessage>[];
   
   List<String> _listChat = [];
-
+/*
   Future<void> connectToChat( ) async {
 
     print("Connect chat");
@@ -49,9 +52,7 @@ class _ChatScreenState extends State<ChatScreen> {
       (data) => _handleIRCData(data.toString()),
       onError: (error) => debugPrint('Chat error: ${error.toString()}'),
       onDone: () async {
-        print("DONE");
-        if (_channel == null) return;
-
+      
         if (_backoffTime > 0) {
           // Add notice that chat was disconnected and then wait the backoff time before reconnecting.
           final notice =
@@ -73,7 +74,7 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-
+*/
   Future<void> pruebas() async{
     
     
@@ -98,32 +99,59 @@ class _ChatScreenState extends State<ChatScreen> {
     // TODO: implement initState
     super.initState();
     pruebas();
-    connectToChat();
+
+    //connectToChat();
   }
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      itemCount: _listChat.length,
-      itemBuilder: (context, index) {
-        return Container(
-          padding: const EdgeInsets.all(16),
-          child: Text(_listChat[index],style: textStyleChat,),
-        );
-      },
-    );
-  }
-  
-  _handleIRCData(String mensaje)async {
-    print("mensaje:--------------------------------- ${IRCMessage.fromIRCData(mensaje)}");
-  
-    if(mounted){
-      setState(() {
+    return  BlocConsumer<ChatBloc, ChatState>( 
+      listener: (context, state) {
         
-      _listChat.add(mensaje);
-    });
-    }else{
-      _listChat.add(mensaje);
-    }
+      },
+      builder: (context, state) {
+        if(state is ChatConnected){
+          return _buildChat(state);
+        }
+
+        return Center();
+      },
+      
+    );
+     
   }
+  
+  Widget _buildChat(ChatConnected state) {
+    return StreamBuilder(
+        stream: state.chatStream,
+        builder: (context, snapshot) {
+          if (snapshot.hasError){
+              //return error message
+              return Center(child: Text("ERROR"),);
+          }
+
+          if (!snapshot.hasData){
+              //return a loader
+              return Center(child: Text("CARGANDO"),);
+
+          }
+
+          //else you have data
+          List<Widget> _chat = snapshot.data!;
+          // do your thing with ListView.builder
+          return SingleChildScrollView(
+            reverse: true, // hacer que siempre 
+            child: ListView.builder(
+              itemCount: _chat.length,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemBuilder: (context, index) {
+                return _chat[index];
+              },
+            )
+          );
+        },
+      );
+  }
+  
 }

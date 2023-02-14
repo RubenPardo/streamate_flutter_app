@@ -32,32 +32,7 @@ class TwitchIRCServiceImpl implements TwitchIRCService{
     channel!.sink.add('JOIN #$loginName',); // TODO cambiar
     channel!.sink.add('CAP REQ :twitch.tv/commands twitch.tv/tags',); // con esto obtenemos mas informacion en los mensjaes
     
-    return channel!.stream;/*listen(
-      (data) => _handleIRCData(data.toString()),
-      onError: (error) => debugPrint('Chat error: ${error.toString()}'),
-      onDone: () async {
-        print("DONE");
-        if (_channel == null) return;
-
-        if (_backoffTime > 0) {
-          // Add notice that chat was disconnected and then wait the backoff time before reconnecting.
-          final notice =
-              'Disconnected from chat, waiting $_backoffTime ${_backoffTime == 1 ? 'second' : 'seconds'} before reconnecting...';
-          _messageBuffer.add(IRCMessage.createNotice(message: notice));
-        }
-
-        await Future.delayed(Duration(seconds: _backoffTime));
-
-        // Increase the backoff time for the next retry.
-        _backoffTime == 0 ? _backoffTime++ : _backoffTime *= 2;
-
-        // Increment the retry count and attempt the reconnect.
-        _retries++;
-        _messageBuffer.add(IRCMessage.createNotice(message: 'Reconnecting to chat (attempt $_retries)...'));
-        _channelListener?.cancel();
-        connectToChat();
-      },
-    );*/
+    return channel!.stream;
   }
 
 }

@@ -4,16 +4,15 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
-import 'package:streamate_flutter_app/data/model/emote.dart';
 import 'package:streamate_flutter_app/data/model/token_data.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
-import 'package:streamate_flutter_app/data/services/twitch_api_service.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_auth_repository.dart';
-import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_bloc.dart';
-import 'package:streamate_flutter_app/presentation/bloc/auth_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_sate.dart';
+import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
+import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
 import 'package:streamate_flutter_app/presentation/screens/chat_screen.dart';
+import 'package:streamate_flutter_app/presentation/screens/login/control_screen.dart';
 import 'package:streamate_flutter_app/presentation/screens/login/log_in_screen.dart';
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart';
 import 'package:streamate_flutter_app/shared/widgets/app_bar.dart';
@@ -45,15 +44,16 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
   // -----------------------------------------------------------------
+  late User _user;
+  late TokenData _tokenData;
+
 
   @override
   void initState(){
     
-
-
     super.initState();
-    myBloc = context.read<AuthBloc>();
-    mSub = myBloc.stream.listen((stateAuth) {
+
+    mSub = context.read<AuthBloc>().stream.listen((stateAuth) {
       if(stateAuth is AuthUnauthenticated){
           // ha cerrado sesion salir
           // TODO cambiar a por el autorouter
@@ -69,36 +69,24 @@ class _HomeScreenState extends State<HomeScreen> {
     
   }
 
-  late User user;
+
 
   void initBotom()async{
-    TokenData tokenData = await serviceLocator<TwitchAuthRepository>().getTokenDataLocal();
-    user = await serviceLocator<TwitchAuthRepository>().getUserRemote(tokenData.accessToken);   
+      setState(() {
+        _isLoading = true;
+      });
+      
+    _tokenData = await serviceLocator<TwitchAuthRepository>().getTokenDataLocal();
+    _user = await serviceLocator<TwitchAuthRepository>().getUserRemote(_tokenData.accessToken); 
+    
+     // inicializar el chat
+    context.read<ChatBloc>().add(InitChatBloc(_user.id, _tokenData.accessToken, _user.login));
+
     _tabsBottomNavigator = [
-      [Column(
-              children: [
-                const Text("LOGEADO"),
-                ElevatedButton(
-                  onPressed: _cerrarSesion, 
-                  child: const Text("Cerrar sesión")
-                ),
-                ElevatedButton(
-                  onPressed: _pruebas, 
-                  child: const Text("Probar")
-                ),
-                 ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: emotes.length,
-                    itemBuilder: (context, index) {
-                      return Image.network(emotes[index].networkUrl);
-                    },
-                  )
-              ],
-            ),
-          Icon(Icons.abc), "ALGO"],
-        [ ChatScreen(token: tokenData,user: user,), Icon(Icons.chat), "Chat"],
+        [ ControlScreen(tokenData: _tokenData, user: _user),Icon(Icons.abc), "ALGO"],
+        [ ChatScreen(token: _tokenData,user: _user,), Icon(Icons.chat), "Chat"],
         
-      ];
+    ];
 
       setState(() {
         _isLoading = false;
@@ -109,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(appTitle,bottom: Row(mainAxisAlignment: MainAxisAlignment.center,children: [Text("Viewers: 1000"),Text("LIVE ON 00:15:34")],)),
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: _isLoading ? null : BottomNavigationBar(
         onTap: _onItemTapped,
         currentIndex: _selectedIndex,
         items: _tabsBottomNavigator.map((e) => BottomNavigationBarItem(
@@ -118,32 +106,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ).toList(),
       ),
-      /*floatingActionButton: FloatingActionButton(
-        onPressed: _pruebas,
-      ),*/
-      body: _tabsBottomNavigator[_selectedIndex][0],
+      body: _isLoading 
+          ? const Center(child: CircularProgressIndicator(),)
+          :_tabsBottomNavigator[_selectedIndex][0],
     );
   }
 
-  void _cerrarSesion() {
-      context.read<AuthBloc>().add(LogOut()); // ---------------------> cerrar sesion         
-  }
-
-  List<Emote> emotes = [];
-
-  void _pruebas() async{
-    TokenData tokenData = await serviceLocator<TwitchAuthRepository>().getTokenDataLocal();
-    user = await serviceLocator<TwitchAuthRepository>().getUserRemote(tokenData.accessToken);   
-    var emotes1 = await serviceLocator<TwitchChatRepository>().getGlobalEmotes();
-    var emotes2 = await serviceLocator<TwitchChatRepository>().getChannelEmotes(user.id);
-    setState(() {
-      emotes.addAll(emotes1);
-      emotes.addAll(emotes2);
-    
-    });
-
-    for(Emote e in emotes){
-      print(e.networkUrl);
-    }
-  }
 }

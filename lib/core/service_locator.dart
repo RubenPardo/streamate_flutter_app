@@ -6,6 +6,9 @@ import 'package:streamate_flutter_app/data/services/twitch_irc_service.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_auth_repository.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository.dart';
 import 'package:streamate_flutter_app/domain/usecases/check_session_use_case.dart';
+import 'package:streamate_flutter_app/domain/usecases/get_badges_use_case.dart';
+import 'package:streamate_flutter_app/domain/usecases/get_chat_settings_use_case.dart';
+import 'package:streamate_flutter_app/domain/usecases/get_emotes_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_user_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/log_in_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/log_out_use_case.dart';
@@ -20,6 +23,9 @@ Future<void> setUpServiceLocator() async {
   serviceLocator.registerFactory<GetUserUseCase>(() => GetUserUseCase());
   serviceLocator.registerFactory<CheckSessionUseCase>(() => CheckSessionUseCase());
   serviceLocator.registerFactory<LogOutUseCase>(() => LogOutUseCase());
+  serviceLocator.registerFactory<GetEmotesUseCase>(() => GetEmotesUseCase());
+  serviceLocator.registerFactory<GetBadgesUseCase>(() => GetBadgesUseCase());
+  serviceLocator.registerFactory<GetChatSettingsUseCase>(() => GetChatSettingsUseCase());
 
   //datasource
   serviceLocator.registerFactory<TwitchApiService>(
