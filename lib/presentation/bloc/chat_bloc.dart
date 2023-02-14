@@ -44,6 +44,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     // atributos de los ajustes del chat -----------------------------------------
     final StreamController<ListChatSettings> _chatSettingsStreamController = BehaviorSubject<ListChatSettings>();
+    late ListChatSettings _listChatSettings;
     Stream<ListChatSettings> get chatSettingsStrem {
       return _chatSettingsStreamController.stream;
     }
@@ -72,6 +73,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
               }, 
               (chatSettings){
                 // guardar los chat settings
+                _listChatSettings = chatSettings;
                 _chatSettingsStreamController.add(chatSettings);
 
               });
@@ -121,10 +123,16 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   void _handleIRCData(IRCMessage mensaje)async {
     if(mensaje is PrivateMessage){
       _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: mensaje));
+      _widgetChatStreamController.add(_chatWidgets);
       
+    }else if(mensaje is RoomStateMessage){
+      // borramos el chat setting igual que el que llega y añadimos el nuevo
+       _listChatSettings.values.removeWhere((element) => element.chatSettingType == mensaje.chatSetting.chatSettingType);
+       _listChatSettings.values.add(mensaje.chatSetting);
+       // lo pasamos al stream
+       _chatSettingsStreamController.add(_listChatSettings);
     }
 
-    _widgetChatStreamController.add(_chatWidgets);
   }
     
 }

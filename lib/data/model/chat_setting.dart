@@ -20,18 +20,18 @@ class ListChatSettings{
 
     // mapeamos el map a una lista de [ChatSetting]
      for(MapEntry entry in data.entries){
-      String value = entry.value != null ? entry.value.toString() : "-1";
+ 
       if(entry.key == "slow_mode_wait_time"){
-        result.add(ChatSetting(ChatSettingType.slow, value));
+        result.add(ChatSetting(ChatSettingType.slow, entry.value != null ? entry.value.toString() : "-1"));
         continue;
       }else if(entry.key =="follower_mode_duration"){
-        result.add(ChatSetting(ChatSettingType.followersOnly, value));
+        result.add(ChatSetting(ChatSettingType.followersOnly, entry.value != null ? entry.value.toString() : "-1"));
         continue;
       }else if(entry.key =="emote_mode"){
-        result.add(ChatSetting(ChatSettingType.emoteOnly,value));
+        result.add(ChatSetting(ChatSettingType.emoteOnly, entry.value  == false ? "0": "1"));
         continue;
       }else if(entry.key =="subscriber_mode"){
-        result.add(ChatSetting(ChatSettingType.subMode, value));
+        result.add(ChatSetting(ChatSettingType.subMode, entry.value  == false ? "0": "1"));
         continue;
       }
          

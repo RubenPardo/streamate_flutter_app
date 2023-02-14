@@ -14,6 +14,7 @@ import 'package:streamate_flutter_app/domain/usecases/get_chat_settings_use_case
 import 'package:streamate_flutter_app/presentation/bloc/auth_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
+import 'package:streamate_flutter_app/shared/widgets/chat_settings_widget.dart';
 
 class ControlScreen extends StatefulWidget {
 
@@ -44,26 +45,10 @@ class _ControlScreenState extends State<ControlScreen> {
                       // TODO devolver los botones deshabilitados
                       return const Center(child: Text("ERROR"),);
                   }
-                  // TODO cambiar aqui a un widget que tenga todos los botones y 
-                  // que reciba el array, si esta vacio estará todo desahibilitado
-                  if (!snapshot.hasData){
-                      //TODO devolver los botones deshabilitados
-                      return const Center();
-
-                  }
-
-                  ListChatSettings listChatSettings = snapshot.data!;
-                  return Column(
-                    children: listChatSettings.values.map(
-                      (e) => Row(
-                        children: [
-                          Text(e.chatSettingType.name),
-                          const SizedBox(width: 8,),
-                          Text(e.value)
-                        ]
-                      )
-                    ).toList(),
-                  );
+                
+                  return ChattSettingsWidget(
+                    isPartner: widget.user.broadcasterType == "partner",
+                    listChatSettings: snapshot.data ?? ListChatSettings([]));
                 }
               )
             ],
