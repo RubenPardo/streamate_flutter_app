@@ -111,7 +111,7 @@ class _ChatScreenState extends State<ChatScreen> {
       },
       builder: (context, state) {
         if(state is ChatConnected){
-          return _buildChat(state);
+          return _buildChat();
         }
 
         return Center();
@@ -121,18 +121,18 @@ class _ChatScreenState extends State<ChatScreen> {
      
   }
   
-  Widget _buildChat(ChatConnected state) {
+  
+  Widget _buildChat() {
     return StreamBuilder(
-        stream: state.chatStream,
+        stream: context.read<ChatBloc>().chatStream,
         builder: (context, snapshot) {
           if (snapshot.hasError){
               //return error message
-              return Center(child: Text("ERROR"),);
+              return const Center(child: Text("ERROR"),);
           }
-
           if (!snapshot.hasData){
               //return a loader
-              return Center(child: Text("CARGANDO"),);
+              return const Center();
 
           }
 

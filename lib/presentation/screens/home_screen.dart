@@ -12,7 +12,7 @@ import 'package:streamate_flutter_app/presentation/bloc/auth_sate.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
 import 'package:streamate_flutter_app/presentation/screens/chat_screen.dart';
-import 'package:streamate_flutter_app/presentation/screens/login/control_screen.dart';
+import 'package:streamate_flutter_app/presentation/screens/control_screen.dart';
 import 'package:streamate_flutter_app/presentation/screens/login/log_in_screen.dart';
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart';
 import 'package:streamate_flutter_app/shared/widgets/app_bar.dart';

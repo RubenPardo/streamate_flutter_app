@@ -12,7 +12,7 @@ import '../../data/services/twitch_api_service.dart';
 /// accede a los servicios de api y irc
 abstract class TwitchChatRepository{
   Stream<IRCMessage> connectChat(String accessToken, String loginName);
-  Future<List<ChatSetting>> getChatSettings(String idBroadcaster);
+  Future<ListChatSettings> getChatSettings(String idBroadcaster);
   bool deleteMessage(String idBroadcaster, String idMessage);
   Future<List<Badge>> getGlobalBadges();
   Future<List<Badge>> getChannelBadges(String idBroadcaster);
@@ -33,11 +33,18 @@ class TwitchChatRepositoryImpl extends TwitchChatRepository{
   }
 
 
+  // Texto -> getChatSettings -> List<ChatSetting>
   @override
-  Future<List<ChatSetting>> getChatSettings(String idBroadcaster) async{
-    print("GET CHAT SETTING: ${_apiService.getChatSettings(idBroadcaster)}");
+  Future<ListChatSettings> getChatSettings(String idBroadcaster) async{
 
-    return []; 
+    // obtenemos el map de la api
+    var mapChatSettings = await _apiService.getChatSettings(idBroadcaster);
+
+    ListChatSettings listChatSettings = ListChatSettings.fromApi(mapChatSettings);
+    // lo mapeamos y lo devolemos
+     print("CHAT -- -------------------$listChatSettings");
+    return listChatSettings;
+
   }
 
   @override

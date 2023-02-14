@@ -4,15 +4,17 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:streamate_flutter_app/data/model/badge.dart';
+import 'package:streamate_flutter_app/data/model/chat_setting.dart';
 import 'package:streamate_flutter_app/data/model/emote.dart';
 import 'package:streamate_flutter_app/data/model/irc_message.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_badges_use_case.dart';
+import 'package:streamate_flutter_app/domain/usecases/get_chat_settings_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_emotes_use_case.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_state.dart';
 import 'package:streamate_flutter_app/shared/widgets/twitch_chat_private_message.dart';
-
+import 'package:rxdart/rxdart.dart';
 
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
@@ -25,13 +27,28 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     late String _accesToken;
     late String _loginUserName;
 
+
+    // atributos del IRCchat -----------------------------------------
     // stream que se devuelve a la vista y el controlador para añadir objetos
-    StreamController<List<Widget>> controllerWidgetIrcMessageStream = StreamController.broadcast();
-    List<Widget> _chatWidgets = [];
-    
+    // tiene que ser un behavior subject para que cuando se cambie de tab al volver vuelva a enviar
+    // el ultimo elemento
+    final StreamController<List<Widget>> _widgetChatStreamController = BehaviorSubject<List<Widget>>();
+    final List<Widget> _chatWidgets = []; 
+    Stream<List<Widget>> get chatStream {
+      return _widgetChatStreamController.stream;
+    }
+
     // variables para controlar la conexion con el chat
     StreamSubscription? _channelListener;
     var _backoffTime = 0;
+
+    // atributos de los ajustes del chat -----------------------------------------
+    final StreamController<ListChatSettings> _chatSettingsStreamController = BehaviorSubject<ListChatSettings>();
+    Stream<ListChatSettings> get chatSettingsStrem {
+      return _chatSettingsStreamController.stream;
+    }
+    
+    
 
     ChatBloc(): super(ChatUninitialized()){
 
@@ -49,57 +66,65 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           (await serviceLocator<GetBadgesUseCase>().call(_idBroadcaster))
               .fold((error) => null, (badges) => allBadges = badges);
 
-          // TODO obtener los ajustes del chat
-          
+          (await serviceLocator<GetChatSettingsUseCase>().call(_idBroadcaster))
+              .fold((error) {
+                // TODO bloquear los chat settings (pull requests para actualzar???)
+              }, 
+              (chatSettings){
+                // guardar los chat settings
+                _chatSettingsStreamController.add(chatSettings);
+
+              });
           // conectarse al chat
           _connectToChat();
 
           // return Stream<Widget>
-          emit(ChatConnected(controllerWidgetIrcMessageStream.stream));
+          emit(ChatConnected());
         },
       );
 
     }
 
+  
 
-    void _connectToChat(){
-      // obtenemos el stream
-       _channelListener = serviceLocator<TwitchChatRepository>().connectChat(_accesToken, _loginUserName)
-          .listen(
-            (data) => _handleIRCData(data),
-            onError: (error) => debugPrint('Chat error: ${error.toString()}'),
-            onDone: () async {
-              print("DONE");
 
-              if (_backoffTime > 0) {
-                // Add notice that chat was disconnected and then wait the backoff time before reconnecting.
-                final notice =
-                    'Disconnected from chat, waiting $_backoffTime ${_backoffTime == 1 ? 'second' : 'seconds'} before reconnecting...';
-                //_messageBuffer.add(IRCMessage.createNotice(message: notice));
-              }
+  void _connectToChat(){
+    // obtenemos el stream
+    _channelListener = serviceLocator<TwitchChatRepository>().connectChat(_accesToken, _loginUserName)
+      .listen(
+        (data) => _handleIRCData(data),
+        onError: (error) => debugPrint('Chat error: ${error.toString()}'),
+        onDone: () async {
+          print("DONE");
 
-              await Future.delayed(Duration(seconds: _backoffTime));
+          if (_backoffTime > 0) {
+            // Add notice that chat was disconnected and then wait the backoff time before reconnecting.
+            final notice =
+                'Disconnected from chat, waiting $_backoffTime ${_backoffTime == 1 ? 'second' : 'seconds'} before reconnecting...';
+            //_messageBuffer.add(IRCMessage.createNotice(message: notice));
+          }
 
-              // Increase the backoff time for the next retry.
-              _backoffTime == 0 ? _backoffTime++ : _backoffTime *= 2;
+          await Future.delayed(Duration(seconds: _backoffTime));
 
-              //_messageBuffer.add(IRCMessage.createNotice(message: 'Reconnecting to chat (attempt $_retries)...'));
-              _channelListener?.cancel();
-              _connectToChat();
-            });
+          // Increase the backoff time for the next retry.
+          _backoffTime == 0 ? _backoffTime++ : _backoffTime *= 2;
+
+          //_messageBuffer.add(IRCMessage.createNotice(message: 'Reconnecting to chat (attempt $_retries)...'));
+          _channelListener?.cancel();
+          _connectToChat();
+        });
 
     }
 
     // IRCMessage ->_handleIRCData ->
     // mapear el mensaje irc a un widget y añadirlo al stream para que se pinte en la vista
-    void _handleIRCData(IRCMessage mensaje)async {
-      print("MENSAJE: $mensaje");
-      if(mensaje is PrivateMessage){
-        _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: mensaje));
-        
-      }
-
-      controllerWidgetIrcMessageStream.add(_chatWidgets);
+  void _handleIRCData(IRCMessage mensaje)async {
+    if(mensaje is PrivateMessage){
+      _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: mensaje));
+      
     }
+
+    _widgetChatStreamController.add(_chatWidgets);
+  }
     
 }

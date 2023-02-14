@@ -7,17 +7,15 @@ import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository
 
 class GetChatSettingsUseCase{
   
-  Future<Either<MyError, List<ChatSetting>>> call(String idBroadcaster) async {
-    List<ChatSetting> badges = [];
+  Future<Either<MyError, ListChatSettings>> call(String idBroadcaster) async {
+    ListChatSettings chatSettings;
 
  
     
     try{
-      
-      await serviceLocator<TwitchChatRepository>().getChatSettings(idBroadcaster);
-
-
-      return Right(badges);
+     
+      chatSettings = await serviceLocator<TwitchChatRepository>().getChatSettings(idBroadcaster);
+      return Right(chatSettings);
 
     }catch(e){
       return Left(MyError("Error al obtener los emoticonos: $e"));

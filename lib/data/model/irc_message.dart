@@ -101,6 +101,13 @@ class RoomStateMessage extends IRCMessage{
       String value = splitData[1].split("=")[1];
       return RoomStateMessage(ChatSetting(ChatSettingType.slow, value));
 
+    }else if(data.contains("subscriber_mode")){
+      // modo lento
+      // slow = segundos
+      //@room-id=878422216;slow=0 :tmi.twitch.tv ROOMSTATE #ruben_pardo_2
+      String value = splitData[1].split("=")[1];
+      return RoomStateMessage(ChatSetting(ChatSettingType.subMode, value));
+
     }else{
       // otro tipo que por ahora no nos interesa
       return RoomStateMessage(ChatSetting(ChatSettingType.none, "-1"));
