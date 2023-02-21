@@ -66,6 +66,50 @@ class ChatSetting {
     return "Chat Setting [type: $chatSettingType, value: $value]";
   }
 
+  /// toApi()-> List<List<String>>
+  /// Metodo para transformar el objeto en los parametros necesarios para actualizarlo
+  /// por ejemplo
+  List<List<String>> toApi() {
+    List<List<String>> res =[];
+
+    List<String> params = [];
+    List<String> values = [];
+
+    switch(chatSettingType){
+      
+      case ChatSettingType.followersOnly:
+        // para actualizar el follower mode se necesita poner el true o false y la duracion
+        params.add("follower_mode");
+        values.add(value == "-1" ? "false" : "true");// en el caso de que tenga un valor
+        params.add("follower_mode_duration");
+        values.add(value);
+
+        break;
+      case ChatSettingType.emoteOnly:
+        params.add("emote_mode");
+        values.add(value);
+        break;
+      case ChatSettingType.slow:
+        // para actualizar el slow mode se necesita poner el true o false y la duracion
+        params.add("slow_mode");
+        values.add(value == "-1" ? "false" : "true");
+        params.add("slow_mode_wait_time");
+        values.add(value);
+        break;
+      case ChatSettingType.none:
+        break;
+      case ChatSettingType.subMode:
+        params.add("subscriber_mode");
+        values.add(value);
+        break;
+    }
+
+    res.add(params);
+    res.add(values);
+
+    return res;
+  }
+
 }
 
 enum ChatSettingType {

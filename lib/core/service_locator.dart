@@ -12,6 +12,7 @@ import 'package:streamate_flutter_app/domain/usecases/get_emotes_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_user_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/log_in_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/log_out_use_case.dart';
+import 'package:streamate_flutter_app/domain/usecases/update_chat_setting_use_case.dart';
 
 
 final serviceLocator = GetIt.instance;
@@ -26,6 +27,7 @@ Future<void> setUpServiceLocator() async {
   serviceLocator.registerFactory<GetEmotesUseCase>(() => GetEmotesUseCase());
   serviceLocator.registerFactory<GetBadgesUseCase>(() => GetBadgesUseCase());
   serviceLocator.registerFactory<GetChatSettingsUseCase>(() => GetChatSettingsUseCase());
+  serviceLocator.registerFactory<UpdateChatSettingUseCase>(() => UpdateChatSettingUseCase());
 
   //datasource
   serviceLocator.registerFactory<TwitchApiService>(

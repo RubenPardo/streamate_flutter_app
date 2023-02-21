@@ -16,7 +16,7 @@ abstract class TwitchApiService{
   Future<bool> deleteMessage(String idBroadCaster, String idMessage);
   Future<String> getUserColor( String idUser);
   Future<Map<String, dynamic>> getChatSettings(String idBroadCaster);
-  Future<bool> updateChatSetting(String idBroadCaster,List<String> setting, List<String> value);
+  Future<Map<String, dynamic>> updateChatSetting(String idBroadCaster,List<String> setting, List<String> value);
   Future<List<dynamic>> getGlobalBadges();
   Future<List<dynamic>> getChannelBadges(String idBroadcaster);
   Future<List<dynamic>> getGlobalEmotes();
@@ -299,13 +299,13 @@ class TwitchApiServiceImpl extends TwitchApiService{
     }
   }
   
-  /// Texto, Texto, Texto -> updateChatSetting() -> T/F
+  /// Texto, [Texto], [Texto] -> updateChatSetting() -> T/F
   ///
   /// Actualiza uno de los ajustes [setting] del chat de twitch [value] 
   /// 
   ///
   @override
-  Future<bool> updateChatSetting(String idBroadCaster,List<String> setting, List<String> value) async{
+  Future<Map<String, dynamic>> updateChatSetting(String idBroadCaster,List<String> setting, List<String> value) async{
     
       if(setting.length == value.length){
         String url = '${baseUrlApi}helix/chat/settings?broadcaster_id=$idBroadCaster&moderator_id=$idBroadCaster';
@@ -319,8 +319,9 @@ class TwitchApiServiceImpl extends TwitchApiService{
         // Envía la solicitud y procesa la respuesta
         var response = await serviceLocator<Request>().patch(url,data:body);
         if (response.statusCode == 200) {
-          return true;
+          return response.data['data'][0];
         } else {
+          print("CHATT -- error al actualizar");
           throw Exception('Failed to update chat setting');
         }
     }else{

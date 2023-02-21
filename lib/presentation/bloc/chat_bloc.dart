@@ -11,6 +11,7 @@ import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository
 import 'package:streamate_flutter_app/domain/usecases/get_badges_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_chat_settings_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_emotes_use_case.dart';
+import 'package:streamate_flutter_app/domain/usecases/update_chat_setting_use_case.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_state.dart';
 import 'package:streamate_flutter_app/shared/widgets/twitch_chat_private_message.dart';
@@ -85,6 +86,29 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         },
       );
 
+
+      on<ChangeChatSettings>(
+        (event, emit) async{
+          print("CHAT -- 2 BLOC");
+          print("CHAT SETTING AL ENTRAR EL EVENTO----------------------------");
+          print(_listChatSettings);
+          (await serviceLocator<UpdateChatSettingUseCase>().call(_idBroadcaster,event.chatSetting))
+              .fold((error) {
+                // poner el que estaba antes
+                print("CHAT -- ERROR");
+                print("CHAT SETTING AL DAR ERROR ----------------------------");
+                print(_listChatSettings);
+                _chatSettingsStreamController.add(_listChatSettings);
+
+              }, 
+              (chatSettings){
+                // guardar los chat settings
+                _listChatSettings = chatSettings;
+                _chatSettingsStreamController.add(chatSettings);
+
+              });
+        },
+      );
     }
 
   

@@ -1,3 +1,4 @@
+import 'package:streamate_flutter_app/data/model/chat_setting.dart';
 import 'package:streamate_flutter_app/data/model/irc_message.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
 
@@ -29,8 +30,8 @@ class DeleteMessage extends ChatEvent{
 }
 
 class ChangeChatSettings extends ChatEvent{
-  RoomStateMessage message;
-  ChangeChatSettings(this.message);
+  ChatSetting chatSetting;
+  ChangeChatSettings(this.chatSetting);
 }
 
 

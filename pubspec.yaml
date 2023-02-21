@@ -44,6 +44,16 @@ flutter:
     - assets/images/logo_twitch_bw.png
     - assets/images/item_fondo.png
     - assets/images/item_fondo_inferior.png
+    - assets/images/modo_sub_activado.png
+    - assets/images/modo_sub_desactivado.png
+    - assets/images/modo_lento_activado.png
+    - assets/images/modo_lento_desactivado.png
+    - assets/images/modo_emote_activado.png
+    - assets/images/modo_emote_desactivado.png
+    - assets/images/modo_seguidores_activado.png
+    - assets/images/modo_seguidores_desactivado.png
+    - assets/images/anuncios_activado.png
+    - assets/images/anuncios_desactivado.png
 
   fonts:
     - family: Quicksand

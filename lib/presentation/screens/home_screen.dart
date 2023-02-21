@@ -35,8 +35,9 @@ class _HomeScreenState extends State<HomeScreen> {
   // bottom navigator ----------------------------------------------
   int _selectedIndex = 0;
   bool _isLoading = true;
+  bool _isError = false;
 
-  static late List<List<dynamic>> _tabsBottomNavigator;
+  static List<List<dynamic>> _tabsBottomNavigator = [[Center(),Center()],[Center(),Center()]];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -74,30 +75,42 @@ class _HomeScreenState extends State<HomeScreen> {
   void initBotom()async{
       setState(() {
         _isLoading = true;
+        _isError = false;
       });
       
-    _tokenData = await serviceLocator<TwitchAuthRepository>().getTokenDataLocal();
-    _user = await serviceLocator<TwitchAuthRepository>().getUserRemote(_tokenData.accessToken); 
-    
-     // inicializar el chat
-    context.read<ChatBloc>().add(InitChatBloc(_user.id, _tokenData.accessToken, _user.login));
+    try{
+      _tokenData = await serviceLocator<TwitchAuthRepository>().getTokenDataLocal();
+      _user = await serviceLocator<TwitchAuthRepository>().getUserRemote(_tokenData.accessToken); 
+       // inicializar el chat
+      context.read<ChatBloc>().add(InitChatBloc(_user.id, _tokenData.accessToken, _user.login));
 
-    _tabsBottomNavigator = [
-        [ ControlScreen(tokenData: _tokenData, user: _user),Icon(Icons.abc), "ALGO"],
-        [ ChatScreen(token: _tokenData,user: _user,), Icon(Icons.chat), "Chat"],
+      _tabsBottomNavigator = [
+          [ ControlScreen(tokenData: _tokenData, user: _user),Icon(Icons.abc), "ALGO"],
+          [ ChatScreen(token: _tokenData,user: _user,), Icon(Icons.chat), "Chat"],
+          
+      ];
+
+       setState(() {
+          _isLoading = false;
+      });
+
         
-    ];
-
+    
+    }catch(e){
+       print("ERRO init bottom: $e");
       setState(() {
         _isLoading = false;
+        _isError = true;
       });
+    }
+    
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: buildAppBar(appTitle,bottom: Row(mainAxisAlignment: MainAxisAlignment.center,children: [Text("Viewers: 1000"),Text("LIVE ON 00:15:34")],)),
-      bottomNavigationBar: _isLoading ? null : BottomNavigationBar(
+      bottomNavigationBar: (_isLoading || _isError) ? null : BottomNavigationBar(
         onTap: _onItemTapped,
         currentIndex: _selectedIndex,
         items: _tabsBottomNavigator.map((e) => BottomNavigationBarItem(
@@ -108,7 +121,20 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       body: _isLoading 
           ? const Center(child: CircularProgressIndicator(),)
-          :_tabsBottomNavigator[_selectedIndex][0],
+          : _isError ? _buildError() : _tabsBottomNavigator[_selectedIndex][0],
+    );
+  }
+  
+  _buildError() {
+    return RefreshIndicator(
+      onRefresh: () async{
+        initBotom();
+      },
+      child: ListView(
+        children: const[
+          Center(child: Text("Ha ocurrido un error, desliza para actualizar"),)
+        ],
+      ), 
     );
   }
 
