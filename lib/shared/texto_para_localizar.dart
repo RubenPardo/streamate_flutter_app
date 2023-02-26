@@ -13,3 +13,4 @@ const dia = "día";
 const semana = "semana";
 const mes = "mes";
 const meses = "meses";
+const respuestaA = "Respuesta a";

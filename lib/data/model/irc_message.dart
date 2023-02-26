@@ -125,11 +125,14 @@ class RoomStateMessage extends IRCMessage{
 class NoticeMessage extends IRCMessage{
   NoticeMessage({required String message}):super(message,IRCCommand.notice);
 
+
   factory NoticeMessage.fromIRCData(String data){
     //@msg-id=followers_on :tmi.twitch.tv NOTICE #ruben_pardo_2 :This room is now in 1 hour followers-only mode.
     // TODO averiguar como pasarlo al español
-    List<String> dataSplit = data.split(":");
-    String message = dataSplit[dataSplit.length-1];
+    List<String> dataSplitDots = data.split(":"); // [@msg-id=followers_on , tmi.twitch.tv NOTICE #ruben_pardo_2 , This room is now in 1 hour followers-only mode.]
+    
+    String message = dataSplitDots[dataSplitDots.length-1];
+    
     return NoticeMessage(message: message);
   }
   
@@ -147,6 +150,8 @@ class PrivateMessage extends IRCMessage{
   late User user;
   late String? messageReply;
   late String? userReply;
+
+  get isReply => messageReply !=null && userReply !=null;
 
   PrivateMessage(this.id, this.idSetIdbadges, this.isFirstMessage, this.user, this.messageReply,this.userReply,
   {required String message}) 
@@ -193,6 +198,14 @@ class PrivateMessage extends IRCMessage{
   }
 
 
+}
+
+class UserNoticeMessage extends IRCMessage{
+
+  //bool isPrime; // para mostrar la corona en el caso de que sea prime o la estrella si es normal
+
+  UserNoticeMessage({required String message}):super(message,IRCCommand.userNotice);
+  
 }
 
 enum IRCCommand{

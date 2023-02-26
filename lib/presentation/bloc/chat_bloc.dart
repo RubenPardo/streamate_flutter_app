@@ -7,6 +7,7 @@ import 'package:streamate_flutter_app/data/model/badge.dart';
 import 'package:streamate_flutter_app/data/model/chat_setting.dart';
 import 'package:streamate_flutter_app/data/model/emote.dart';
 import 'package:streamate_flutter_app/data/model/irc_message.dart';
+import 'package:streamate_flutter_app/data/model/user.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_badges_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_chat_settings_use_case.dart';
@@ -14,6 +15,7 @@ import 'package:streamate_flutter_app/domain/usecases/get_emotes_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/update_chat_setting_use_case.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_state.dart';
+import 'package:streamate_flutter_app/shared/widgets/twitch_chat_notice_message.dart';
 import 'package:streamate_flutter_app/shared/widgets/twitch_chat_private_message.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -140,12 +142,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           _connectToChat();
         });
 
-    }
 
+    //_addDummyMessages();
+  }
+  
     // IRCMessage ->_handleIRCData ->
     // mapear el mensaje irc a un widget y añadirlo al stream para que se pinte en la vista
   void _handleIRCData(IRCMessage mensaje)async {
     if(mensaje is PrivateMessage){
+      // Añadir widget de mensaje privado ( alguien ha hablado )
       _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: mensaje));
       _widgetChatStreamController.add(_chatWidgets);
       
@@ -155,8 +160,37 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
        _listChatSettings.values.add(mensaje.chatSetting);
        // lo pasamos al stream
        _chatSettingsStreamController.add(_listChatSettings);
+    }else if(mensaje is NoticeMessage){
+      // añadir widget de mensaje de noticia del chat ( texto recibido cuando se cambia el chat de modo )
+      _chatWidgets.add(TwitchChatNoticeMessage(noticeMessage: mensaje));
+      _widgetChatStreamController.add(_chatWidgets);
     }
+    // TODO hacer el user notice message en irc_message.dart para mostrar en el chat suscripciones, donaciones, etc
 
   }
     
+
+  void _addDummyMessages(){
+    String mensaje = "Hola esto es un mensaje largo con varias lineas incluso con emotes LUL";
+    _chatWidgets.add(TwitchChatPrivateMessage(
+      privateMessage: PrivateMessage(
+        message: mensaje,
+        "1",
+        [{"set_id":"1979-revolution_1","id":"1"}],
+        false,
+        User("id","user-2", "user-2", "email", "profileImageUrl", "offlineImageUrl", "", "description", "551144", "createdAt", 12),
+        null,null)
+      ));
+    _chatWidgets.add(TwitchChatPrivateMessage(
+      privateMessage: PrivateMessage(
+        message: "Hola! Te estoy respondiendo",
+        "1",
+        [{"set_id":"1979-revolution_1","id":"1"}],
+        false,
+        User("id","user-1", "user-1", "email", "profileImageUrl", "offlineImageUrl", "", "description", "ff1144", "createdAt", 12),
+        mensaje,
+        "user-2")
+      ));
+    _widgetChatStreamController.add(_chatWidgets);
+  }
 }

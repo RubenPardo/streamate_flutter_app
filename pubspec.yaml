@@ -54,6 +54,7 @@ flutter:
     - assets/images/modo_seguidores_desactivado.png
     - assets/images/anuncios_activado.png
     - assets/images/anuncios_desactivado.png
+    - assets/images/reply_icon.png
 
   fonts:
     - family: Quicksand

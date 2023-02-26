@@ -1,57 +1,88 @@
 
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
+
 import 'package:flutter/widgets.dart';
 import 'package:streamate_flutter_app/data/model/badge.dart';
 import 'package:streamate_flutter_app/data/model/emote.dart';
 import 'package:streamate_flutter_app/data/model/irc_message.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
-import 'package:streamate_flutter_app/shared/extension_color.dart';
 import 'package:streamate_flutter_app/shared/styles.dart';
+import 'package:streamate_flutter_app/shared/texto_para_localizar.dart' as texts;
 
 class TwitchChatPrivateMessage extends StatelessWidget {
 
-  PrivateMessage privateMessage;
+  final PrivateMessage privateMessage;
 
 
-  TwitchChatPrivateMessage({super.key, required this.privateMessage});
+  const TwitchChatPrivateMessage({super.key, required this.privateMessage});
 
+  // TODO averiguar como quitar el padding que se añade en el texto
+  // TODO comprobar si es un mensaje que responde a otro (
+  //Respuesta a @xokaspov: ahora seran viewres
+  //brunixdxd: de hecho soy yo
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(8.0),
-      child: Row(
+      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
-            children: [
-               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8),
-                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width*0.95),
-                child: Text.rich(
-                  overflow: TextOverflow.clip,
-                  TextSpan(
-                    children: [
-                      // obtener badges
-                      ...privateMessage.idSetIdbadges.map((idSetAndId) 
-                          => _buildBadgeWidget(idSetAndId)),
-                      // nombre con el color
-                      TextSpan(
-                        text: "${privateMessage.user.displayName}: ",
-                        style: textStyleChatName(privateMessage.user.colorUser),
-                      ),
-                      // poner el mensaje
-                      
-                    ] + _getMessageWidget(privateMessage.message),
-                  
-                  ),
-                ),
-               ),
-            ],
-          ),
+          privateMessage.isReply ? _buildReplyMessage(context) : Container(),
+          _buildMessage(context),
         ],
       ),
     );
+  }
+
+   Widget _buildReplyMessage(BuildContext context){
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width*0.95),
+      child: Text.rich(
+        
+        overflow: TextOverflow.ellipsis,
+        
+        TextSpan(
+          children: [
+            WidgetSpan(
+              baseline: TextBaseline.ideographic, 
+              alignment: PlaceholderAlignment.baseline,
+              child: Image.asset("assets/images/reply_icon.png",height: 14,width: 14,),
+            ),
+            const WidgetSpan(child: SizedBox(width: 8,)),
+            TextSpan(
+              text: "${texts.respuestaA} @${privateMessage.userReply}: ${privateMessage.messageReply}",
+              style: textStyleChatNotice,
+            ),
+          ],
+        )
+      ),
+    );
+   }
+  /// Funcion que construye el widget del mensaje 
+  Widget _buildMessage(BuildContext context){
+    return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width*0.95),
+            child: Text.rich(
+              overflow: TextOverflow.clip,
+              TextSpan(
+                children: [
+                  // obtener badges
+                  ...privateMessage.idSetIdbadges.map((idSetAndId) 
+                      => _buildBadgeWidget(idSetAndId)),
+                  // nombre con el color
+                  TextSpan(
+                    text: "${privateMessage.user.displayName}: ",
+                    style: textStyleChatName(privateMessage.user.colorUser),
+                  ),
+                  // poner el mensaje
+                  
+                ] + _getMessageWidget(privateMessage.message),
+              
+              ),
+            ),
+          );
   }
 
   InlineSpan _buildBadgeWidget(Map<String, String> idSetAndId) {
@@ -103,7 +134,8 @@ class TwitchChatPrivateMessage extends StatelessWidget {
               )]);
       }else{
         // palabra
-        return TextSpan(text: "$word ");
+        return TextSpan(text: "$word ",style: textStyleChat);
+        
       }
     }).toList();
 

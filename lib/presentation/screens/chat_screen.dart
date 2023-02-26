@@ -1,28 +1,20 @@
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:streamate_flutter_app/data/model/irc_message.dart';
 import 'package:streamate_flutter_app/data/model/token_data.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
-import 'package:streamate_flutter_app/data/services/twitch_api_service.dart';
-import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
-import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_state.dart';
-import 'package:streamate_flutter_app/shared/styles.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-
 
 class ChatScreen extends StatefulWidget {
 
-  TokenData token;
-  User user;
+  final TokenData token;
+  final User user;
 
-  ChatScreen({super.key, required this.token, required this.user});
+  const ChatScreen({super.key, required this.token, required this.user});
 
   @override
   State<ChatScreen> createState() => _ChatScreenState();
@@ -136,17 +128,16 @@ class _ChatScreenState extends State<ChatScreen> {
 
           }
 
-          //else you have data
-          List<Widget> _chat = snapshot.data!;
-          // do your thing with ListView.builder
+          List<Widget> chat = snapshot.data!;
+
           return SingleChildScrollView(
             reverse: true, // hacer que siempre 
             child: ListView.builder(
-              itemCount: _chat.length,
+              itemCount: chat.length,
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemBuilder: (context, index) {
-                return _chat[index];
+                return chat[index];
               },
             )
           );
