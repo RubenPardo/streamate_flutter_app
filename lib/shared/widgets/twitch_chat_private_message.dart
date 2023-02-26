@@ -16,9 +16,6 @@ class TwitchChatPrivateMessage extends StatelessWidget {
   const TwitchChatPrivateMessage({super.key, required this.privateMessage});
 
   // TODO averiguar como quitar el padding que se añade en el texto
-  // TODO comprobar si es un mensaje que responde a otro (
-  //Respuesta a @xokaspov: ahora seran viewres
-  //brunixdxd: de hecho soy yo
   @override
   Widget build(BuildContext context) {
     return Container(

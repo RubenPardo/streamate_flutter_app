@@ -181,14 +181,22 @@ class PrivateMessage extends IRCMessage{
           }).toList()
           : [];
 
+    // los mensajes de respuesta vienen con \s en vez de espacios
+    String? replyMessageBoddy =  mappedTags['reply-parent-msg-body']?.replaceAll("\\s"," ");
+    String? userReply = mappedTags['reply-parent-display-name'];
+    //si es una respuesta tendra los parametros de a quien responde y en el mensaje también, quitar el del mensaje
+    if(userReply!=null){
+      msg = msg.replaceFirst("@$userReply","");
+    }
+    
     // devolver el irc message
     return PrivateMessage(
       mappedTags['id'] ?? "", 
       badges, 
       (mappedTags['first-msg'] ?? 0) == 1, 
       User.fromIRC(mappedTags['user-id']??"", mappedTags['display-name']??"", mappedTags['color']??""),
-      mappedTags['reply-parent-msg-body'], 
-      mappedTags['reply-parent-display-name'],
+      replyMessageBoddy, 
+      userReply,
       message: msg);
   }
 
