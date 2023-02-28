@@ -50,6 +50,27 @@ const TextStyle textStyleChatNotice = TextStyle(
   fontSize: 16
 );
 
+const TextStyle textStyleChatUserNoticeTitleSub = TextStyle(
+  fontFamily: 'Roobert',
+  color: MyColors.secondaryColor,
+  fontWeight: FontWeight.bold,
+  fontSize: 16
+);
+
+const TextStyle textStyleChatUserNoticeTitleGiftMyster = TextStyle(
+  fontFamily: 'Roobert',
+  color: MyColors.textoSobreOscuro,
+  fontWeight: FontWeight.bold,
+  fontSize: 24
+);
+
+
+const TextStyle textStyleChatUserNoticeBody = TextStyle(
+  fontFamily: 'Roobert',
+  color: MyColors.textoSobreOscuro,
+  fontSize: 16
+);
+
 TextStyle textStyleChatName(String color){
   return TextStyle(
     color: HexColor.fromHex(color),

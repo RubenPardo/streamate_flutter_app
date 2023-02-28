@@ -46,11 +46,11 @@ class User{
     );
   }
 
-  factory User.fromIRC(String id, String displayName,String color){
+  factory User.fromIRC(String id, String login, String displayName,String color){
     return User(
       id,
       displayName,
-      "",
+      login,
       "",
       "",
       "",
@@ -62,6 +62,10 @@ class User{
     );
   }
 
+
+  factory User.dummy(){
+    return User("id","user_dummy","user_dummy", "email", "", "", "", "Descripcion dummy", "ff5533", "", 0);
+  }
   @override
   String toString() {
     // TODO: implement toString

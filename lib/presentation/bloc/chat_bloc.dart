@@ -18,6 +18,7 @@ import 'package:streamate_flutter_app/presentation/bloc/chat_state.dart';
 import 'package:streamate_flutter_app/shared/widgets/twitch_chat_notice_message.dart';
 import 'package:streamate_flutter_app/shared/widgets/twitch_chat_private_message.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:streamate_flutter_app/shared/widgets/twitch_chat_user_notice_message.dart';
 
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
@@ -82,7 +83,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
               });
           // conectarse al chat
           _connectToChat();
-
+          _addDummyMessages();
           // return Stream<Widget>
           emit(ChatConnected());
         },
@@ -164,33 +165,30 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       // añadir widget de mensaje de noticia del chat ( texto recibido cuando se cambia el chat de modo )
       _chatWidgets.add(TwitchChatNoticeMessage(noticeMessage: mensaje));
       _widgetChatStreamController.add(_chatWidgets);
+    }else if(mensaje is UserNoticeMessage){
+      // añadir widget de mensaje de noticia del chat ( texto recibido cuando se cambia el chat de modo )
+      print("CHAT -- user notice");
+      _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: mensaje));
+      _widgetChatStreamController.add(_chatWidgets);
     }
     // TODO hacer el user notice message en irc_message.dart para mostrar en el chat suscripciones, donaciones, etc
-
+    
   }
     
 
   void _addDummyMessages(){
-    String mensaje = "Hola esto es un mensaje largo con varias lineas incluso con emotes LUL";
-    _chatWidgets.add(TwitchChatPrivateMessage(
-      privateMessage: PrivateMessage(
-        message: mensaje,
-        "1",
-        [{"set_id":"1979-revolution_1","id":"1"}],
-        false,
-        User("id","user-2", "user-2", "email", "profileImageUrl", "offlineImageUrl", "", "description", "551144", "createdAt", 12),
-        null,null)
-      ));
-    _chatWidgets.add(TwitchChatPrivateMessage(
-      privateMessage: PrivateMessage(
-        message: "Hola! Te estoy respondiendo",
-        "1",
-        [{"set_id":"1979-revolution_1","id":"1"}],
-        false,
-        User("id","user-1", "user-1", "email", "profileImageUrl", "offlineImageUrl", "", "description", "ff1144", "createdAt", 12),
-        mensaje,
-        "user-2")
-      ));
+    _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: PrivateMessage.dummyConEmoji()));
+    _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: PrivateMessage.dummy()));
+    _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: PrivateMessage.dummy()));
+    _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: PrivateMessage.dummyConEmoji()));
+    _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: PrivateMessage.dummyReply()));
+    _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: UserNoticeMessage.dummySubscriptionPrime()));
+    _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: UserNoticeMessage.dummyGift5Sub()));
+    _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: UserNoticeMessage.dummyGiftedSub()));
+    _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: UserNoticeMessage.dummyGiftedSub()));
+    _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: UserNoticeMessage.dummyGiftedSub()));
+    _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: UserNoticeMessage.dummyGiftedSub()));
+    _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: UserNoticeMessage.dummyGiftedSub()));
     _widgetChatStreamController.add(_chatWidgets);
   }
 }

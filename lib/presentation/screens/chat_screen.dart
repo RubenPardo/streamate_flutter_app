@@ -137,7 +137,10 @@ class _ChatScreenState extends State<ChatScreen> {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemBuilder: (context, index) {
-                return chat[index];
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: chat[index]
+                );
               },
             )
           );
