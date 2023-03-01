@@ -59,41 +59,42 @@ class TwitchChatPrivateMessage extends StatelessWidget {
   /// Funcion que construye el widget del mensaje 
   Widget _buildMessage(BuildContext context){
     return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width*0.95),
-            child: Text.rich(
-              overflow: TextOverflow.clip,
-              TextSpan(
-                children: [
-                  // obtener badges
-                  ...privateMessage.idSetIdbadges.map((idSetAndId) 
-                      => _buildBadgeWidget(idSetAndId)),
-                  // nombre con el color
-                  TextSpan(
-                    text: "${privateMessage.user.displayName}: ",
-                    style: textStyleChatName(privateMessage.user.colorUser),
-                  ),
-                  // poner el mensaje
-                  
-                ] + _getMessageWidget(privateMessage.message),
-              
-              ),
-            ),
-          );
+      padding: const EdgeInsets.symmetric(horizontal: 8),
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width*0.95),
+      child: Text.rich(
+            overflow: TextOverflow.clip,
+            TextSpan(
+              children: [
+                // obtener badges
+                ...privateMessage.idSetIdbadges.map((idSetAndId) 
+                    => _buildBadgeWidget(idSetAndId)),
+                // nombre con el color
+                TextSpan(
+                  text: "${privateMessage.user.displayName}: ",
+                  style: textStyleChatName(privateMessage.user.colorUser),
+                ),
+                // poner el mensaje
+                ..._getMessageWidget(privateMessage.message) 
+              ]
+            
+            )
+      ),
+    );
   }
 
   InlineSpan _buildBadgeWidget(Map<String, String> idSetAndId) {
+    print("CHAT -- $idSetAndId");
    String urlBadge = _getBadgeFromIdSetAndId(idSetAndId);
     if(urlBadge != ""){
       return  WidgetSpan( 
         alignment: PlaceholderAlignment.middle, 
-        child:Padding(
+        child: Padding(
           padding: const EdgeInsets.only(right: 3),
           child:  Image.network(_getBadgeFromIdSetAndId(idSetAndId)),
           )
       );
     }else{
-      return WidgetSpan(child: Container());
+      return const WidgetSpan(child:Text(""));
     }
     
   }

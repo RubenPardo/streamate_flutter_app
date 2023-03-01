@@ -154,6 +154,7 @@ class PrivateMessage extends IRCMessage{
       // mapear los tags en clave valor
     final mappedTags = <String, String>{};
     
+    print("CHAT -- $tags");
 
     // Loop through each tag and store their key value pairs into the map.
     for (final tag in tags.split(';')) {
@@ -215,13 +216,7 @@ class PrivateMessage extends IRCMessage{
   }
   
   factory PrivateMessage.dummy(){
-    return PrivateMessage(message: "Hola esto es un texto largo  para que haga un salto de linea, que tal mi gente",
-        "1",
-        [{"set_id":"60-seconds_1","id":"1"}],
-        false,
-        User("id","user-1", "user-1", "email", "profileImageUrl", "offlineImageUrl", "", "description", "ff1144", "createdAt", 12),
-        null,
-        null);
+    return PrivateMessage.fromIRCData("@badge-info=subscriber/55;badges=vip/1,subscriber/48,sub-gifter/600;color=#1E90FF;display-name=Ale05zr;emotes=;first-msg=0;flags=;id=db2efa7b-0ab6-4c29-be60-c6693cbd3722;mod=0;returning-chatter=0;room-id=152633332;subscriber=1;tmi-sent-ts=1677682570863;turbo=0;user-id=98544441;user-type=;vip=1", "Hola mi gente xDDD LUL");
   }
 
   factory PrivateMessage.dummyReply(){
