@@ -58,6 +58,7 @@ flutter:
     - assets/images/sub_tier.png
     - assets/images/prime_logo.png
     - assets/images/sub_gift_icon.png
+    - assets/images/anuncio_icono.png
 
   fonts:
     - family: Quicksand

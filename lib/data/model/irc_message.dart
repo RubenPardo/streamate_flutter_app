@@ -28,26 +28,18 @@ class IRCMessage{
           final msgSplit = data.split(":");
           return PrivateMessage.fromIRCData(parts[0],msgSplit[msgSplit.length-1]);
         case IRCCommand.clearChat:
-        // TODO mapear 
           return IRCMessage("", IRCCommand.clearChat);
         case IRCCommand.clearMessage:
-           // TODO mapear 
           return IRCMessage("",IRCCommand.clearMessage);
         case IRCCommand.notice:
           return NoticeMessage.fromIRCData(data);
         case IRCCommand.userNotice:
-          //IRC [message: @badge-info=;badges=moderator/1,partner/1;color=#54BC75;display-name=Moobot;emotes=;flags=;id=feabeb1b-7e7f-4fc9-92fe-365f841671df;login=moobot;mod=1;msg-id=announcement;msg-param-color=PRIMARY;room-id=83232866;subscriber=0;system-msg=;tmi-sent-ts=1676308167959;user-id=1564983;user-type=mod :tmi.twitch.tv USERNOTICE #ibai :Si queréis apuntaros como jugadoras de la Queens League: https://www.infojobs.net/barcelona/deportista-profesional-para-queens-league/of-i0177a442274e8384b5890ba28d5856
-          //@badge-info=subscriber/15;badges=subscriber/12,premium/1;color=#0000FF;display-name=cultuayaax;emotes=;flags=;id=ef849818-825a-46e5-bed9-b39c89a7d6c8;login=cultuayaax;mod=0;msg-id=resub;msg-param-cumulative-months=15;msg-param-months=0;msg-param-multimonth-duration=0;msg-param-multimonth-tenure=0;msg-param-should-share-streak=0;msg-param-sub-plan-name=Channel\sSubscription\s(ibaailvp);msg-param-sub-plan=Prime;msg-param-was-gifted=false;room-id=83232866;subscriber=1;system-msg=cultuayaax\ssubscribed\swith\sPrime.\sThey've\ssubscribed\sfor\s15\smonths!;tmi-sent-ts=1676308226752;user-id=473618573;user-type= :tmi.twitch.tv USERNOTICE #ibai :Vamooos KOI
-          // se diferencia en msg-id = anouncment, resub, sub
-          // TODO mapear user notice
          return UserNoticeMessage.fromIRCData(data);
         case IRCCommand.roomState:
          return RoomStateMessage.fromIRCData(data);  
         case IRCCommand.userState:
-        // TODO mapear 
           return IRCMessage("",IRCCommand.userState);
         case IRCCommand.globalUserState:
-        // TODO mapear 
           return IRCMessage("",IRCCommand.globalUserState);
         default:
           return IRCMessage("",IRCCommand.none);
@@ -291,8 +283,8 @@ class UserNoticeMessage extends IRCMessage{
         return SubscriptionNotice.fromIRCData(msgId, mappedTags,data);
       case "resub":
         return SubscriptionNotice.fromIRCData(msgId, mappedTags,data);
-      case "announcenment":
-        break;
+      case "announcement":
+        return Announcement.fromIRCData(msgId, mappedTags, data);
       case "submysterygift":
         return SubMysterGift.fromIRCData(msgId, mappedTags, data);
       case "subgift":
@@ -317,13 +309,17 @@ class UserNoticeMessage extends IRCMessage{
       message: "se ha suscrito con prime. ¡Su suscripicón es de 3 meses!"
     );
   }
-
   factory UserNoticeMessage.dummyGift5Sub(){
     return UserNoticeMessage.fromIRCData("@badge-info=subscriber/20;badges=subscriber/12,premium/1;color=#FF0000;display-name=The_eMe20;emotes=;flags=;id=87f83479-66ea-42f7-8a62-36e1a9dfe75b;login=the_eme20;mod=0;msg-id=submysterygift;msg-param-mass-gift-count=5;msg-param-origin-id=3c\\s6e\\s10\\s98\\s90\\s63\\s45\\s4c\\s70\\sb5\\s7a\\s97\\s3f\\s48\\sfc\\sf4\\s4d\\sb4\\s14\\sc9;msg-param-sender-count=262;msg-param-sub-plan=1000;room-id=605221125;subscriber=1;system-msg=The_eMe20\\sis\\sgifting\\s5\\sTier\\s1\\sSubs\\sto\\sgerardromero's\\scommunity!\\sThey've\\sgifted\\sa\\stotal\\sof\\s262\\sin\\sthe\\schannel!;tmi-sent-ts=1677590893254;user-id=276665317;user-type= :tmi.twitch.tv USERNOTICE #gerardromero");
   }
   factory UserNoticeMessage.dummyGiftedSub(){
     return UserNoticeMessage.fromIRCData("@badge-info=subscriber/20;badges=subscriber/12,premium/1;color=#FF0000;display-name=The_eMe20;emotes=;flags=;id=03604d2c-60fa-409a-a616-e3fc0e23b3a7;login=the_eme20;mod=0;msg-id=subgift;msg-param-gift-months=1;msg-param-months=1;msg-param-origin-id=3c\s6e\s10\s98\s90\s63\s45\s4c\s70\sb5\s7a\s97\s3f\s48\sfc\sf4\s4d\sb4\s14\sc9;msg-param-recipient-display-name=odco89;msg-param-recipient-id=50439450;msg-param-recipient-user-name=odco89;msg-param-sender-count=0;msg-param-sub-plan-name=JIJANTE;msg-param-sub-plan=1000;room-id=605221125;subscriber=1;system-msg=The_eMe20\\sgifted\\sa\\sTier\\s1\\ssub\\sto\\sodco89!;tmi-sent-ts=1677590893853;user-id=276665317;user-type= :tmi.twitch.tv USERNOTICE #gerardromero");
   }
+  
+  factory UserNoticeMessage.dummyAnnouncement(){
+    return UserNoticeMessage.fromIRCData("@badge-info=;badges=moderator/1,partner/1;color=#54BC75;display-name=Moobot;emotes=;flags=;id=89b202c1-30ff-445e-b3ee-8fa0555c6af8;login=moobot;mod=1;msg-id=announcement;msg-param-color=GREEN;room-id=121606712;subscriber=0;system-msg=;tmi-sent-ts=1677425473325;user-id=1564983;user-type=mod :tmi.twitch.tv USERNOTICE #kingsleague :ENTRA EN EL TWITTER DE GREFUSA Y GANA LOTAZOS: https://twitter.com/grefusa");
+  }
+
 }
 
 class SubscriptionNotice extends UserNoticeMessage{
@@ -401,8 +397,29 @@ class SubscriptionNotice extends UserNoticeMessage{
   
 }
 
-// announcenment
+// announcement
 //@badge-info=;badges=moderator/1,partner/1;color=#54BC75;display-name=Moobot;emotes=;flags=;id=89b202c1-30ff-445e-b3ee-8fa0555c6af8;login=moobot;mod=1;msg-id=announcement;msg-param-color=GREEN;room-id=121606712;subscriber=0;system-msg=;tmi-sent-ts=1677425473325;user-id=1564983;user-type=mod :tmi.twitch.tv USERNOTICE #kingsleague :ENTRA EN EL TWITTER DE GREFUSA Y GANA LOTAZOS: https://twitter.com/grefusa
+class Announcement extends UserNoticeMessage{
+
+  PrivateMessage privateMessage;
+  
+  Announcement(super.user, super.msgId,this.privateMessage,{required super.message});
+
+  
+
+  factory Announcement.fromIRCData(String msgId, Map<String, String> mappedTags,String rawData){
+    // obtener el user
+    User user = User.fromIRC(mappedTags['user-id']??"",mappedTags['login']??"", mappedTags['display-name']??"", mappedTags['color']??"");
+    
+    // el mensaje es el final del raw data
+    // extraemos el mensaje con expresion regular, entre el usernotice #<cualquier cosa> :<mesnaje a extraer>
+    var splitData = rawData.split(RegExp(r'USERNOTICE\s+#\w+\s+:'));
+    String message = splitData[splitData.length-1];
+
+
+    return Announcement(user, msgId,PrivateMessage.fromIRCData(rawData, message),message: message);
+  }
+}
 
 // submysterygift
 // @badge-info=subscriber/20;badges=subscriber/12,premium/1;color=#FF0000;display-name=The_eMe20;emotes=;flags=;id=87f83479-66ea-42f7-8a62-36e1a9dfe75b;login=the_eme20;mod=0;msg-id=submysterygift;msg-param-mass-gift-count=5;msg-param-origin-id=3c\s6e\s10\s98\s90\s63\s45\s4c\s70\sb5\s7a\s97\s3f\s48\sfc\sf4\s4d\sb4\s14\sc9;msg-param-sender-count=262;msg-param-sub-plan=1000;room-id=605221125;subscriber=1;system-msg=The_eMe20\sis\sgifting\s5\sTier\s1\sSubs\sto\sgerardromero's\scommunity!\sThey've\sgifted\sa\stotal\sof\s262\sin\sthe\schannel!;tmi-sent-ts=1677590893254;user-id=276665317;user-type= :tmi.twitch.tv USERNOTICE #gerardromero
@@ -442,7 +459,6 @@ class SubMysterGift extends UserNoticeMessage{
 
 // subgift
 // @badge-info=subscriber/20;badges=subscriber/12,premium/1;color=#FF0000;display-name=The_eMe20;emotes=;flags=;id=03604d2c-60fa-409a-a616-e3fc0e23b3a7;login=the_eme20;mod=0;msg-id=subgift;msg-param-gift-months=1;msg-param-months=1;msg-param-origin-id=3c\s6e\s10\s98\s90\s63\s45\s4c\s70\sb5\s7a\s97\s3f\s48\sfc\sf4\s4d\sb4\s14\sc9;msg-param-recipient-display-name=odco89;msg-param-recipient-id=50439450;msg-param-recipient-user-name=odco89;msg-param-sender-count=0;msg-param-sub-plan-name=JIJANTE;msg-param-sub-plan=1000;room-id=605221125;subscriber=1;system-msg=The_eMe20\sgifted\sa\sTier\s1\ssub\sto\sodco89!;tmi-sent-ts=1677590893853;user-id=276665317;user-type= :tmi.twitch.tv USERNOTICE #gerardromero
-
 /// clase que representa el mensaje cuando alguien recibe un mensaje
 class SubGift extends UserNoticeMessage{
 

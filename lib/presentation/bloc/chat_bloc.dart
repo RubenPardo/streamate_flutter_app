@@ -188,6 +188,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: UserNoticeMessage.dummyGiftedSub()));
     _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: UserNoticeMessage.dummyGiftedSub()));
     _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: UserNoticeMessage.dummyGiftedSub()));
+    _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: UserNoticeMessage.dummyAnnouncement()));
     _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: UserNoticeMessage.dummyGiftedSub()));
     _widgetChatStreamController.add(_chatWidgets);
   }
