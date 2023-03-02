@@ -1,242 +1,11 @@
-import 'package:streamate_flutter_app/core/utils.dart';
-import 'package:streamate_flutter_app/data/model/chat_setting.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/private_message.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart' as texts;
-
-/// Clase que representa un mensaje IRC del chat de twitch
-class IRCMessage{
-
-  late String message;
-  late IRCCommand command;
+/// Fichero donde se definen los mensajes UserNoticeMessage y todas sus variantes
 
 
-  IRCMessage(this.message,this.command);
-
-
-  factory IRCMessage.fromIRCData(String data){
-    // averiguar que tipo de mensaje es
-    final parts = data.split(" ");
-    // comprobamos que no sea un PING
-    if(parts[0] != "PING"){
-        // el comando siempre esta en la 3 posicion 
-      final command = Utils.parseTextToIRCCOmmand(parts[2]);
-
-      switch(command){
-        
-        case IRCCommand.privateMessage:
-          // para obtener el mensaje en sí hay que dividir por : y pillar el ultimo elemento
-          final msgSplit = data.split(":");
-          return PrivateMessage.fromIRCData(parts[0],msgSplit[msgSplit.length-1]);
-        case IRCCommand.clearChat:
-          return IRCMessage("", IRCCommand.clearChat);
-        case IRCCommand.clearMessage:
-          return IRCMessage("",IRCCommand.clearMessage);
-        case IRCCommand.notice:
-          return NoticeMessage.fromIRCData(data);
-        case IRCCommand.userNotice:
-         return UserNoticeMessage.fromIRCData(data);
-        case IRCCommand.roomState:
-         return RoomStateMessage.fromIRCData(data);  
-        case IRCCommand.userState:
-          return IRCMessage("",IRCCommand.userState);
-        case IRCCommand.globalUserState:
-          return IRCMessage("",IRCCommand.globalUserState);
-        default:
-          return IRCMessage("",IRCCommand.none);
-      }
-    }else{
-       return IRCMessage("",IRCCommand.none);
-    }
-   
-    
-    
-  }
-
-  @override
-  String toString() {
-    return "IRC [message: $message, command: $command]";
-  }
- 
-}
-
-/// estos mensajes se usarán para avisar a la aplicación que ha cambiado 
-/// los ajustes del chat, estos no se pintan en el chat
-class RoomStateMessage extends IRCMessage{
-
-  late ChatSetting chatSetting;
-
-
-  RoomStateMessage(this.chatSetting) : super("",IRCCommand.roomState);
-
-  factory RoomStateMessage.fromIRCData(String data){
-
-    List<String> splitData = data.split(';');
-
-    if(data.contains("emote-only")){
-      // solo emoticonos
-      // emote only -> 0 = true, -1 = false 
-      //@emote-only=0;room-id=878422216 :tmi.twitch.tv ROOMSTATE #ruben_pardo_2
-      // obtenemos el valor despues del =
-      String value = splitData[0].split("=")[1];
-      return RoomStateMessage(ChatSetting(ChatSettingType.emoteOnly, value));
-
-    }else if(data.contains("followers-only")){
-      // solo seguidores
-      // followers-only indica minutos, -1 es desactivado
-      //@followers-only=-1;room-id=878422216 :tmi.twitch.tv ROOMSTATE #ruben_pardo_2
-      String value = splitData[0].split("=")[1];
-      return RoomStateMessage(ChatSetting(ChatSettingType.followersOnly, value));
-
-    }else if(data.contains("slow")){
-      // modo lento
-      // slow = segundos
-      //@room-id=878422216;slow=0 :tmi.twitch.tv ROOMSTATE #ruben_pardo_2
-      String value = splitData[1].split("=")[1];
-      return RoomStateMessage(ChatSetting(ChatSettingType.slow, value));
-
-    }else if(data.contains("subscriber_mode")){
-      // modo lento
-      // slow = segundos
-      //@room-id=878422216;slow=0 :tmi.twitch.tv ROOMSTATE #ruben_pardo_2
-      String value = splitData[1].split("=")[1];
-      return RoomStateMessage(ChatSetting(ChatSettingType.subMode, value));
-
-    }else{
-      // otro tipo que por ahora no nos interesa
-      return RoomStateMessage(ChatSetting(ChatSettingType.none, "-1"));
-    }
-  }
-
-   @override
-  String toString() {
-    return "ROOMSTATE [ chatSetting:$chatSetting command:$command]";
-  }
-
-}
-
-// avisos que salen en el chat al producirse un cambio
-class NoticeMessage extends IRCMessage{
-  NoticeMessage({required String message}):super(message,IRCCommand.notice);
-
-
-  factory NoticeMessage.fromIRCData(String data){
-    //@msg-id=followers_on :tmi.twitch.tv NOTICE #ruben_pardo_2 :This room is now in 1 hour followers-only mode.
-    // TODO averiguar como pasarlo al español
-    List<String> dataSplitDots = data.split(":"); // [@msg-id=followers_on , tmi.twitch.tv NOTICE #ruben_pardo_2 , This room is now in 1 hour followers-only mode.]
-    
-    String message = dataSplitDots[dataSplitDots.length-1];
-    
-    return NoticeMessage(message: message);
-  }
-  
-  @override
-  String toString() {
-    return "NOTICE [message: $message, command: $command]";
-  }
-}
-/// mensajes normales que se pintarán en el chat
-class PrivateMessage extends IRCMessage{
-  late String id;
-  /// guardar el id del set y el id del emblema {setId:"",id:""}
-  late List<Map<String,String>> idSetIdbadges;
-  late bool isFirstMessage;
-  late User user;
-  late String? messageReply;
-  late String? userReply;
-
-  get isReply => messageReply !=null && userReply !=null;
-
-  PrivateMessage(this.id, this.idSetIdbadges, this.isFirstMessage, this.user, this.messageReply,this.userReply,
-  {required String message}) 
-  : super(message, IRCCommand.privateMessage);
-
-  factory PrivateMessage.fromIRCData(String tags,String msg){
-      // mapear los tags en clave valor
-    final mappedTags = <String, String>{};
-    
-    print("CHAT -- $tags");
-
-    // Loop through each tag and store their key value pairs into the map.
-    for (final tag in tags.split(';')) {
-      // Skip if the tag has no value.
-      if (tag.endsWith('=')) continue;
-
-      final tagSplit = tag.split('=');
-      mappedTags[tagSplit[0]] = tagSplit[1];
-    }
-
-    // mapear los badges
-    // de badges=moderator/1,founder/0,premium/1 a [{setId:"moderator",id:"1"},{..}]
-    List<Map<String,String>> badges = (mappedTags['badges']!=null) 
-          ? mappedTags['badges']!.split(",").map((e){
-            // e == moderator/1
-            var splitE = e.split("/");
-            return {"setId":splitE[0],"id":splitE[1]};
-          }).toList()
-          : [];
-
-    // los mensajes de respuesta vienen con \s en vez de espacios
-    String? replyMessageBoddy =  mappedTags['reply-parent-msg-body']?.replaceAll("\\s"," ");
-    String? userReply = mappedTags['reply-parent-display-name'];
-    //si es una respuesta tendra los parametros de a quien responde y en el mensaje también, quitar el del mensaje
-    if(userReply!=null){
-      msg = msg.replaceFirst("@$userReply","");
-    }
-    
-    // devolver el irc message
-    return PrivateMessage(
-      mappedTags['id'] ?? "", 
-      badges, 
-      (mappedTags['first-msg'] ?? 0) == 1, 
-      User.fromIRC(mappedTags['user-id']??"",mappedTags['login']??"", mappedTags['display-name']??"", mappedTags['color']??""),
-      replyMessageBoddy, 
-      userReply,
-      message: msg.replaceAll("\n", ""));
-  }
-
-
-  factory PrivateMessage.dummyResub(){
-    return PrivateMessage(message: "3 mesecitos ya LUL",
-        "1",
-        [{"set_id":"1979-revolution_1","id":"1"}],
-        false,
-        User("id","user-1", "user-1", "email", "profileImageUrl", "offlineImageUrl", "", "description", "ff1144", "createdAt", 12),
-        null,
-        null);
-  }
-
-  factory PrivateMessage.dummyConEmoji(){
-    return PrivateMessage(message: "Hola LUL",
-        "1",
-        [{"set_id":"1979-revolution_1","id":"1"}],
-        false,
-        User("id","user-1", "user-1", "email", "profileImageUrl", "offlineImageUrl", "", "description", "ff1144", "createdAt", 12),
-        null,
-        null);
-  }
-  
-  factory PrivateMessage.dummy(){
-    return PrivateMessage.fromIRCData("@badge-info=subscriber/55;badges=vip/1,subscriber/48,sub-gifter/600;color=#1E90FF;display-name=Ale05zr;emotes=;first-msg=0;flags=;id=db2efa7b-0ab6-4c29-be60-c6693cbd3722;mod=0;returning-chatter=0;room-id=152633332;subscriber=1;tmi-sent-ts=1677682570863;turbo=0;user-id=98544441;user-type=;vip=1", "Hola mi gente xDDD LUL");
-  }
-
-  factory PrivateMessage.dummyReply(){
-    return PrivateMessage(message: "Hola",
-        "2",
-        [{"set_id":"vip","id":"1"}],
-        false,
-        User("id","user-2", "user-2", "email", "profileImageUrl", "offlineImageUrl", "", "description", "4411ff", "createdAt", 12),
-        "Hola LUL",
-        "user-1");
-  }
-
-   @override
-  String toString() {
-    return "PRIVMSG [id:$id, badges:$idSetIdbadges, msg:$message, isFirst:$isFirstMessage command:$command, parentName: $userReply, msgReply: $messageReply, user: $user]";
-  }
-
-
-}
-
+/// Clase que representa los atributos comunes de un mensaje UserNoticeMessage
 class UserNoticeMessage extends IRCMessage{
 
   //bool isPrime; // para mostrar la corona en el caso de que sea prime o la estrella si es normal
@@ -258,8 +27,7 @@ class UserNoticeMessage extends IRCMessage{
 
       // mapear los tags en clave valor
     final mappedTags = <String, String>{};
-    
-    print("CHAT -- $data");
+  
 
     // Loop through each tag and store their key value pairs into the map.
     for (final tag in data.split(';')) {
@@ -317,6 +85,7 @@ class UserNoticeMessage extends IRCMessage{
 
 }
 
+/// Clase que representa una suscripcion en el chat
 class SubscriptionNotice extends UserNoticeMessage{
   
   PrivateMessage? privateMessage;
@@ -393,7 +162,8 @@ class SubscriptionNotice extends UserNoticeMessage{
 }
 
 // announcement
-//@badge-info=;badges=moderator/1,partner/1;color=#54BC75;display-name=Moobot;emotes=;flags=;id=89b202c1-30ff-445e-b3ee-8fa0555c6af8;login=moobot;mod=1;msg-id=announcement;msg-param-color=GREEN;room-id=121606712;subscriber=0;system-msg=;tmi-sent-ts=1677425473325;user-id=1564983;user-type=mod :tmi.twitch.tv USERNOTICE #kingsleague :ENTRA EN EL TWITTER DE GREFUSA Y GANA LOTAZOS: https://twitter.com/grefusa
+/// Clase que representa un anuncio en el chat
+/// ejemplo de irc: @badge-info=;badges=moderator/1,partner/1;color=#54BC75;display-name=Moobot;emotes=;flags=;id=89b202c1-30ff-445e-b3ee-8fa0555c6af8;login=moobot;mod=1;msg-id=announcement;msg-param-color=GREEN;room-id=121606712;subscriber=0;system-msg=;tmi-sent-ts=1677425473325;user-id=1564983;user-type=mod :tmi.twitch.tv USERNOTICE #kingsleague :ENTRA EN EL TWITTER DE GREFUSA Y GANA LOTAZOS: https://twitter.com/grefusa
 class Announcement extends UserNoticeMessage{
 
   PrivateMessage privateMessage;
@@ -417,8 +187,8 @@ class Announcement extends UserNoticeMessage{
 }
 
 // submysterygift
-// @badge-info=subscriber/20;badges=subscriber/12,premium/1;color=#FF0000;display-name=The_eMe20;emotes=;flags=;id=87f83479-66ea-42f7-8a62-36e1a9dfe75b;login=the_eme20;mod=0;msg-id=submysterygift;msg-param-mass-gift-count=5;msg-param-origin-id=3c\s6e\s10\s98\s90\s63\s45\s4c\s70\sb5\s7a\s97\s3f\s48\sfc\sf4\s4d\sb4\s14\sc9;msg-param-sender-count=262;msg-param-sub-plan=1000;room-id=605221125;subscriber=1;system-msg=The_eMe20\sis\sgifting\s5\sTier\s1\sSubs\sto\sgerardromero's\scommunity!\sThey've\sgifted\sa\stotal\sof\s262\sin\sthe\schannel!;tmi-sent-ts=1677590893254;user-id=276665317;user-type= :tmi.twitch.tv USERNOTICE #gerardromero
 /// clase que representa cuando alguien dona subscripciones
+/// ejemplo: @badge-info=subscriber/20;badges=subscriber/12,premium/1;color=#FF0000;display-name=The_eMe20;emotes=;flags=;id=87f83479-66ea-42f7-8a62-36e1a9dfe75b;login=the_eme20;mod=0;msg-id=submysterygift;msg-param-mass-gift-count=5;msg-param-origin-id=3c\s6e\s10\s98\s90\s63\s45\s4c\s70\sb5\s7a\s97\s3f\s48\sfc\sf4\s4d\sb4\s14\sc9;msg-param-sender-count=262;msg-param-sub-plan=1000;room-id=605221125;subscriber=1;system-msg=The_eMe20\sis\sgifting\s5\sTier\s1\sSubs\sto\sgerardromero's\scommunity!\sThey've\sgifted\sa\stotal\sof\s262\sin\sthe\schannel!;tmi-sent-ts=1677590893254;user-id=276665317;user-type= :tmi.twitch.tv USERNOTICE #gerardromero
 class SubMysterGift extends UserNoticeMessage{
   SubMysterGift(super.user, super.msgId, {required super.message});
 
@@ -453,8 +223,8 @@ class SubMysterGift extends UserNoticeMessage{
 }
 
 // subgift
-// @badge-info=subscriber/20;badges=subscriber/12,premium/1;color=#FF0000;display-name=The_eMe20;emotes=;flags=;id=03604d2c-60fa-409a-a616-e3fc0e23b3a7;login=the_eme20;mod=0;msg-id=subgift;msg-param-gift-months=1;msg-param-months=1;msg-param-origin-id=3c\s6e\s10\s98\s90\s63\s45\s4c\s70\sb5\s7a\s97\s3f\s48\sfc\sf4\s4d\sb4\s14\sc9;msg-param-recipient-display-name=odco89;msg-param-recipient-id=50439450;msg-param-recipient-user-name=odco89;msg-param-sender-count=0;msg-param-sub-plan-name=JIJANTE;msg-param-sub-plan=1000;room-id=605221125;subscriber=1;system-msg=The_eMe20\sgifted\sa\sTier\s1\ssub\sto\sodco89!;tmi-sent-ts=1677590893853;user-id=276665317;user-type= :tmi.twitch.tv USERNOTICE #gerardromero
-/// clase que representa el mensaje cuando alguien recibe un mensaje
+/// clase que representa el mensaje cuando alguien recibe un suscripción
+/// ejemplo: @badge-info=subscriber/20;badges=subscriber/12,premium/1;color=#FF0000;display-name=The_eMe20;emotes=;flags=;id=03604d2c-60fa-409a-a616-e3fc0e23b3a7;login=the_eme20;mod=0;msg-id=subgift;msg-param-gift-months=1;msg-param-months=1;msg-param-origin-id=3c\s6e\s10\s98\s90\s63\s45\s4c\s70\sb5\s7a\s97\s3f\s48\sfc\sf4\s4d\sb4\s14\sc9;msg-param-recipient-display-name=odco89;msg-param-recipient-id=50439450;msg-param-recipient-user-name=odco89;msg-param-sender-count=0;msg-param-sub-plan-name=JIJANTE;msg-param-sub-plan=1000;room-id=605221125;subscriber=1;system-msg=The_eMe20\sgifted\sa\sTier\s1\ssub\sto\sodco89!;tmi-sent-ts=1677590893853;user-id=276665317;user-type= :tmi.twitch.tv USERNOTICE #gerardromero
 class SubGift extends UserNoticeMessage{
 
   String userRecivingSub;
@@ -480,16 +250,4 @@ class SubGift extends UserNoticeMessage{
 
     return SubGift(user, msgId, userRecivingSub, message: message);
   }
-}
-
-enum IRCCommand{
-  privateMessage,//when a user posts a chat message in the chat room
-  clearChat, //all messages are removed from the chat room, or all messages for a specific user are removed from the chat room
-  clearMessage, //when a specific message is removed from the chat room
-  notice, // to indicate whether a command succeeded or failed. For example, a moderator tried to ban a user that was already banned
-  userNotice,//when events like user subscriptions occur
-  roomState,// when a bot joins a channel or a moderator changes the chat room’s chat settings
-  userState,//when a user joins a channel or the bot sends a PRIVMSG message
-  globalUserState,//when a bot connects to the server
-  none
 }

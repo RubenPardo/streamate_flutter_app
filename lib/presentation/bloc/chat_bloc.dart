@@ -6,7 +6,11 @@ import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:streamate_flutter_app/data/model/badge.dart';
 import 'package:streamate_flutter_app/data/model/chat_setting.dart';
 import 'package:streamate_flutter_app/data/model/emote.dart';
-import 'package:streamate_flutter_app/data/model/irc_message.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/notice_message.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/private_message.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/room_state_message.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/user_notice_message.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_badges_use_case.dart';
@@ -167,7 +171,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       _widgetChatStreamController.add(_chatWidgets);
     }else if(mensaje is UserNoticeMessage){
       // añadir widget de mensaje de noticia del chat ( texto recibido cuando se cambia el chat de modo )
-      print("CHAT -- user notice");
       _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: mensaje));
       _widgetChatStreamController.add(_chatWidgets);
     }

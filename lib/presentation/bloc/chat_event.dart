@@ -1,5 +1,6 @@
 import 'package:streamate_flutter_app/data/model/chat_setting.dart';
-import 'package:streamate_flutter_app/data/model/irc_message.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/private_message.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
 
 abstract class ChatEvent{}

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:streamate_flutter_app/data/model/irc_message.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
 
 class Utils{
 

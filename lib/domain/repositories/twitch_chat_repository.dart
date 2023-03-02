@@ -3,7 +3,7 @@ import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:streamate_flutter_app/data/model/badge.dart';
 import 'package:streamate_flutter_app/data/model/chat_setting.dart';
 import 'package:streamate_flutter_app/data/model/emote.dart';
-import 'package:streamate_flutter_app/data/model/irc_message.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
 import 'package:streamate_flutter_app/data/services/twitch_irc_service.dart';
 
 import '../../data/services/twitch_api_service.dart';

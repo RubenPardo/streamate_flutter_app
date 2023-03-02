@@ -3,7 +3,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:streamate_flutter_app/data/model/badge.dart';
 import 'package:streamate_flutter_app/data/model/emote.dart';
-import 'package:streamate_flutter_app/data/model/irc_message.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/private_message.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
 import 'package:streamate_flutter_app/shared/styles.dart';
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart' as texts;
@@ -83,7 +84,6 @@ class TwitchChatPrivateMessage extends StatelessWidget {
   }
 
   InlineSpan _buildBadgeWidget(Map<String, String> idSetAndId) {
-    print("CHAT -- $idSetAndId");
    String urlBadge = _getBadgeFromIdSetAndId(idSetAndId);
     if(urlBadge != ""){
       return  WidgetSpan( 
