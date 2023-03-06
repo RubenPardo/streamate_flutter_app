@@ -84,6 +84,10 @@ class PrivateMessage extends IRCMessage{
     return PrivateMessage.fromIRCData("@badge-info=subscriber/55;badges=vip/1,subscriber/48,sub-gifter/600;color=#1E90FF;display-name=Ale05zr;emotes=;first-msg=0;flags=;id=db2efa7b-0ab6-4c29-be60-c6693cbd3722;mod=0;returning-chatter=0;room-id=152633332;subscriber=1;tmi-sent-ts=1677682570863;turbo=0;user-id=98544441;user-type=;vip=1", "Hola mi gente xDDD LUL");
   }
 
+  factory PrivateMessage.dummyLarge(){
+    return PrivateMessage.fromIRCData("@badge-info=subscriber/55;badges=vip/1,subscriber/48,sub-gifter/600;color=#1E90FF;display-name=Ale05zr;emotes=;first-msg=0;flags=;id=db2efa7b-0ab6-4c29-be60-c6693cbd3722;mod=0;returning-chatter=0;room-id=152633332;subscriber=1;tmi-sent-ts=1677682570863;turbo=0;user-id=98544441;user-type=;vip=1", "Hola mi gente xDDD LUL esto es un mensaje muy largo en plan largisimo muy largo. !!!! hola");
+  }
+
   factory PrivateMessage.dummyReply(){
     return PrivateMessage(message: "Hola",
         "2",

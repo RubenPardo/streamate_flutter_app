@@ -12,6 +12,7 @@ class MyColors{
   static const Color textoError = Color(0xffdb3434);
 
   static const Color backgroundColorChatPaused = Color(0xBB484747);
+  static const Color messageReslted= Color(0x77e6e6e6);
 
   
 }

@@ -6,10 +6,9 @@ abstract class ChatState{}
 
 class ChatUninitialized extends ChatState{}
 class ChatConnected extends ChatState{}
-class ChatNewMessage extends ChatState{
-  Widget widgetMessage;
-  ChatNewMessage(this.widgetMessage);
+class ChatClickedMessage extends ChatState{
 }
+
 class ChatPaused extends ChatState{
   
 }

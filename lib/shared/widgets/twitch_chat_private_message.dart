@@ -1,38 +1,110 @@
 
 
+import 'dart:async';
+
+import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/data/model/badge.dart';
 import 'package:streamate_flutter_app/data/model/emote.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/private_message.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
+import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
+import 'package:streamate_flutter_app/presentation/bloc/chat_state.dart';
+import 'package:streamate_flutter_app/shared/colors.dart';
 import 'package:streamate_flutter_app/shared/styles.dart';
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart' as texts;
 
-class TwitchChatPrivateMessage extends StatelessWidget {
+class TwitchChatPrivateMessage extends StatefulWidget {
 
   final PrivateMessage privateMessage;
+  bool isFromSub = false;
 
 
-  const TwitchChatPrivateMessage({super.key, required this.privateMessage});
+  TwitchChatPrivateMessage({super.key, required this.privateMessage, this.isFromSub = false});
 
-  // TODO averiguar como quitar el padding que se añade en el texto
+  @override
+  State<StatefulWidget> createState() => _TwitchChatPrivateMessageState();
+
+  
+  
+  
+ 
+}
+
+
+class _TwitchChatPrivateMessageState extends State<TwitchChatPrivateMessage>{
+
+  bool _isPressed = false;
+  late StreamSubscription mSub; // suscribirse al listener para escuchar si se pulsa otro mensaje
+
+  @override
+  void initState() {
+    super.initState();
+    mSub = context.read<ChatBloc>().stream.listen((event) {
+      print("ME LLEGA UN ${event.runtimeType}");
+      if(event is ChatResumed && _isPressed){
+        // si se reanuda quitar el highlited
+        setState(() {
+          _isPressed = false;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    mSub.cancel();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          privateMessage.isReply ? _buildReplyMessage(context) : Container(),
-          _buildMessage(context),
-        ],
+    return InkWell(
+      onTap: widget.isFromSub ? null : _messageClicked,
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: _isPressed ? MyColors.messageReslted : null,
+        ),
+        padding: EdgeInsets.only(right: _isPressed ? 8 :0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            widget.privateMessage.isReply ? _buildReplyMessage(context) : Container(),
+            
+            Stack(
+              alignment: Alignment.centerLeft,
+              children: [
+                _buildMessage(context),
+                _buildDeleteMessageIcon()
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
 
-   Widget _buildReplyMessage(BuildContext context){
+
+  // callback cuando se pulsa un nombre de usuario
+  void _userClicked(){
+    context.read<ChatBloc>().add(ClickUserChat(widget.privateMessage.user));
+  }
+
+  // callback cuando se pulsa un mensaje
+  void _messageClicked(){
+    // si se pulsa parar el chat
+    setState(() {
+      _isPressed = !_isPressed;
+    });
+    if(_isPressed) context.read<ChatBloc>().add(ClickMessage());
+  }
+
+  Widget _buildReplyMessage(BuildContext context){
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8),
       constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width*0.95),
@@ -49,7 +121,7 @@ class TwitchChatPrivateMessage extends StatelessWidget {
             ),
             const WidgetSpan(child: SizedBox(width: 8,)),
             TextSpan(
-              text: "${texts.respuestaA} @${privateMessage.userReply}: ${privateMessage.messageReply}",
+              text: "${texts.respuestaA} @${widget.privateMessage.userReply}: ${widget.privateMessage.messageReply}",
               style: textStyleChatNotice,
             ),
           ],
@@ -60,27 +132,54 @@ class TwitchChatPrivateMessage extends StatelessWidget {
   /// Funcion que construye el widget del mensaje 
   Widget _buildMessage(BuildContext context){
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8),
+      padding: const EdgeInsets.all(8),
       constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width*0.95),
       child: Text.rich(
             overflow: TextOverflow.clip,
             TextSpan(
               children: [
                 // obtener badges
-                ...privateMessage.idSetIdbadges.map((idSetAndId) 
+                ...widget.privateMessage.idSetIdbadges.map((idSetAndId) 
                     => _buildBadgeWidget(idSetAndId)),
                 // nombre con el color
-                TextSpan(
-                  text: "${privateMessage.user.displayName}: ",
-                  style: textStyleChatName(privateMessage.user.colorUser),
-                ),
+                _buildName(),
                 // poner el mensaje
-                ..._getMessageWidget(privateMessage.message) 
+                ..._getMessageWidget(widget.privateMessage.message) 
               ]
             
             )
       ),
     );
+  }
+
+  // 
+  Widget _buildDeleteMessageIcon(){
+    return _isPressed 
+      ? Align(
+          alignment: Alignment.centerRight,
+          child: IconButton(
+            icon: const Icon(Icons.delete), 
+            onPressed: (){
+              // BORRAR MENSAJE ---------------------------
+              context.read<ChatBloc>().add(DeleteMessage(widget.privateMessage.user, widget.privateMessage));
+            },
+          ),
+        )
+      : Container();
+  }
+
+  // construimos el widget span con el nombre pero con inkwell para poder pulsar el usuario
+  WidgetSpan _buildName(){
+    return WidgetSpan(
+      alignment: PlaceholderAlignment.baseline,
+      baseline: TextBaseline.alphabetic,
+      child: InkWell(
+        onTap: _userClicked,
+        child: Text(
+          "${widget.privateMessage.user.displayName}: ",
+          style: textStyleChatName(widget.privateMessage.user.colorUser),
+        ),
+      ));
   }
 
   InlineSpan _buildBadgeWidget(Map<String, String> idSetAndId) {
@@ -159,5 +258,4 @@ class TwitchChatPrivateMessage extends StatelessWidget {
     
   }
   
- 
 }

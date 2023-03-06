@@ -14,7 +14,7 @@ abstract class TwitchChatRepository{
   Stream<IRCMessage> connectChat(String accessToken, String loginName);
   Future<ListChatSettings> getChatSettings(String idBroadcaster);
   Future<ListChatSettings> updateChatSetting(String idBroadcaster, List<String>params, List<String> values);
-  bool deleteMessage(String idBroadcaster, String idMessage);
+  Future<bool> deleteMessage(String idBroadcaster, String idMessage);
   Future<List<Badge>> getGlobalBadges();
   Future<List<Badge>> getChannelBadges(String idBroadcaster);
   Future<List<Emote>> getGlobalEmotes();
@@ -59,9 +59,9 @@ class TwitchChatRepositoryImpl extends TwitchChatRepository{
   }
 
   @override
-  bool deleteMessage(String idBroadcaster, String idMessage) {
+  Future<bool> deleteMessage(String idBroadcaster, String idMessage) async{
   // implementación para eliminar un mensaje del chat
-    throw UnimplementedError();
+    return await _apiService.deleteMessage(idBroadcaster, idMessage);
   }
 
   @override

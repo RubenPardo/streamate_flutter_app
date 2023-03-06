@@ -74,7 +74,7 @@ class _ChatScreenState extends State<ChatScreen> {
       builder: (context, state) {
         
 
-        if(state is ChatConnected || state is ChatNewMessage){
+        if(state is ChatConnected){
           return Column(
             children: [
               

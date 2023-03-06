@@ -6,6 +6,7 @@ import 'package:streamate_flutter_app/data/services/twitch_irc_service.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_auth_repository.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository.dart';
 import 'package:streamate_flutter_app/domain/usecases/check_session_use_case.dart';
+import 'package:streamate_flutter_app/domain/usecases/delete_message_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_badges_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_chat_settings_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_emotes_use_case.dart';
@@ -28,6 +29,7 @@ Future<void> setUpServiceLocator() async {
   serviceLocator.registerFactory<GetBadgesUseCase>(() => GetBadgesUseCase());
   serviceLocator.registerFactory<GetChatSettingsUseCase>(() => GetChatSettingsUseCase());
   serviceLocator.registerFactory<UpdateChatSettingUseCase>(() => UpdateChatSettingUseCase());
+  serviceLocator.registerFactory<DeleteMessageUseCase>(() => DeleteMessageUseCase());
 
   //datasource
   serviceLocator.registerFactory<TwitchApiService>(

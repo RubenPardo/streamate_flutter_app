@@ -80,7 +80,7 @@ class TwitchChatUserNoticeMessage extends StatelessWidget{
             ),
             // si el usuario ha escrito un mensaje mostrarlo
             subscriptionNotice.haveMessage 
-              ? TwitchChatPrivateMessage(privateMessage: subscriptionNotice.privateMessage!)
+              ? TwitchChatPrivateMessage(privateMessage: subscriptionNotice.privateMessage!, isFromSub: true,)
               : Container()
           ],
       )
@@ -196,7 +196,7 @@ class TwitchChatUserNoticeMessage extends StatelessWidget{
             // Message
             Container(
               padding: const EdgeInsets.only(bottom: 8, top: 4),
-              child: TwitchChatPrivateMessage(privateMessage: announcement.privateMessage)
+              child: TwitchChatPrivateMessage(privateMessage: announcement.privateMessage, isFromSub: true,)
             )
             
           ],

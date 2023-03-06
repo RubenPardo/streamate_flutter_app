@@ -14,6 +14,7 @@ import 'package:streamate_flutter_app/data/model/irc_message/room_state_message.
 import 'package:streamate_flutter_app/data/model/irc_message/user_notice_message.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository.dart';
+import 'package:streamate_flutter_app/domain/usecases/delete_message_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_badges_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_chat_settings_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_emotes_use_case.dart';
@@ -101,6 +102,23 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         },
       );
 
+      on<ClickUserChat>((event, emit) { // -------------------------------------------------------
+        
+        // si alguien ha pulsado un mensaje paramos el chat
+        add(StopChat());
+        print("BLOC click user");
+
+
+      },);
+
+      on<ClickMessage>((event, emit) {
+        
+        // si alguien ha pulsado un mensaje paramos el chat
+        print("BLOC click message");
+        add(StopChat());
+
+
+      },);
 
       on<StopChat>(//----------------------------------------------------
         (event, emit) {
@@ -109,7 +127,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           emit(ChatConnected());
 
       },);
-       on<ResumeChat>(//----------------------------------------------------
+      
+      on<ResumeChat>(//----------------------------------------------------
         (event, emit) {
           // añadir todos los mensajes a la espera a la lista que se muestra
           _isPaused = false;
@@ -123,6 +142,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           emit(ChatConnected());
 
       },);
+      
       on<ChangeChatSettings>(
         (event, emit) async{
           print("CHAT -- 2 BLOC");
@@ -145,6 +165,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
               });
         },
       );
+    
+      on<DeleteMessage>(
+        (event, emit) {
+          String idUser = event.user.id;
+          String idMessage = event.message.id;
+          serviceLocator<DeleteMessageUseCase>().call(idUser, idMessage);
+        },
+      );
+
     }
 
   
@@ -273,6 +302,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: UserNoticeMessage.dummyGiftedSub()));
     _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: UserNoticeMessage.dummyAnnouncement()));
     _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: UserNoticeMessage.dummyGiftedSub()));
+    _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: PrivateMessage.dummy()));
+    _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: PrivateMessage.dummy()));
+    _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: PrivateMessage.dummy()));
+    _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: PrivateMessage.dummy()));
+    _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: PrivateMessage.dummyLarge()));
     _widgetChatStreamController.add(_chatWidgets);
   }
 }

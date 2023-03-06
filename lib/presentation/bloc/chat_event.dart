@@ -21,6 +21,8 @@ class ClickUserChat extends ChatEvent{
   ClickUserChat(this.user);
 }
 
+class ClickMessage extends ChatEvent{}
+
 class BanUserChat extends ChatEvent{
   User user;
   User userToBan;
