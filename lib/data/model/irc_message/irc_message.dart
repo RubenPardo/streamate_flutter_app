@@ -1,4 +1,5 @@
 import 'package:streamate_flutter_app/core/utils.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/clear_message.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/notice_message.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/private_message.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/room_state_message.dart';
@@ -31,7 +32,7 @@ class IRCMessage{
         case IRCCommand.clearChat:
           return IRCMessage("", IRCCommand.clearChat);
         case IRCCommand.clearMessage:
-          return IRCMessage("",IRCCommand.clearMessage);
+          return ClearMessage.fromIRCData(data);
         case IRCCommand.notice:
           return NoticeMessage.fromIRCData(data);
         case IRCCommand.userNotice:

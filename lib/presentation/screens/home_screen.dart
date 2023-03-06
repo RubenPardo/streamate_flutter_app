@@ -11,6 +11,7 @@ import 'package:streamate_flutter_app/presentation/bloc/auth_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_sate.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
+import 'package:streamate_flutter_app/presentation/bloc/chat_state.dart';
 import 'package:streamate_flutter_app/presentation/screens/chat_screen.dart';
 import 'package:streamate_flutter_app/presentation/screens/control_screen.dart';
 import 'package:streamate_flutter_app/presentation/screens/login/log_in_screen.dart';
@@ -28,8 +29,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
    // obtenemos la referencia a la subscripcion del bloc, 
    // para cuando se cierre esta ventana, cerrarla y asi tambien evitar duplicidad
-  late StreamSubscription mSub;
-  late AuthBloc myBloc;
+  late StreamSubscription mSubAuthBloc;
+  // para recibir los mensajes de si el chat se ha parado o no 
+  late StreamSubscription mSubChatBloc;
 
 
   // bottom navigator ----------------------------------------------
@@ -48,13 +50,16 @@ class _HomeScreenState extends State<HomeScreen> {
   late User _user;
   late TokenData _tokenData;
 
+  bool _isChatPaused = false;
+  final int _chatIndex = 1;
+
 
   @override
   void initState(){
     
     super.initState();
 
-    mSub = context.read<AuthBloc>().stream.listen((stateAuth) {
+    mSubAuthBloc = context.read<AuthBloc>().stream.listen((stateAuth) {
       if(stateAuth is AuthUnauthenticated){
           // ha cerrado sesion salir
           // TODO cambiar a por el autorouter
@@ -62,15 +67,33 @@ class _HomeScreenState extends State<HomeScreen> {
               builder: (context) =>  const LogInScreen(title: 'Login',),
           ));
           
-          mSub.cancel();
+          mSubAuthBloc.cancel();
       }
+    });
+
+    mSubChatBloc = context.read<ChatBloc>().stream.listen((state) {
+      if(state is ChatPaused){
+          setState(() {
+            _isChatPaused = true;
+          });
+        }
+        if(state is ChatResumed){
+          setState(() {
+            _isChatPaused = false;
+          });
+        }
     });
 
     initBotom();
     
   }
 
-
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    mSubChatBloc.cancel();
+  }
 
   void initBotom()async{
       setState(() {
@@ -97,7 +120,6 @@ class _HomeScreenState extends State<HomeScreen> {
         
     
     }catch(e){
-       print("ERRO init bottom: $e");
       setState(() {
         _isLoading = false;
         _isError = true;
@@ -109,7 +131,12 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(appTitle,bottom: Row(mainAxisAlignment: MainAxisAlignment.center,children: [Text("Viewers: 1000"),Text("LIVE ON 00:15:34")],)),
+      appBar: buildAppBar(appTitle, bottom: Center(child: Text("PRUEBA"),),
+        actions: [
+          _selectedIndex == _chatIndex 
+            ? _buildPauseChatButton() : Container()
+        ] 
+      ),
       bottomNavigationBar: (_isLoading || _isError) ? null : BottomNavigationBar(
         onTap: _onItemTapped,
         currentIndex: _selectedIndex,
@@ -136,6 +163,17 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ), 
     );
+  }
+
+  Widget _buildPauseChatButton(){
+    return IconButton(onPressed: (){
+      if(!_isChatPaused){
+        context.read<ChatBloc>().add(StopChat());
+      }else{
+        context.read<ChatBloc>().add(ResumeChat());
+      }
+      
+    }, icon: Icon(_isChatPaused ? Icons.play_arrow  : Icons.pause));
   }
 
 }

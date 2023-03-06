@@ -31,6 +31,9 @@ class Utils{
       case "USERNOTICE":
         command = IRCCommand.userNotice;
         break;
+      case "CLEARMSG":
+        command = IRCCommand.clearMessage;
+        break;
       case "USERSTATE":
         command = IRCCommand.userState;
         break;
@@ -40,4 +43,18 @@ class Utils{
     return command;
   }
 
+  // Texto -> mapTagsIrcData() -> {Texto:Texto}
+  static Map<String,String> mapTagsIrcData(String data){
+    final mappedTags = <String, String>{};
+    for (final tag in data.split(';')) {
+      // Skip if the tag has no value.
+      if (tag.endsWith('=')) continue;
+
+      final tagSplit = tag.split('=');
+      mappedTags[tagSplit[0]] = tagSplit[1];
+    }
+
+    return mappedTags;
+
+  }
 }

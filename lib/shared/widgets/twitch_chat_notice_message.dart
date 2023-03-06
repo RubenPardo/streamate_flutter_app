@@ -10,7 +10,7 @@ import 'package:streamate_flutter_app/shared/styles.dart';
 
 class TwitchChatNoticeMessage extends StatelessWidget {
 
-  final NoticeMessage noticeMessage;
+  final String noticeMessage;
 
 
   const TwitchChatNoticeMessage({super.key, required this.noticeMessage});
@@ -28,7 +28,7 @@ class TwitchChatNoticeMessage extends StatelessWidget {
                Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 0),
                 constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width*0.95),
-                child: Text(noticeMessage.message, style: textStyleChatNotice,),
+                child: Text(noticeMessage, style: textStyleChatNotice,),
                 ),
             ],
           ),

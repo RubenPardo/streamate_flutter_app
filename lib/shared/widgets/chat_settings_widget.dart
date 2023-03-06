@@ -36,11 +36,9 @@ class _ChattSettingsWidgetState extends State<ChattSettingsWidget> {
     ChatSetting chatSlow =widget.listChatSettings.values.firstWhere((element) => element.chatSettingType == ChatSettingType.slow,orElse: () => ChatSetting(ChatSettingType.none,""));
 
     return Center(
-      child: Wrap(
-        spacing: 16, //vertical spacing
-        runSpacing: 16, //horizontal spacing
-        alignment: WrapAlignment.center,
-        crossAxisAlignment: WrapCrossAlignment.center,
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
           //modo emotes
           _buildChatSetting(
@@ -167,16 +165,18 @@ class _ChattSettingsWidgetState extends State<ChattSettingsWidget> {
   Widget _buildChatSetting(
   { required Null Function() onTap, required String text, required bool disable, required bool activado, required assetPrefix}) {
     return Container(
+      margin: const EdgeInsets.all(8),
+
       decoration:  BoxDecoration(
         borderRadius: BorderRadius.circular(10),
         // if(disable) { gris } else{ if(activado){ morado } else{ blanco }}
         color: disable ? MyColors.backgroundColorSecondary : activado ? MyColors.primaryColor : Colors.white,
       ),
-      constraints: const BoxConstraints(maxHeight: 100, maxWidth: 100),
+      constraints: const BoxConstraints(maxHeight: 36, maxWidth: 36),
       child: InkWell(
         onTap: onTap, 
         child: Padding(
-          padding: const EdgeInsets.all(12),
+          padding: const EdgeInsets.all(8),
           child: Center(child:  Image.asset('assets/images/${assetPrefix}_${activado ? "activado": "desactivado"}.png'),),
         )
         

@@ -16,4 +16,5 @@ const meses = "meses";
 const respuestaA = "Respuesta a";
 const subGifted = "ha regalado una suscripción de tier {1?}";
 const subMysterGift = "está regalando {1?} sucripciones de nivel {2?} a la comunidad de {3?}";
+const eliminarMensaje = "Se ha eliminado el mensaje de ";
 const announcement = "Anuncio";

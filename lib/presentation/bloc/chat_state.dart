@@ -6,6 +6,17 @@ abstract class ChatState{}
 
 class ChatUninitialized extends ChatState{}
 class ChatConnected extends ChatState{}
+class ChatNewMessage extends ChatState{
+  Widget widgetMessage;
+  ChatNewMessage(this.widgetMessage);
+}
+class ChatPaused extends ChatState{
+  
+}
+class ChatResumed extends ChatState{
+    int? lastItem;
+    ChatResumed({this.lastItem});
+}
 class ChatError extends ChatState{
   String error;
   ChatError(this.error);

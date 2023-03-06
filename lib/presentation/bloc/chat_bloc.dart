@@ -6,6 +6,7 @@ import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:streamate_flutter_app/data/model/badge.dart';
 import 'package:streamate_flutter_app/data/model/chat_setting.dart';
 import 'package:streamate_flutter_app/data/model/emote.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/clear_message.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/notice_message.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/private_message.dart';
@@ -42,9 +43,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     // el ultimo elemento
     final StreamController<List<Widget>> _widgetChatStreamController = BehaviorSubject<List<Widget>>();
     final List<Widget> _chatWidgets = []; 
+    final List<Widget> _chatPausedWidgets = []; 
+
     Stream<List<Widget>> get chatStream {
       return _widgetChatStreamController.stream;
     }
+  
+    bool _isPaused = false;
+    bool get isPaused => _isPaused;
+    final int _maxChatItems = 250;
 
     // variables para controlar la conexion con el chat
     StreamSubscription? _channelListener;
@@ -90,10 +97,32 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           _addDummyMessages();
           // return Stream<Widget>
           emit(ChatConnected());
+          
         },
       );
 
 
+      on<StopChat>(//----------------------------------------------------
+        (event, emit) {
+          _isPaused = true;
+          emit(ChatPaused());
+          emit(ChatConnected());
+
+      },);
+       on<ResumeChat>(//----------------------------------------------------
+        (event, emit) {
+          // añadir todos los mensajes a la espera a la lista que se muestra
+          _isPaused = false;
+          int lastItem = _chatWidgets.length-1;
+          _chatWidgets.addAll(_chatPausedWidgets);
+          _chatPausedWidgets.clear();
+          _widgetChatStreamController.add(_chatWidgets);
+          // pasamos el length del array de los elementos que estaban en pantalla para que no salte directamente 
+          // bajo del todo
+          emit(ChatResumed(lastItem: lastItem));
+          emit(ChatConnected());
+
+      },);
       on<ChangeChatSettings>(
         (event, emit) async{
           print("CHAT -- 2 BLOC");
@@ -154,11 +183,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     // IRCMessage ->_handleIRCData ->
     // mapear el mensaje irc a un widget y añadirlo al stream para que se pinte en la vista
   void _handleIRCData(IRCMessage mensaje)async {
+    
+    Widget? chatWidget; // nuevo widget
+    int? position;//posicion en el caso de sustituir un mensaje por otro
     if(mensaje is PrivateMessage){
       // Añadir widget de mensaje privado ( alguien ha hablado )
-      _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: mensaje));
-      _widgetChatStreamController.add(_chatWidgets);
-      
+      chatWidget = TwitchChatPrivateMessage(privateMessage: mensaje);   
     }else if(mensaje is RoomStateMessage){
       // borramos el chat setting igual que el que llega y añadimos el nuevo
        _listChatSettings.values.removeWhere((element) => element.chatSettingType == mensaje.chatSetting.chatSettingType);
@@ -167,17 +197,67 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
        _chatSettingsStreamController.add(_listChatSettings);
     }else if(mensaje is NoticeMessage){
       // añadir widget de mensaje de noticia del chat ( texto recibido cuando se cambia el chat de modo )
-      _chatWidgets.add(TwitchChatNoticeMessage(noticeMessage: mensaje));
-      _widgetChatStreamController.add(_chatWidgets);
+      chatWidget = TwitchChatNoticeMessage(noticeMessage: mensaje.message);
     }else if(mensaje is UserNoticeMessage){
-      // añadir widget de mensaje de noticia del chat ( texto recibido cuando se cambia el chat de modo )
-      _chatWidgets.add(TwitchChatUserNoticeMessage(userNoticeMessage: mensaje));
-      _widgetChatStreamController.add(_chatWidgets);
+      // añadir widget de mensaje de usuario, cuando se suscribe, se hace un anuncio, regalos, etc..
+      chatWidget = (TwitchChatUserNoticeMessage(userNoticeMessage: mensaje));
+    }else if(mensaje is ClearMessage){
+      // cuando se borra un mensaje hay que añadir este widget en el sitio donde el mensjae que se ha borrado
+      // creamos el mensaje que indica que se ha borrado el mensaje
+      chatWidget = TwitchChatNoticeMessage(noticeMessage: mensaje.message);
+      // buscamos el widget que corresponde al mensaje que se ha borrado
+      int indexDeletedMessage = _chatWidgets.indexWhere((element){
+          if(element is TwitchChatPrivateMessage && element.privateMessage.id == mensaje.idMessage){
+            return true;
+          }else{
+            return false;
+          }
+      } );
+      if(indexDeletedMessage!=-1){
+        position = indexDeletedMessage;
+        // si esta en la lista quitarlo y remplazarlo    
+      }
     }
-    // TODO hacer el user notice message en irc_message.dart para mostrar en el chat suscripciones, donaciones, etc
-    
+    if(chatWidget != null){
+      _addNewMessage(chatWidget, atPosition: position);
+     
+    }
   }
-    
+
+  /// Añadir un nuevo mensaje al chat, se puede pasar una posicion en el caso de 
+  /// que se borre un mensaje y se tenga que sustituir
+  void _addNewMessage(Widget newChatWidget,{int? atPosition}){
+    if(atPosition!=null){
+      // TODO TESTEAR MUCHO MAS
+      // sustituir un mensaje
+      _chatWidgets.removeAt(atPosition);
+      _chatWidgets.insert(atPosition, newChatWidget);
+    }else{
+      // nuevo mensaje
+       if(_isPaused){
+        _chatPausedWidgets.add(newChatWidget);
+      }else{
+        _chatWidgets.add(newChatWidget);
+      }
+      
+    }
+
+    // comprobar el limite de mensajes
+    if(_isPaused){
+      if((_chatPausedWidgets.length + _chatWidgets.length) == _maxChatItems){
+          // borrar de los que se ven el primero y añadirlo a los pausados
+          _chatWidgets.removeAt(0);
+      }
+    }else{
+      if(( _chatWidgets.length) == _maxChatItems){
+          // borrar de los que se ven el primero y añadirlo a los pausados
+          _chatWidgets.removeAt(0);
+      }
+    }
+
+    _widgetChatStreamController.add(_chatWidgets);
+  }
+  
 
   void _addDummyMessages(){
     _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: PrivateMessage.dummyConEmoji()));

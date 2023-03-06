@@ -11,6 +11,8 @@ class MyColors{
   static const Color secondaryColor = Color(0xffb9a3e3);
   static const Color textoError = Color(0xffdb3434);
 
+  static const Color backgroundColorChatPaused = Color(0xBB484747);
+
   
 }
 

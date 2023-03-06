@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:streamate_flutter_app/data/model/chat_setting.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/private_message.dart';
@@ -11,6 +12,9 @@ class InitChatBloc extends ChatEvent{
   String loginName;
   InitChatBloc(this.idBroadcaster, this.accesToken,this.loginName);
 }
+
+class StopChat extends ChatEvent{}
+class ResumeChat extends ChatEvent{}
 
 class ClickUserChat extends ChatEvent{
   User user;
