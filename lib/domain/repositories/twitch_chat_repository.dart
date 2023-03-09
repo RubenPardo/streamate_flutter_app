@@ -4,6 +4,7 @@ import 'package:streamate_flutter_app/data/model/badge.dart';
 import 'package:streamate_flutter_app/data/model/chat_setting.dart';
 import 'package:streamate_flutter_app/data/model/emote.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
+import 'package:streamate_flutter_app/data/model/user.dart';
 import 'package:streamate_flutter_app/data/services/twitch_irc_service.dart';
 
 import '../../data/services/twitch_api_service.dart';
@@ -13,6 +14,7 @@ import '../../data/services/twitch_api_service.dart';
 abstract class TwitchChatRepository{
   Stream<IRCMessage> connectChat(String accessToken, String loginName);
   Future<ListChatSettings> getChatSettings(String idBroadcaster);
+  Future<User> getUserByUserId(String accesToken, String id);
   Future<ListChatSettings> updateChatSetting(String idBroadcaster, List<String>params, List<String> values);
   Future<bool> deleteMessage(String idBroadcaster, String idMessage);
   Future<List<Badge>> getGlobalBadges();
@@ -102,6 +104,11 @@ class TwitchChatRepositoryImpl extends TwitchChatRepository{
       emotes.add(Emote.fromApi(emoteData));
     }
     return emotes;
+  }
+  
+  @override
+  Future<User> getUserByUserId(String accessToken, String id) async{
+    return User.fromApi((await _apiService.getUsers(accessToken, ids: [id]))[0]);
   }
   
  

@@ -196,7 +196,7 @@ class TwitchChatUserNoticeMessage extends StatelessWidget{
             // Message
             Container(
               padding: const EdgeInsets.only(bottom: 8, top: 4),
-              child: TwitchChatPrivateMessage(privateMessage: announcement.privateMessage, isFromSub: true,)
+              child: TwitchChatPrivateMessage(privateMessage: announcement.privateMessage, canInteract: false,)
             )
             
           ],

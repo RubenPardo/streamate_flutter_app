@@ -7,10 +7,9 @@ import 'package:streamate_flutter_app/data/model/user.dart';
 abstract class ChatEvent{}
 
 class InitChatBloc extends ChatEvent{
-  String idBroadcaster;
+  User user;
   String accesToken;
-  String loginName;
-  InitChatBloc(this.idBroadcaster, this.accesToken,this.loginName);
+  InitChatBloc(this.user, this.accesToken,);
 }
 
 class StopChat extends ChatEvent{}

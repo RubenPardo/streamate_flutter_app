@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
+import 'package:streamate_flutter_app/shared/widgets/user_info_widget.dart';
 
 class Utils{
 
@@ -56,5 +57,24 @@ class Utils{
 
     return mappedTags;
 
+  }
+
+  static void showModal(BuildContext context,{required UserInfoWidget widgetBody}) {
+    showModalBottomSheet<void>(
+            context: context,
+            builder: (BuildContext context) {
+              return widgetBody;
+            },
+          );
+  }
+
+  static List<Widget> removeListFromList(List<Widget> lst1, List<Widget> lst2){
+    var set1 = Set.from(lst1);
+    var set2 = Set.from(lst2);
+    print(set1);
+    print(set2);
+    List<Widget> list = List.from(set1.difference(set2));
+    print(list);
+    return list;
   }
 }

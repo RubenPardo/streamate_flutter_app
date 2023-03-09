@@ -1,5 +1,6 @@
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/data/model/chat_setting.dart';
 import 'package:streamate_flutter_app/data/model/token_data.dart';
@@ -31,6 +32,8 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
+
+    
     
   }
 
@@ -50,7 +53,8 @@ class _ChatScreenState extends State<ChatScreen> {
     });
     if(mounted && !fromScroll){
       // nos movemos al principio del scroll para reanudar el chat
-      _scrollController.jumpTo(_scrollController.position.minScrollExtent);
+      //_scrollController.jumpTo(_scrollController.position.minScrollExtent);
+      
     }
   }
   // para el chat, a partir de ahora el bloc guardara los mensajes nuevos en cache asi no se movera el scroll
@@ -62,6 +66,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
   @override
   Widget build(BuildContext context) {
+
     return  BlocConsumer<ChatBloc, ChatState>( 
       listener: (context, state) {
         if(state is ChatPaused){
@@ -69,6 +74,7 @@ class _ChatScreenState extends State<ChatScreen> {
         }
         if(state is ChatResumed){
           _resumeChat(fromScroll: false,addToBloc: false);
+
         }
       },
       builder: (context, state) {
@@ -139,6 +145,8 @@ class _ChatScreenState extends State<ChatScreen> {
 
           }
           List<Widget> chat = snapshot.data!;
+          
+
 
           return NotificationListener<ScrollNotification>(
             onNotification: (notification) {
@@ -155,10 +163,9 @@ class _ChatScreenState extends State<ChatScreen> {
               controller: _scrollController,
               reverse: true, // hacer que siempre 
               child: ListView.builder(
-                itemCount: chat.length,
+                itemCount: context.read<ChatBloc>().messageCountToPaint,
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-
                 itemBuilder: (context, index) {
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),

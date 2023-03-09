@@ -105,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _tokenData = await serviceLocator<TwitchAuthRepository>().getTokenDataLocal();
       _user = await serviceLocator<TwitchAuthRepository>().getUserRemote(_tokenData.accessToken); 
        // inicializar el chat
-      context.read<ChatBloc>().add(InitChatBloc(_user.id, _tokenData.accessToken, _user.login));
+      context.read<ChatBloc>().add(InitChatBloc(_user, _tokenData.accessToken));
 
       _tabsBottomNavigator = [
           [ ControlScreen(tokenData: _tokenData, user: _user),Icon(Icons.abc), "ALGO"],

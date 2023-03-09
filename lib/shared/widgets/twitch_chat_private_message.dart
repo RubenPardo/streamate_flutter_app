@@ -5,24 +5,28 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:streamate_flutter_app/core/utils.dart';
 import 'package:streamate_flutter_app/data/model/badge.dart';
 import 'package:streamate_flutter_app/data/model/emote.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/private_message.dart';
+import 'package:streamate_flutter_app/data/model/user.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_state.dart';
 import 'package:streamate_flutter_app/shared/colors.dart';
 import 'package:streamate_flutter_app/shared/styles.dart';
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart' as texts;
+import 'package:streamate_flutter_app/shared/widgets/user_info_widget.dart';
 
 class TwitchChatPrivateMessage extends StatefulWidget {
 
   final PrivateMessage privateMessage;
   bool isFromSub = false;
+  bool canInteract;
 
 
-  TwitchChatPrivateMessage({super.key, required this.privateMessage, this.isFromSub = false});
+  TwitchChatPrivateMessage({super.key, required this.privateMessage, this.isFromSub = false, this.canInteract = true});
 
   @override
   State<StatefulWidget> createState() => _TwitchChatPrivateMessageState();
@@ -43,7 +47,6 @@ class _TwitchChatPrivateMessageState extends State<TwitchChatPrivateMessage>{
   void initState() {
     super.initState();
     mSub = context.read<ChatBloc>().stream.listen((event) {
-      print("ME LLEGA UN ${event.runtimeType}");
       if(event is ChatResumed && _isPressed){
         // si se reanuda quitar el highlited
         setState(() {
@@ -63,7 +66,7 @@ class _TwitchChatPrivateMessageState extends State<TwitchChatPrivateMessage>{
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: widget.isFromSub ? null : _messageClicked,
+      onTap: (widget.isFromSub || !widget.canInteract) ? null : _messageClicked,
       child: Container(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
@@ -92,6 +95,7 @@ class _TwitchChatPrivateMessageState extends State<TwitchChatPrivateMessage>{
 
   // callback cuando se pulsa un nombre de usuario
   void _userClicked(){
+    Utils.showModal(context,widgetBody: UserInfoWidget(user: widget.privateMessage.user));
     context.read<ChatBloc>().add(ClickUserChat(widget.privateMessage.user));
   }
 
@@ -174,7 +178,7 @@ class _TwitchChatPrivateMessageState extends State<TwitchChatPrivateMessage>{
       alignment: PlaceholderAlignment.baseline,
       baseline: TextBaseline.alphabetic,
       child: InkWell(
-        onTap: _userClicked,
+        onTap: widget.canInteract ? _userClicked : null ,
         child: Text(
           "${widget.privateMessage.user.displayName}: ",
           style: textStyleChatName(widget.privateMessage.user.colorUser),

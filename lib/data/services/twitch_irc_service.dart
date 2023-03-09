@@ -29,7 +29,7 @@ class TwitchIRCServiceImpl implements TwitchIRCService{
 
     channel!.sink.add('PASS oauth:$accesToken');
     channel!.sink.add('NICK $loginName');
-    channel!.sink.add('JOIN #$loginName',); // TODO cambiar
+    channel!.sink.add('JOIN #el_yuste',); // TODO cambiar
     channel!.sink.add('CAP REQ :twitch.tv/commands twitch.tv/tags',); // con esto obtenemos mas informacion en los mensjaes
     
     return channel!.stream;

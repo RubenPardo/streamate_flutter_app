@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
+import 'package:streamate_flutter_app/core/utils.dart';
 import 'package:streamate_flutter_app/data/model/badge.dart';
 import 'package:streamate_flutter_app/data/model/chat_setting.dart';
 import 'package:streamate_flutter_app/data/model/emote.dart';
@@ -37,6 +38,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     late String _accesToken;
     late String _loginUserName;
 
+    late User _broadcasterUser;
+    User get getBroadcasterUser => _broadcasterUser;
+
 
     // atributos del IRCchat -----------------------------------------
     // stream que se devuelve a la vista y el controlador para añadir objetos
@@ -44,7 +48,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     // el ultimo elemento
     final StreamController<List<Widget>> _widgetChatStreamController = BehaviorSubject<List<Widget>>();
     final List<Widget> _chatWidgets = []; 
-    final List<Widget> _chatPausedWidgets = []; 
+
+    // variable para controlar que mensajes se pintan en pantalla, de esta forma se puede parar el chat y no pintar los nuevos que llegan
+    int _messageCountToPaint = 0;
+    int get messageCountToPaint => _messageCountToPaint;
 
     Stream<List<Widget>> get chatStream {
       return _widgetChatStreamController.stream;
@@ -52,7 +59,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   
     bool _isPaused = false;
     bool get isPaused => _isPaused;
-    final int _maxChatItems = 250;
+    final int _maxChatItems = 500;
 
     // variables para controlar la conexion con el chat
     StreamSubscription? _channelListener;
@@ -71,10 +78,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       on<InitChatBloc>(// -------------------------------------------
         (event, emit) async{
-
-          _idBroadcaster = event.idBroadcaster;
+          _broadcasterUser = event.user;
+          _idBroadcaster = event.user.id;
           _accesToken = event.accesToken;
-          _loginUserName = event.loginName;
+          _loginUserName = event.user.login;
 
           
           // obtener los emotes, los emblemas, los ajustes del canal y 
@@ -95,7 +102,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
               });
           // conectarse al chat
           _connectToChat();
-          _addDummyMessages();
+          //_addDummyMessages();
           // return Stream<Widget>
           emit(ChatConnected());
           
@@ -104,8 +111,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       on<ClickUserChat>((event, emit) { // -------------------------------------------------------
         
-        // si alguien ha pulsado un mensaje paramos el chat
-        add(StopChat());
+        // si alguien ha pulsado un usuario reanudamos el chat porque sino
+        // en la ventana nueva no saldran los mensajes
+        add(ResumeChat());
         print("BLOC click user");
 
 
@@ -132,13 +140,19 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         (event, emit) {
           // añadir todos los mensajes a la espera a la lista que se muestra
           _isPaused = false;
-          int lastItem = _chatWidgets.length-1;
-          _chatWidgets.addAll(_chatPausedWidgets);
-          _chatPausedWidgets.clear();
-          _widgetChatStreamController.add(_chatWidgets);
-          // pasamos el length del array de los elementos que estaban en pantalla para que no salte directamente 
-          // bajo del todo
-          emit(ChatResumed(lastItem: lastItem));
+          /*print((_chatWidgets.map((e) => (e as TwitchChatPrivateMessage).privateMessage.message)).toList());
+          _chatWidgets.removeWhere((element) => _chatWidgetToRemoveWhenChatResumed.contains(element));
+          print((_chatWidgets.map((e) => (e as TwitchChatPrivateMessage).privateMessage.message)).toList());
+          _chatWidgetToRemoveWhenChatResumed.clear();*/
+          // de esta forma cuando esta pausado evitamos que cuando se añadan nuevos items y este pausado no se borren los 
+          // que se estan mostrando y cuando se reanudan se borren la diferencia hasta el top
+          if(_chatWidgets.length > _maxChatItems){
+            print("Se borran desde: 0 hasta ${_chatWidgets.length - _maxChatItems}");
+            _chatWidgets.removeRange(0, _chatWidgets.length - _maxChatItems);
+          }
+          _messageCountToPaint = _chatWidgets.length > _maxChatItems ? _maxChatItems : _chatWidgets.length;
+          print("Resumed: $_messageCountToPaint");
+          emit(ChatResumed());
           emit(ChatConnected());
 
       },);
@@ -263,27 +277,24 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       _chatWidgets.insert(atPosition, newChatWidget);
     }else{
       // nuevo mensaje
-       if(_isPaused){
-        _chatPausedWidgets.add(newChatWidget);
-      }else{
-        _chatWidgets.add(newChatWidget);
+      if(!_isPaused){
+        _messageCountToPaint++;// de esta forma el listview no pintara los nuevos
       }
+      _chatWidgets.add(newChatWidget);
       
     }
 
     // comprobar el limite de mensajes
-    if(_isPaused){
-      if((_chatPausedWidgets.length + _chatWidgets.length) == _maxChatItems){
-          // borrar de los que se ven el primero y añadirlo a los pausados
-          _chatWidgets.removeAt(0);
+    if(( _chatWidgets.length) > _maxChatItems){
+      // borrar de los que se ven el primero y añadirlo a los pausados
+      if(!_isPaused){
+        
+        print("SE BORRa el 0");
+        _chatWidgets.removeAt(0);
+        _messageCountToPaint = _maxChatItems;
       }
-    }else{
-      if(( _chatWidgets.length) == _maxChatItems){
-          // borrar de los que se ven el primero y añadirlo a los pausados
-          _chatWidgets.removeAt(0);
-      }
+      
     }
-
     _widgetChatStreamController.add(_chatWidgets);
   }
   

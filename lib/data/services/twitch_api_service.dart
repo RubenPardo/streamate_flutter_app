@@ -8,13 +8,13 @@ import 'package:streamate_flutter_app/shared/strings.dart';
 ///
 abstract class TwitchApiService{
   Future<Map<String, dynamic>> getTokenDataRemote(String authorizationCode);
-  Future<List<dynamic>> getUsers(String accessToken, {List<String>? loginNames});
+  Future<List<dynamic>> getUsers(String accessToken, {List<String>? ids});
   Future<Map<String,dynamic>> updateToken(String accessToken);
   String getAutorizationUrl();
   Future<bool> banUser(String idBroadCaster, String idUser, {int duration});
   Future<bool> unBanUser(String idBroadCaster, String idUser);
   Future<bool> deleteMessage(String idBroadCaster, String idMessage);
-  Future<String> getUserColor( String idUser);
+  Future<String> getUserColor( String idUser);// TODO quitar
   Future<Map<String, dynamic>> getChatSettings(String idBroadCaster);
   Future<Map<String, dynamic>> updateChatSetting(String idBroadCaster,List<String> setting, List<String> value);
   Future<List<dynamic>> getGlobalBadges();
@@ -115,7 +115,7 @@ class TwitchApiServiceImpl extends TwitchApiService{
   ///If you don’t specify IDs or login names, the request returns information 
   ///about the user in the access token if you specify a user access token.
   @override
-  Future<List<dynamic>> getUsers(String accessToken, {List<String>? loginNames}) async {
+  Future<List<dynamic>> getUsers(String accessToken, {List<String>? ids}) async {
     // Obtiene el token de acceso
     // 
     // Prepara la solicitud
@@ -125,12 +125,12 @@ class TwitchApiServiceImpl extends TwitchApiService{
     };
 
     // añadir si hay login names
-    if(loginNames!=null){
+    if(ids!=null){
       // añadir a la url '?login=foo&login=bar'
-      url+= "?login=";
-      url+= loginNames.join('&login=');
+      url+= "?id=";
+      url+= ids.join('&id=');
     }
-
+    print("url: $url");
     // Envía la solicitud y procesa la respuesta
     var response = await serviceLocator<Request>().get(url,headers: headers);
     if (response.statusCode == 200) {

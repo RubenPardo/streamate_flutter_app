@@ -5,6 +5,7 @@ import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
 import 'package:streamate_flutter_app/presentation/screens/login/log_in_screen.dart';
 import 'package:streamate_flutter_app/shared/colors.dart';
 import 'package:streamate_flutter_app/shared/styles.dart';
+import 'package:streamate_flutter_app/shared/widgets/user_info_widget.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -19,6 +20,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => ChatBloc(),
+        ),
+        BlocProvider(
+          create: (_) => UserInfoBloc(),
         ),
       ],
       child: MaterialApp(
