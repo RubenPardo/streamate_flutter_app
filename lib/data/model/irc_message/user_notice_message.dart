@@ -154,7 +154,7 @@ class SubscriptionNotice extends UserNoticeMessage{
     var splitData = rawData.split(":");
     String message = splitData[splitData.length-1];
 
-    PrivateMessage? privateMessage = message.contains("USERNOTICE") ? null : PrivateMessage.fromIRCData(rawData, message);
+    PrivateMessage? privateMessage = message.contains("USERNOTICE") ? null : PrivateMessage.fromIRCData(rawData, message: message);
 
     return SubscriptionNotice(user, msgId,cumulativeMonths,isPrime,isGifted,gitfterName,privateMessage, message: noticeMessage);
   }
@@ -182,7 +182,7 @@ class Announcement extends UserNoticeMessage{
     String message = splitData[splitData.length-1];
 
 
-    return Announcement(user, msgId,PrivateMessage.fromIRCData(rawData, message),message: message);
+    return Announcement(user, msgId,PrivateMessage.fromIRCData(rawData, message: message),message: message);
   }
 }
 

@@ -1,4 +1,5 @@
 import 'package:streamate_flutter_app/core/utils.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/clear_all_messages.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/clear_message.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/notice_message.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/private_message.dart';
@@ -22,15 +23,14 @@ class IRCMessage{
     if(parts[0] != "PING"){
         // el comando siempre esta en la 3 posicion 
       final command = Utils.parseTextToIRCCOmmand(parts[2]);
-
+      print("BAN USER -- $command");
+      print("BAN USER -- $data");
       switch(command){
         
         case IRCCommand.privateMessage:
-          // para obtener el mensaje en sí hay que dividir por : y pillar el ultimo elemento
-          final msgSplit = data.split(":");
-          return PrivateMessage.fromIRCData(parts[0],msgSplit[msgSplit.length-1]);
+          return PrivateMessage.fromIRCData(data);
         case IRCCommand.clearChat:
-          return IRCMessage("", IRCCommand.clearChat);
+          return ClearMessageAll.fromIRCData(data);
         case IRCCommand.clearMessage:
           return ClearMessage.fromIRCData(data);
         case IRCCommand.notice:

@@ -7,6 +7,7 @@ import 'package:streamate_flutter_app/core/utils.dart';
 import 'package:streamate_flutter_app/data/model/badge.dart';
 import 'package:streamate_flutter_app/data/model/chat_setting.dart';
 import 'package:streamate_flutter_app/data/model/emote.dart';
+import 'package:streamate_flutter_app/data/model/irc_message/clear_all_messages.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/clear_message.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/notice_message.dart';
@@ -15,6 +16,7 @@ import 'package:streamate_flutter_app/data/model/irc_message/room_state_message.
 import 'package:streamate_flutter_app/data/model/irc_message/user_notice_message.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository.dart';
+import 'package:streamate_flutter_app/domain/usecases/ban_user_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/delete_message_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_badges_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_chat_settings_use_case.dart';
@@ -188,6 +190,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         },
       );
 
+      on<BanUserChat>((event, emit) { // --------------------------------------------------
+        User userToBan = event.userToBan;
+        serviceLocator<BanUserUseCase>().call(_broadcasterUser.id, userToBan.id,duration: event.duration);
+      },);
+
     }
 
   
@@ -260,6 +267,21 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         position = indexDeletedMessage;
         // si esta en la lista quitarlo y remplazarlo    
       }
+    }else if(mensaje is ClearMessageAll){
+      // se borran mas de un mensaje, si el user es null todos los del chat
+      // en otra caso los de ese usuario
+      String? user = mensaje.user;
+      
+      if(user == null || user == ""){
+        // todos
+        print("SE VAN a TODOS DE BORRAR MENSAJES de $user");
+        _clearMessages();
+      }else{
+        print("SE VAN A BORRAR MENSAJES de $user");
+        // borrar los de ese justo
+        _clearMessages(user: user);
+      }
+      chatWidget = TwitchChatNoticeMessage(noticeMessage: mensaje.message);
     }
     if(chatWidget != null){
       _addNewMessage(chatWidget, atPosition: position);
@@ -288,8 +310,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if(( _chatWidgets.length) > _maxChatItems){
       // borrar de los que se ven el primero y añadirlo a los pausados
       if(!_isPaused){
-        
-        print("SE BORRa el 0");
         _chatWidgets.removeAt(0);
         _messageCountToPaint = _maxChatItems;
       }
@@ -298,6 +318,36 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _widgetChatStreamController.add(_chatWidgets);
   }
   
+  /// borra todos los mensajes si user es null
+  /// borra los mensajes de ese user en especifico
+   void _clearMessages({String? user}) {
+    if(user !=null){
+      
+      List<Widget> chatWidgetUser = _chatWidgets.where((element){
+        return element is TwitchChatPrivateMessage && element.privateMessage.user.displayName.toLowerCase().compareTo(user)==0;
+      }).toList();
+      _messageCountToPaint -= chatWidgetUser.length;// restar los que se van a borrar
+      // eliminar mensajes
+      _chatWidgets.removeWhere((element){
+        print("BAN USER ----------------------------");
+        print((element is TwitchChatPrivateMessage) ? "BAN USER -- Disp ${element.privateMessage.user.displayName.toLowerCase()}" : "BAN USER -- ------");
+        print((element is TwitchChatPrivateMessage) ? "BAN USER -- USER ${user}" : "BAN USER -- ------");
+        print((element is TwitchChatPrivateMessage) ? "BAN USER -- USER ${element.privateMessage.user.displayName.toLowerCase().compareTo(user)}" : "BAN USER -- ------");
+        print("BAN USER ----------------------------");
+
+        if(element is TwitchChatPrivateMessage && element.privateMessage.user.displayName.toLowerCase().compareTo(user)==0){
+          print("BAN USER -- borrar");
+          return true;
+        }else{
+          return false;
+        }
+      });
+    }else{
+      _messageCountToPaint = 0;
+      _chatWidgets.clear();
+    }
+      
+   }
 
   void _addDummyMessages(){
     _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: PrivateMessage.dummyConEmoji()));
@@ -318,6 +368,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: PrivateMessage.dummy()));
     _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: PrivateMessage.dummy()));
     _chatWidgets.add(TwitchChatPrivateMessage(privateMessage: PrivateMessage.dummyLarge()));
+    _messageCountToPaint = 18;
     _widgetChatStreamController.add(_chatWidgets);
   }
+  
+ 
 }

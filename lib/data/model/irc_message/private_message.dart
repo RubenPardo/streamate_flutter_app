@@ -17,12 +17,17 @@ class PrivateMessage extends IRCMessage{
   {required String message}) 
   : super(message, IRCCommand.privateMessage);
 
-  factory PrivateMessage.fromIRCData(String tags,String msg){
+  factory PrivateMessage.fromIRCData(String data,{String? message}){
+
+    var splitData = data.split(RegExp(r'PRIVMSG\s+#\w+\s+:'));
+     // si el message que llega no es null es que ya se lo han pasado, por otra parte es el ultimo elemento del split anterior
+    message ??= splitData[splitData.length-1];
+
       // mapear los tags en clave valor
     final mappedTags = <String, String>{};
   
     // Loop through each tag and store their key value pairs into the map.
-    for (final tag in tags.split(';')) {
+    for (final tag in data.split(';')) {
       // Skip if the tag has no value.
       if (tag.endsWith('=')) continue;
 
@@ -45,7 +50,7 @@ class PrivateMessage extends IRCMessage{
     String? userReply = mappedTags['reply-parent-display-name'];
     //si es una respuesta tendra los parametros de a quien responde y en el mensaje también, quitar el del mensaje
     if(userReply!=null){
-      msg = msg.replaceFirst("@$userReply","");
+      message = message.replaceFirst("@$userReply","");
     }
     
     // devolver el irc message
@@ -56,7 +61,7 @@ class PrivateMessage extends IRCMessage{
       User.fromIRC(mappedTags['user-id']??"",mappedTags['login']??"", mappedTags['display-name']??"", mappedTags['color']??""),
       replyMessageBoddy, 
       userReply,
-      message: msg.replaceAll("\n", ""));
+      message: message.replaceAll("\n", ""));
   }
 
 
@@ -81,11 +86,11 @@ class PrivateMessage extends IRCMessage{
   }
   
   factory PrivateMessage.dummy(){
-    return PrivateMessage.fromIRCData("@badge-info=subscriber/55;badges=vip/1,subscriber/48,sub-gifter/600;color=#1E90FF;display-name=Ale05zr;emotes=;first-msg=0;flags=;id=db2efa7b-0ab6-4c29-be60-c6693cbd3722;mod=0;returning-chatter=0;room-id=152633332;subscriber=1;tmi-sent-ts=1677682570863;turbo=0;user-id=98544441;user-type=;vip=1", "Hola mi gente xDDD LUL");
+    return PrivateMessage.fromIRCData("@badge-info=;badges=broadcaster/1;client-nonce=839f40774a390d3610c265d414638a98;color=#DAA520;display-name=ruben_pardo_2;emotes=;first-msg=0;flags=;id=2bbc2cc4-f942-45b2-920f-999a7f107bf0;mod=0;returning-chatter=0;room-id=878422216;subscriber=0;tmi-sent-ts=1678359594270;turbo=0;user-id=878422216;user-type= :ruben_pardo_2!ruben_pardo_2@ruben_pardo_2.tmi.twitch.tv PRIVMSG #ruben_pardo_2 : Hola mi gente LUL",);
   }
 
   factory PrivateMessage.dummyLarge(){
-    return PrivateMessage.fromIRCData("@badge-info=subscriber/55;badges=vip/1,subscriber/48,sub-gifter/600;color=#1E90FF;display-name=Ale05zr;emotes=;first-msg=0;flags=;id=db2efa7b-0ab6-4c29-be60-c6693cbd3722;mod=0;returning-chatter=0;room-id=152633332;subscriber=1;tmi-sent-ts=1677682570863;turbo=0;user-id=98544441;user-type=;vip=1", "Hola mi gente xDDD LUL esto es un mensaje muy largo en plan largisimo muy largo. !!!! hola");
+    return PrivateMessage.fromIRCData("@badge-info=;badges=broadcaster/1;client-nonce=839f40774a390d3610c265d414638a98;color=#DAA520;display-name=ruben_pardo_2;emotes=;first-msg=0;flags=;id=2bbc2cc4-f942-45b2-920f-999a7f107bf0;mod=0;returning-chatter=0;room-id=878422216;subscriber=0;tmi-sent-ts=1678359594270;turbo=0;user-id=878422216;user-type= :ruben_pardo_2!ruben_pardo_2@ruben_pardo_2.tmi.twitch.tv PRIVMSG #ruben_pardo_2 : Hola xD");
   }
 
   factory PrivateMessage.dummyReply(){

@@ -3,11 +3,14 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:flutter/material.dart';
+import 'package:streamate_flutter_app/core/utils.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_user_use_case.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
+import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
 import 'package:streamate_flutter_app/shared/styles.dart';
 import 'package:streamate_flutter_app/shared/widgets/twitch_chat_private_message.dart';
+import 'package:streamate_flutter_app/shared/texto_para_localizar.dart' as texts;
 
 /// Widget que muestra la info de un usuario en concreto y un mini chat con sus mensajes solo
 class UserInfoWidget extends StatefulWidget {
@@ -102,7 +105,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
               minRadius: 40,
               backgroundImage: NetworkImage(user.profileImageUrl,),
             ),
-            const SizedBox(width: 14,),
+            const SizedBox(width: 8,),
             // DETALLES -----------------------------------------
             Expanded(
               child: Column(
@@ -127,6 +130,12 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
       children: [
         IconButton(onPressed: (){
           // banear ------------------------------
+          Utils.showConfirmDialog(context, texts.banUserTitle.replaceFirst("{1}", widget.user.displayName), texts.banUserDescription, 
+          confrimText: texts.ban,
+          (){
+            Navigator.of(context).pop(); // dismiss dialog
+            context.read<ChatBloc>().add(BanUserChat(widget.user));
+          });
         }, icon: Icon(Icons.lock_clock)),
         IconButton(onPressed: (){
           // timeout ------------------------------

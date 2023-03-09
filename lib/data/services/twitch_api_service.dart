@@ -11,7 +11,7 @@ abstract class TwitchApiService{
   Future<List<dynamic>> getUsers(String accessToken, {List<String>? ids});
   Future<Map<String,dynamic>> updateToken(String accessToken);
   String getAutorizationUrl();
-  Future<bool> banUser(String idBroadCaster, String idUser, {int duration});
+  Future<bool> banUser(String idBroadCaster, String idUser, {int? duration});
   Future<bool> unBanUser(String idBroadCaster, String idUser);
   Future<bool> deleteMessage(String idBroadCaster, String idMessage);
   Future<String> getUserColor( String idUser);// TODO quitar

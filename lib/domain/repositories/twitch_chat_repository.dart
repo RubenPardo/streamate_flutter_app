@@ -21,6 +21,7 @@ abstract class TwitchChatRepository{
   Future<List<Badge>> getChannelBadges(String idBroadcaster);
   Future<List<Emote>> getGlobalEmotes();
   Future<List<Emote>> getChannelEmotes(String idBroadcaster);
+  Future<bool> banUser(String idBroadCaster, String idUser, {int? duration});
 }
 
 class TwitchChatRepositoryImpl extends TwitchChatRepository{
@@ -111,5 +112,14 @@ class TwitchChatRepositoryImpl extends TwitchChatRepository{
     return User.fromApi((await _apiService.getUsers(accessToken, ids: [id]))[0]);
   }
   
+
+  /// Texto, Texto, N -> banUser() -> T/F
+  /// vetar a un usuario con id = [idUser] del chat de la retransmisión con id = [idBroadCaster]
+  /// si se pasa [duration] se le pondrá un timeout
+  @override
+  Future<bool> banUser(String idBroadCaster, String idUser, {int? duration}) async{
+    return _apiService.banUser(idBroadCaster, idUser, duration: duration);
+        
+  }
  
 }

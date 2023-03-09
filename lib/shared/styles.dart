@@ -38,6 +38,20 @@ const TextStyle textStyleButton = TextStyle(
   fontSize: 20
 );
 
+const TextStyle textStyleAlertDialogTitle = TextStyle(
+  fontWeight: FontWeight.bold,
+  fontFamily: 'Quicksand',
+  color: MyColors.textoSobreClaro,
+  fontSize: 20
+);
+
+const TextStyle textStyleAlertDialogBody = TextStyle(
+  fontWeight: FontWeight.w500,
+  fontFamily: 'Quicksand',
+  color: MyColors.textoSobreClaro,
+  fontSize: 16
+);
+
 const TextStyle textStyleChat = TextStyle(
   fontFamily: 'Roobert',
   color: MyColors.textoSobreOscuro,

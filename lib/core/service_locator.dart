@@ -5,6 +5,7 @@ import 'package:streamate_flutter_app/data/services/twitch_api_service.dart';
 import 'package:streamate_flutter_app/data/services/twitch_irc_service.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_auth_repository.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository.dart';
+import 'package:streamate_flutter_app/domain/usecases/ban_user_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/check_session_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/delete_message_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/get_badges_use_case.dart';
@@ -30,6 +31,7 @@ Future<void> setUpServiceLocator() async {
   serviceLocator.registerFactory<GetChatSettingsUseCase>(() => GetChatSettingsUseCase());
   serviceLocator.registerFactory<UpdateChatSettingUseCase>(() => UpdateChatSettingUseCase());
   serviceLocator.registerFactory<DeleteMessageUseCase>(() => DeleteMessageUseCase());
+  serviceLocator.registerFactory<BanUserUseCase>(() => BanUserUseCase());
 
   //datasource
   serviceLocator.registerFactory<TwitchApiService>(

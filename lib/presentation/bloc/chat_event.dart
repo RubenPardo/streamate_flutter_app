@@ -23,10 +23,9 @@ class ClickUserChat extends ChatEvent{
 class ClickMessage extends ChatEvent{}
 
 class BanUserChat extends ChatEvent{
-  User user;
   User userToBan;
   int? duration;
-  BanUserChat(this.user,this.userToBan,{this.duration});
+  BanUserChat(this.userToBan,{this.duration});
 }
 
 class DeleteMessage extends ChatEvent{
