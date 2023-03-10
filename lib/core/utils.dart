@@ -76,13 +76,13 @@ class Utils{
           );
   }
 
-  static void showConfirmDialog(BuildContext context, String title, String description, Function() confirmMethod, {String confrimText = "Confirmar",}){
+  static void showConfirmDialog(BuildContext context, String title, Widget content, Function() confirmMethod, {String confrimText = "Confirmar",}){
     showDialog(context: context, builder: (BuildContext context){
         return AlertDialog(
           backgroundColor: MyColors.backgroundColorClaro,
           shape:  const RoundedRectangleBorder( borderRadius: BorderRadius.all(Radius.circular(12))),
           title: Text(title, style: styles.textStyleAlertDialogTitle,),
-          content: Text(description,style: styles.textStyleAlertDialogBody),
+          content: content,
           actions: [
             TextButton(onPressed: (){
               Navigator.of(context).pop(); // dismiss dialog

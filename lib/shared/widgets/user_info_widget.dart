@@ -1,16 +1,19 @@
 
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:flutter/material.dart';
 import 'package:streamate_flutter_app/core/utils.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
-import 'package:streamate_flutter_app/domain/usecases/get_user_use_case.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
+import 'package:streamate_flutter_app/presentation/bloc/user_info_bloc/user_info_bloc.dart';
+import 'package:streamate_flutter_app/presentation/bloc/user_info_bloc/user_info_event.dart';
+import 'package:streamate_flutter_app/presentation/bloc/user_info_bloc/user_info_state.dart';
+import 'package:streamate_flutter_app/shared/colors.dart';
 import 'package:streamate_flutter_app/shared/styles.dart';
 import 'package:streamate_flutter_app/shared/widgets/twitch_chat_private_message.dart';
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart' as texts;
+import 'package:streamate_flutter_app/shared/styles.dart' as styles;
 
 /// Widget que muestra la info de un usuario en concreto y un mini chat con sus mensajes solo
 class UserInfoWidget extends StatefulWidget {
@@ -24,7 +27,19 @@ class UserInfoWidget extends StatefulWidget {
 class _UserInfoWidgetState extends State<UserInfoWidget> {
 
   late User _broadcasterUser;
+  bool _isBanned = false;
+  bool _isTimeout = false;
 
+  final List<DropdownMenuItem> _dropdownMenuTimeoutsItems = const [
+    DropdownMenuItem(value: 300,child: Text("5 ${texts.minutos}"),),
+    DropdownMenuItem(value: 1800,child:  Text("30 ${texts.minutos}"),),
+    DropdownMenuItem(value: 3600,child:  Text("1 ${texts.hora}"),),
+    DropdownMenuItem(value: 28800,child:  Text("8 ${texts.horas}"),),
+    DropdownMenuItem(value: 86400,child:  Text("1 ${texts.dia}"),),
+    DropdownMenuItem(value: 604800,child:Text("1 ${texts.semana}"),),
+    DropdownMenuItem(value: 1209600,child:  Text("2 ${texts.semanas}"),),
+  ];
+  int _timeoutDurationSelected = 300;
   @override
   void initState() {
     super.initState();
@@ -73,7 +88,12 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
       children: [
         
         _buildHeader(user),
-        Expanded(child: _buildChat())
+       
+        !_isBanned && !_isTimeout ? Expanded(child:   _buildChat() ): Container(), 
+        _isBanned ? const Padding(padding: EdgeInsets.only(top: 12), child: Center(child: Text(texts.userBanned),),): Container(),
+        _isTimeout ? const Padding(padding: EdgeInsets.only(top: 12), child: Center(child: Text(texts.userTimedOut),),): Container(),
+        
+         
         
       ],
     );
@@ -129,21 +149,40 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
     return Row(
       children: [
         IconButton(onPressed: (){
-          // banear ------------------------------
-          Utils.showConfirmDialog(context, texts.banUserTitle.replaceFirst("{1}", widget.user.displayName), texts.banUserDescription, 
+          // banear -----------------------------------------------------------------------------------------------------------
+          Utils.showConfirmDialog(context, texts.banUserTitle.replaceFirst("{1}", widget.user.displayName), 
+          const Text(texts.banUserDescription,style: styles.textStyleAlertDialogBody), 
           confrimText: texts.ban,
           (){
             Navigator.of(context).pop(); // dismiss dialog
             context.read<ChatBloc>().add(BanUserChat(widget.user));
+            setState(() {
+              _isBanned = true;
+            });
           });
-        }, icon: Icon(Icons.lock_clock)),
+        }, icon: const Icon(Icons.remove)),
         IconButton(onPressed: (){
-          // timeout ------------------------------
-        }, icon: Icon(Icons.abc)),
+          // timeout ------------------------------------------------------------------------------------------------------------
+          Utils.showConfirmDialog(context, texts.timeoutUserTitle.replaceFirst("{1}", widget.user.displayName), 
+          // body: ------ necesitamos un statful builder para que el dialog se pueda actualizar y asi el dropdwon cambie cuando se cambie de opcion
+              _buildDropDownTimeoutUser(), 
+              // accion ---------
+              confrimText: texts.expulsar,
+              (){
+                Navigator.of(context).pop(); // dismiss dialog
+                context.read<ChatBloc>().add(BanUserChat(widget.user, duration: _timeoutDurationSelected));
+                setState(() {
+                _isTimeout = true;
+              });
+              }
+            );// dialog ---------------
+            }, icon: const Icon(Icons.lock_clock)
+          ),
       ],
     );
   }
 
+  /// funcion que crea un chat de twtich pero con solo los mensajes de un usuario
   Widget _buildChat() {
     
     return StreamBuilder(
@@ -184,6 +223,41 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
       );
   }
 
+  /// funcion que crea un desplegable de los tiempos para expulsar temporalmente a un usuario
+  Widget _buildDropDownTimeoutUser(){
+    return StatefulBuilder(builder: (context, setState) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            const Text(texts.timeoutUserDescription,style: styles.textStyleAlertDialogBody), 
+            Container(
+              decoration: BoxDecoration(
+                color: MyColors.primaryColor, borderRadius: BorderRadius.circular(10),
+                
+              ),
+              child: Padding(
+                padding: const EdgeInsets.only(left:12),
+                child: DropdownButtonHideUnderline(
+                    child: DropdownButton(
+                    value: _timeoutDurationSelected, items: _dropdownMenuTimeoutsItems, 
+                    onChanged: (value){
+                      setState(() {
+                        _timeoutDurationSelected = value;
+                      });
+                    }
+                  ),
+                )
+              )
+            ) 
+          ],
+        );
+      },
+    );
+  }
+
+  /// Texto, List<Widgets> -> _chatFilterById() -> List<Widgets>
+  /// filtrar un array de widgets por el id de un usuario
   List<Widget> _chatFilterById(String id, List<Widget> chatList){
     return chatList.where(
       (e) {
@@ -195,60 +269,3 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
 
 }
 
-
-
-
-
-// TODO pasar a un archivo a parte
-class UserInfoBloc extends Bloc<UserInfoEvent,UserInfoState> {
-  
-
-  final GetUserUseCase _getUserUseCase = serviceLocator<GetUserUseCase>();
-
-  UserInfoBloc(): super(UserInfoStateLoading()){
-        
-        
-        on<UserInfoEventStart>( // ------------------------------------------------------------------
-          (event,emit) async{
-            // obtener usuario
-            
-            var res = await _getUserUseCase.call(id: event.id, idBroadCaster: event.broadcasterUser.id);
-            res.fold(
-              (error) {
-                // ------------------------------------------ return error
-                emit(UserInfoStateError());
-              }, 
-              (user) {
-                // ------------------------------------------ return usuario
-                emit(UserInfoStateLoaded(user));
-              }
-            );
-          }
-
-        );
-        on<UserInfoEventClose>( // ------------------------------------------------------------------
-          (event,emit) async{
-            emit(UserInfoStateLoading());
-          }
-
-        );
-    }
-}
-
-abstract class UserInfoEvent{}
-class UserInfoEventStart extends UserInfoEvent{
-  String id;
-  User broadcasterUser;
-  UserInfoEventStart(this.id, this.broadcasterUser);
-}
-class UserInfoEventClose extends UserInfoEvent{
-
-}
-
-abstract class UserInfoState{}
-class UserInfoStateLoaded extends UserInfoState{
-  User user;
-  UserInfoStateLoaded(this.user);
-}
-class UserInfoStateLoading extends UserInfoState{}
-class UserInfoStateError extends UserInfoState{}
