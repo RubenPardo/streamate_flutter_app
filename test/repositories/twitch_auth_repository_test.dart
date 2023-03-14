@@ -48,7 +48,7 @@ void main() {
     
       // dato esperado
         String authorizationCode = "1234";
-        int expiresAtEsperado = DateTime.now().add(const Duration(seconds: 3600)).millisecondsSinceEpoch ~/ 1000;// una hora mas tarde
+        int expiresAtEsperado = DateTime.now().add(const Duration(seconds: 3600)).millisecondsSinceEpoch;// una hora mas tarde
         TokenData tokenDataEsperado = TokenData(accessToken: "access_token",refreshToken: "refresh_token",expiresAt: expiresAtEsperado);
         
         // mockeamos la respuesta del servicio
@@ -60,12 +60,15 @@ void main() {
           'refresh_token': 'refresh_token',
         }));
 
-        //when(() => twitchAuthRepository.saveTokenDataLocal(any()),);
-
         // ejecucion ----------------------
         TokenData tokenDataRecibido = await twitchAuthRepository.getTokenDataRemote(authorizationCode);
+        
         // comprobacion -----------
-        expect(tokenDataRecibido.toMap().toString() == tokenDataEsperado.toMap().toString(),true,);
+        /// los milisegundos de expires at lo debemos comprobar con una aproximacion ya que entre una linea de codigo y otra varia y nunca
+        /// seran iguales
+        expect(tokenDataRecibido.toMap()['expires_at'] as int ,closeTo(tokenDataEsperado.toMap()['expires_at'], 200),);
+        expect(tokenDataRecibido.toMap()['access_token'] == tokenDataEsperado.toMap()['access_token'], true);
+        expect(tokenDataRecibido.toMap()['refresh_token'] == tokenDataEsperado.toMap()['refresh_token'], true);
       
 
         }
@@ -98,7 +101,7 @@ void main() {
     
       // dato esperado
         String refresToken = "1234";
-        int expiresAtEsperado = DateTime.now().add(const Duration(seconds: 3600)).millisecondsSinceEpoch ~/ 1000;// una hora mas tarde
+        int expiresAtEsperado = DateTime.now().add(const Duration(seconds: 3600)).millisecondsSinceEpoch;// una hora mas tarde
         TokenData tokenDataEsperado = TokenData(accessToken: "access_token",refreshToken: "refresh_token",expiresAt: expiresAtEsperado);
         
         // mockeamos la respuesta del servicio
@@ -115,7 +118,9 @@ void main() {
         // ejecucion ----------------------
         TokenData tokenDataRecibido = await twitchAuthRepository.updateToken(refresToken);
         // comprobacion -----------
-        expect(tokenDataRecibido.toMap().toString() == tokenDataEsperado.toMap().toString(),true,);
+        expect(tokenDataRecibido.toMap()['expires_at'] as int ,closeTo(tokenDataEsperado.toMap()['expires_at'], 200),);
+        expect(tokenDataRecibido.toMap()['access_token'] == tokenDataEsperado.toMap()['access_token'], true);
+        expect(tokenDataRecibido.toMap()['refresh_token'] == tokenDataEsperado.toMap()['refresh_token'], true);
       
 
         }

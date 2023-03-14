@@ -219,9 +219,9 @@ void main() {
     test('Successfully get user data con login names', () async {
     // dato esperado
       String accesToken = "123";
-      Map<String,dynamic> mapRecibidoPost = {"data":[{"login":"user1"},{"login":"user2"},{"login":"user3"}]};
-      String urlEsperada = '${baseUrlApi}helix/users?login=user1&login=user2&login=user3';
-      List<String> loginNames = ['user1','user2','user3'];
+      Map<String,dynamic> mapRecibidoPost = {"data":[{"id":"id1"},{"id":"id2"},{"id":"id3"}]};
+      String urlEsperada = '${baseUrlApi}helix/users?id=id1&id=id2&id=id3';
+      List<String> ids = ['id1','id2','id3'];
       var headersEsperados = {
       'Client-ID': CLIENT_ID,
       };
@@ -240,9 +240,9 @@ void main() {
 
 
       // ejecucion
-      var response = await twitchApiService.getUsers(accesToken,loginNames: loginNames);
+      var response = await twitchApiService.getUsers(accesToken,ids: ids);
 
-      expect(response.length == loginNames.length, true);
+      expect(response.length == ids.length, true);
       // verificacion ----------------------
       verify(() => serviceLocator<Request>().get(urlEsperada,headers: headersEsperados)).called(1); // comprobamos que se ha montado bien la url
     });
@@ -255,7 +255,7 @@ void main() {
       String idUserToBan = "234";
       //Map<String,dynamic> mapRecibidoPost = {"data":[{"login":"user1"},{"login":"user2"},{"login":"user3"}]};
       String urlEsperada = '${baseUrlApi}helix/moderation/bans?broadcaster_id=$idUser&moderator_id=$idUser';
-      Map bodyEsperado = {'data':{'user':idUserToBan}}; // el primer data es por como funciona mockito que le pone un nombre delante igual al nombre del atributo
+      Map bodyEsperado = {'data':{'data':{'user':idUserToBan}}}; // el primer data es por como funciona mockito que le pone un nombre delante igual al nombre del atributo
       
       // inicializar ------------------
       // mockeamos la respuest post

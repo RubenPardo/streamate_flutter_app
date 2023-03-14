@@ -14,13 +14,17 @@ void main() {
 
   late LogInUseCase loginUseCase;
   
-    // before all test
-    setUpAll(() async{
+  // before all test
+  setUpAll(() async{
       registerFallbackValue(TokenData.empty());
       serviceLocator.registerSingleton<TwitchAuthRepository>(MockTwitchAuthRepository());
       loginUseCase = LogInUseCase();
     });
 
+  // after all test
+  tearDownAll((){
+    serviceLocator.reset();
+  });
 
   test("Login - nos devuelven un token valido",() async {
 
