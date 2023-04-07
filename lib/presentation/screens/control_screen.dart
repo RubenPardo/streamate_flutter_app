@@ -131,7 +131,7 @@ class _OBSScreenState extends State<OBSScreen> {
   Widget _buildSceneItem(OBSScene scene){
     return GestureDetector(
       onTap: () {
-        
+        context.read<OBSBloc>().add(OBSChangeScene(scene: scene));
       },
       child: Container(
         padding: const EdgeInsets.all(16),

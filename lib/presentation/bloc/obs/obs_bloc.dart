@@ -70,6 +70,22 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
       },
     );
 
+    /// OBSScene -> OBSChangeScene
+    /// cambiar la escena en el obs
+    on<OBSChangeScene>(
+      (event, emit) async{
+        try{
+          OBSScene scene = event.scene;
+          
+          obsService.setCurrentScene(scene.name);
+          
+        }catch(e){
+
+          emit(OBSError(message: 'Error al cambiar la escena en el obs $e'));
+        }
+      },
+    );
+
   }
 
   /// Event -> eventHandler
