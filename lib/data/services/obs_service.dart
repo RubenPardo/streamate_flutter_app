@@ -15,12 +15,11 @@ class OBSService {
   
 
   
-  Future<bool> connect(String address, int port, String password) async {
+  Future<bool> connect(String address, int port, String? password) async {
    if(_obsWebSocket == null){
       _obsWebSocket = await ObsWebSocket.connect(
         'ws://$address:$port', 
         password: password,
-        fallbackEventHandler: eventHandler,
       );
       // tell obsWebSocket to listen to events, since the default is to ignore them
       await _obsWebSocket!.listen(EventSubscription.all.index);
@@ -73,37 +72,10 @@ class OBSService {
     print( (await _obsWebSocket!.send(request))!.responseData);
   }
 
-  /// Event -> eventHandler
-  /// 
-  /// funcion para manejer los eventos que llegan del obs
-  ///
-  void eventHandler(Event event) {
-
-        log('type: ${event.eventType}');
-    switch(Utils.mapTextToOBSEvent(event.eventType)){
-      
-      case ObsEvent.currentProgramSceneChanged:
-        log('data: ${event.eventData}');
-        break;
-      case ObsEvent.inputVolumeChanged:
-        log('data: ${event.eventData}');
-        break;
-      case ObsEvent.sceneNameChanged:
-        // TODO: Handle this case.
-        break;
-      case ObsEvent.inputNameChanged:
-        // TODO: Handle this case.
-        break;
-      case ObsEvent.sceneCreated:
-        // TODO: Handle this case.
-        break;
-      case ObsEvent.sceneRemoved:
-        // TODO: Handle this case.
-        break;
-      case ObsEvent.none:
-        print('Ni idea');
-        break;
-    }
-    
+  /// Function(Event e) -> setEventHandler
+  /// añadir un manejador de eventos para poder escuchar los 
+  /// cambios que se realizan desde el obs
+  void setEventHandler(Function(Event) handler){
+    _obsWebSocket?.fallbackHandlers.add(handler);
   }
 }

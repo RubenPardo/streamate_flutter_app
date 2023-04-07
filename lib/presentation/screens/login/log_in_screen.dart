@@ -7,6 +7,7 @@ import 'package:streamate_flutter_app/presentation/bloc/auth_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_sate.dart';
 import 'package:streamate_flutter_app/presentation/screens/home_screen.dart';
+import 'package:streamate_flutter_app/shared/styles.dart';
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart';
 import 'package:streamate_flutter_app/shared/widgets/large_primary_button.dart';
 import 'login_in_webview_screen.dart';
@@ -137,7 +138,14 @@ class _LogInScreenState extends State<LogInScreen> {
                 messageError: _messageError,
                 onPressed: () {
                   context.read<AuthBloc>().add(Autorizarse()); // Empezar Login
-                }
+                },
+                child: Stack(
+                alignment: Alignment.center,
+                  children: const [
+                    Align(alignment: Alignment.centerLeft, child: Image(image: AssetImage('assets/images/logo_twitch_bw.png',),height: 48),),
+                    Text(iniciarSesion, style: textStyleButton,),
+                  ],
+                ),
               )
             ]
           ),

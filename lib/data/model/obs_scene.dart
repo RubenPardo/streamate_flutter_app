@@ -3,7 +3,7 @@ import 'dart:developer';
 class OBSScene {
   final String name;
   final int index;
-  final bool isActual;
+  bool isActual;
 
   OBSScene({required this.name, required this.index, this.isActual = false});
 

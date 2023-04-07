@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
+import 'package:streamate_flutter_app/presentation/bloc/obs/obs_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/user_info_bloc/user_info_bloc.dart';
 import 'package:streamate_flutter_app/presentation/screens/login/log_in_screen.dart';
 import 'package:streamate_flutter_app/shared/colors.dart';
@@ -24,6 +25,9 @@ class App extends StatelessWidget {
         ),
         BlocProvider(
           create: (_) => UserInfoBloc(),
+        ),
+        BlocProvider(
+          create: (_) => OBSBloc(),
         ),
       ],
       child: MaterialApp(

@@ -109,7 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
       context.read<ChatBloc>().add(InitChatBloc(_user, _tokenData.accessToken));
 
       _tabsBottomNavigator = [
-          [ ControlScreen(tokenData: _tokenData, user: _user),Icon(Icons.abc), "ALGO"],
+          [ OBSScreen(tokenData: _tokenData, user: _user),Icon(Icons.abc), "ALGO"],
           [ ChatScreen(token: _tokenData,user: _user,), Icon(Icons.chat), "Chat"],
           
       ];

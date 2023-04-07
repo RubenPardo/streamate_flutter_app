@@ -4,11 +4,18 @@ import 'package:streamate_flutter_app/shared/texto_para_localizar.dart';
 
 class LargePrimaryButton extends StatelessWidget {
 
-  Function()? onPressed;
-  bool theresError;
-  String messageError;
+  final Function()? onPressed;
+  final bool theresError;
+  final String messageError;
+  final Widget child;
 
-  LargePrimaryButton({super.key, required this.onPressed, this.theresError = false, this.messageError=""});
+  const LargePrimaryButton({
+    super.key, 
+    required this.onPressed, 
+    this.theresError = false, 
+    this.messageError="",
+    required this.child,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -22,13 +29,7 @@ class LargePrimaryButton extends StatelessWidget {
                 minimumSize: const Size.fromHeight(56), // NEW
               ),
               onPressed: onPressed, 
-              child:  Stack(
-                alignment: Alignment.center,
-                  children: const [
-                    Align(alignment: Alignment.centerLeft, child: Image(image: AssetImage('assets/images/logo_twitch_bw.png',),height: 48),),
-                    Text(iniciarSesion, style: textStyleButton,),
-                  ],
-                ),
+              child: child
             ),
           ),
           theresError 

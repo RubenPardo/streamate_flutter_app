@@ -31,3 +31,5 @@ const expulsar = "Expulsar";
 const userTimedOut = "Usuario expulsado temporalmente";
 const welcomeChat = "Te damos la bienvenida a la sala del chat";
 const unexpectedError = "Error inesperado";
+const linkObsTitle = 'Vincular OBS para tener acceso a tus escenas y pistas de audio.';
+const linkObs = 'Vincular';
