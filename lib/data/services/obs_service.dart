@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:developer';
-
 import 'package:obs_websocket/obs_websocket.dart';
 import 'package:streamate_flutter_app/core/utils.dart';
 import 'package:streamate_flutter_app/data/model/obs_event_type.dart';

@@ -35,7 +35,7 @@ class _ControlScreenState extends State<ControlScreen> {
 
     void _cerrarSesion() async{
       var obs = OBSService();
-     await obs.connect('192.168.1.131', 4455, 'holaxd');
+     await obs.connect('192.168.1.107', 4455, 'holaxd');
       await obs.getSceneList();
       await obs.getAudioTrackList();
       await obs.setVolume('Audio del escritorioxD',0);
