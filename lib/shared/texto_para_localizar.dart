@@ -29,3 +29,4 @@ const ban = "Vetar";
 const userBanned = "Usuario baneado";
 const expulsar = "Expulsar";
 const userTimedOut = "Usuario expulsado temporalmente";
+const unexpectedError = "Error inesperado";

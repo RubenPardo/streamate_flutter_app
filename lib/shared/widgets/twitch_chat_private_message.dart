@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/core/utils.dart';
-import 'package:streamate_flutter_app/data/model/badge.dart';
+import 'package:streamate_flutter_app/data/model/badge.dart' as BadgeModel;
 import 'package:streamate_flutter_app/data/model/emote.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/private_message.dart';
@@ -208,7 +208,7 @@ class _TwitchChatPrivateMessageState extends State<TwitchChatPrivateMessage>{
   String _getBadgeFromIdSetAndId(Map<String, String> idSetAndId) {
     try{
       // obtenemos el badge con set id
-      Badge badge = ChatBloc.allBadges.firstWhere((badge)=>badge.setId == idSetAndId['setId']);
+      BadgeModel.Badge badge = ChatBloc.allBadges.firstWhere((badge)=>badge.setId == idSetAndId['setId']);
     // de ese badge la version
       return badge.badgeVersions.firstWhere((version) => version.id == idSetAndId['id']).imageUrls[0];
     }catch(e){

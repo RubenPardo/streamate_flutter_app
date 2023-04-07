@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:streamate_flutter_app/core/utils.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_sate.dart';
@@ -7,6 +10,7 @@ import 'package:streamate_flutter_app/presentation/screens/home_screen.dart';
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart';
 import 'package:streamate_flutter_app/shared/widgets/large_primary_button.dart';
 import 'login_in_webview_screen.dart';
+import 'package:streamate_flutter_app/shared/texto_para_localizar.dart' as texts;
 
 class LogInScreen extends StatefulWidget {
   const LogInScreen({super.key, required this.title});
@@ -40,7 +44,7 @@ class _LogInScreenState extends State<LogInScreen> {
         listener: (context, state) { 
           /// para enviar mensajes como el snack bar o cambiar de ruta
           /// cuando cambia el estado
-          
+          log(state.runtimeType.toString());
           if (state is AuthError) {
             if(mounted){
               _isError = true;
@@ -69,12 +73,13 @@ class _LogInScreenState extends State<LogInScreen> {
             ).then((redirectUri) {
               
               if (redirectUri!=null && redirectUri!="") {
-                
+                print("----------------- empieza login");
                 // Obtenemos autorizacion ----> empezar con el login
                 context.read<AuthBloc>().add(LogIn(redirectUri: redirectUri));
 
               } else {
                 // Autorizacion cancelada o fallida ---> 
+                Utils.showSnackBar(context, texts.unexpectedError);
                
               }
             });
@@ -85,6 +90,7 @@ class _LogInScreenState extends State<LogInScreen> {
           /// para cambiar la vista
           /// cuando cambia el estado
           if (state is AuthUninitialized || state is AuthUnauthenticated || state is AuthAutorizacion) { // ------------------------> No inicializado
+            print("------ build body");
             return _buildBody();
           }
           else if(state is AuthLoading){ // -----------------------------> Cargando

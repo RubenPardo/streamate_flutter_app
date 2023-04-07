@@ -61,7 +61,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   
     bool _isPaused = false;
     bool get isPaused => _isPaused;
-    final int _maxChatItems = 500;
+    final int _maxChatItems = 250;
 
     // variables para controlar la conexion con el chat
     StreamSubscription? _channelListener;
@@ -142,18 +142,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         (event, emit) {
           // añadir todos los mensajes a la espera a la lista que se muestra
           _isPaused = false;
-          /*print((_chatWidgets.map((e) => (e as TwitchChatPrivateMessage).privateMessage.message)).toList());
-          _chatWidgets.removeWhere((element) => _chatWidgetToRemoveWhenChatResumed.contains(element));
-          print((_chatWidgets.map((e) => (e as TwitchChatPrivateMessage).privateMessage.message)).toList());
-          _chatWidgetToRemoveWhenChatResumed.clear();*/
-          // de esta forma cuando esta pausado evitamos que cuando se añadan nuevos items y este pausado no se borren los 
-          // que se estan mostrando y cuando se reanudan se borren la diferencia hasta el top
           if(_chatWidgets.length > _maxChatItems){
-            print("Se borran desde: 0 hasta ${_chatWidgets.length - _maxChatItems}");
             _chatWidgets.removeRange(0, _chatWidgets.length - _maxChatItems);
           }
           _messageCountToPaint = _chatWidgets.length > _maxChatItems ? _maxChatItems : _chatWidgets.length;
-          print("Resumed: $_messageCountToPaint");
+          
           emit(ChatResumed());
           emit(ChatConnected());
 
@@ -201,6 +194,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
 
   void _connectToChat(){
+    if(_channelListener != null){
+      _channelListener!.cancel();
+    }
     // obtenemos el stream
     _channelListener = serviceLocator<TwitchChatRepository>().connectChat(_accesToken, _loginUserName)
       .listen(
@@ -274,10 +270,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       
       if(user == null || user == ""){
         // todos
-        print("SE VAN a TODOS DE BORRAR MENSAJES de $user");
         _clearMessages();
       }else{
-        print("SE VAN A BORRAR MENSAJES de $user");
         // borrar los de ese justo
         _clearMessages(user: user);
       }
@@ -329,11 +323,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       _messageCountToPaint -= chatWidgetUser.length;// restar los que se van a borrar
       // eliminar mensajes
       _chatWidgets.removeWhere((element){
-        print("BAN USER ----------------------------");
-        print((element is TwitchChatPrivateMessage) ? "BAN USER -- Disp ${element.privateMessage.user.displayName.toLowerCase()}" : "BAN USER -- ------");
-        print((element is TwitchChatPrivateMessage) ? "BAN USER -- USER ${user}" : "BAN USER -- ------");
-        print((element is TwitchChatPrivateMessage) ? "BAN USER -- USER ${element.privateMessage.user.displayName.toLowerCase().compareTo(user)}" : "BAN USER -- ------");
-        print("BAN USER ----------------------------");
+   
 
         if(element is TwitchChatPrivateMessage && element.privateMessage.user.displayName.toLowerCase().compareTo(user)==0){
           print("BAN USER -- borrar");
