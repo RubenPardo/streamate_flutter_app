@@ -23,8 +23,7 @@ class IRCMessage{
     if(parts[0] != "PING"){
         // el comando siempre esta en la 3 posicion 
       final command = Utils.parseTextToIRCCOmmand(parts[2]);
-      print("BAN USER -- $command");
-      print("BAN USER -- $data");
+  
       switch(command){
         
         case IRCCommand.privateMessage:

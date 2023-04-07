@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
+import 'package:streamate_flutter_app/data/model/obs_event_type.dart';
 import 'package:streamate_flutter_app/shared/colors.dart';
 import 'package:streamate_flutter_app/shared/widgets/user_info_widget.dart';
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart' as texts;
@@ -51,6 +52,24 @@ class Utils{
     }
     return command;
   }
+
+   /// Texto -> mapTextToOBSEvent() -> EventObs
+  /// 
+  static ObsEvent mapTextToOBSEvent(String text){
+    ObsEvent event;
+    switch(text) {
+      case "CurrentProgramSceneChanged":
+        event = ObsEvent.currentProgramSceneChanged;
+        break;
+      case "InputVolumeChanged":
+        event = ObsEvent.inputVolumeChanged;
+        break;
+      default:
+       event = ObsEvent.none;
+    }
+    return event;
+  }
+
 
   // Texto -> mapTagsIrcData() -> {Texto:Texto}
   static Map<String,String> mapTagsIrcData(String data){

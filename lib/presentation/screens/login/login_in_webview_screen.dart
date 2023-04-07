@@ -46,6 +46,9 @@ class _LoginWebViewScreenState extends State<LoginWebViewScreen> {
     _webViewController.setNavigationDelegate(
       NavigationDelegate(
         onPageFinished: (url) {
+          
+        },
+        onPageStarted: (url) {
           print("-------------------------------");
           print("URL ------------- $url");
           print("URL ------------- $_urlAnterior");
@@ -63,8 +66,6 @@ class _LoginWebViewScreenState extends State<LoginWebViewScreen> {
             Navigator.pop(context);
           }*/
           _urlAnterior = url;
-        },
-        onPageStarted: (url) {
         },
         onProgress: (progress) {
           if(mounted){ // para no hacer un set state cuando no exista el widget

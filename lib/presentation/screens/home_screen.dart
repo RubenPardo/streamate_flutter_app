@@ -51,6 +51,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late TokenData _tokenData;
 
   bool _isChatPaused = false;
+  bool _isEventsOnly = false;
   final int _chatIndex = 1;
 
 
@@ -134,7 +135,9 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: buildAppBar(appTitle, bottom: Center(child: Text("PRUEBA"),),
         actions: [
           _selectedIndex == _chatIndex 
-            ? _buildPauseChatButton() : Container()
+            ? _buildPauseChatButton() : Container(),
+          _selectedIndex == _chatIndex 
+            ? _buildFilterChatButton() : Container()
         ] 
       ),
       bottomNavigationBar: (_isLoading || _isError) ? null : BottomNavigationBar(
@@ -175,5 +178,16 @@ class _HomeScreenState extends State<HomeScreen> {
       
     }, icon: Icon(_isChatPaused ? Icons.play_arrow  : Icons.pause));
   }
+
+  Widget _buildFilterChatButton(){
+    return IconButton(onPressed: (){
+      setState(() {
+        _isEventsOnly = !_isEventsOnly;
+      });
+      context.read<ChatBloc>().add(FilterChat(_isEventsOnly));
+      
+    }, icon: Icon(_isEventsOnly ? Icons.filter_alt_off  : Icons.filter_alt));
+  }
+
 
 }

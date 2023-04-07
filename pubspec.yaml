@@ -27,6 +27,7 @@ dependencies:
 
   mocktail: ^0.3.0
   rxdart: ^0.27.7
+  obs_websocket: ^5.1.0+1
   #build_runner: ^2.2.0 # For generating code (Mocks, etc)
   #mockito: ^5.2.0 # For mocking and stubbing
 
