@@ -28,6 +28,7 @@ import 'package:streamate_flutter_app/shared/widgets/twitch_chat_notice_message.
 import 'package:streamate_flutter_app/shared/widgets/twitch_chat_private_message.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:streamate_flutter_app/shared/widgets/twitch_chat_user_notice_message.dart';
+import 'package:streamate_flutter_app/shared/texto_para_localizar.dart' as texts;
 
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
@@ -50,6 +51,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     // el ultimo elemento
     final StreamController<List<Widget>> _widgetChatStreamController = BehaviorSubject<List<Widget>>();
     final List<Widget> _chatWidgets = []; 
+    // de esta forma podremos filtrar solo los eventos
+    final List<Widget> _chatEventsOnlyWidgets = []; 
+    bool eventsOnly = false;
 
     // variable para controlar que mensajes se pintan en pantalla, de esta forma se puede parar el chat y no pintar los nuevos que llegan
     int _messageCountToPaint = 0;
@@ -105,6 +109,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           // conectarse al chat
           _connectToChat();
           //_addDummyMessages();
+          _addWelcomeMessage();
           // return Stream<Widget>
           emit(ChatConnected());
           
@@ -146,7 +151,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
             _chatWidgets.removeRange(0, _chatWidgets.length - _maxChatItems);
           }
           _messageCountToPaint = _chatWidgets.length > _maxChatItems ? _maxChatItems : _chatWidgets.length;
-          
+          print("Resumed: $_messageCountToPaint");
           emit(ChatResumed());
           emit(ChatConnected());
 
@@ -186,6 +191,21 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       on<BanUserChat>((event, emit) { // --------------------------------------------------
         User userToBan = event.userToBan;
         serviceLocator<BanUserUseCase>().call(_broadcasterUser.id, userToBan.id,duration: event.duration);
+      },);
+
+      on<FilterChat>((event, emit) { // --------------------------------------------------
+        print("FILTER");
+        eventsOnly = event.eventsOnly;
+        // cambiar de array cuando venga un filtro por eventos, 
+        // hay que actualizar el el message count to paint para que no se borren los mensajes mientras vienen nuevos
+        if(eventsOnly){
+          _widgetChatStreamController.add(_chatEventsOnlyWidgets);
+           _messageCountToPaint = _chatEventsOnlyWidgets.length > _maxChatItems ? _maxChatItems : _chatEventsOnlyWidgets.length;
+        }else{
+          _widgetChatStreamController.add(_chatWidgets);
+           _messageCountToPaint = _chatWidgets.length > _maxChatItems ? _maxChatItems : _chatWidgets.length;
+
+        }
       },);
 
     }
@@ -293,23 +313,50 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       _chatWidgets.insert(atPosition, newChatWidget);
     }else{
       // nuevo mensaje
+      // sumar contador para pintar en el chat ---------------
       if(!_isPaused){
-        _messageCountToPaint++;// de esta forma el listview no pintara los nuevos
+        if(!eventsOnly){
+          // si no esta en events only sumar si os si
+          _messageCountToPaint++;// de esta forma el listview no pintara los nuevos
+          
+
+        }else if(newChatWidget is TwitchChatUserNoticeMessage){
+          // si es events only y es un evento sumar
+          _messageCountToPaint++;// de esta forma el listview no pintara los nuevos
+        }
+        
+      }
+
+      // añadir al array  ---------------
+      if(newChatWidget is TwitchChatUserNoticeMessage){
+        _chatEventsOnlyWidgets.add(newChatWidget);
       }
       _chatWidgets.add(newChatWidget);
       
     }
 
     // comprobar el limite de mensajes
-    if(( _chatWidgets.length) > _maxChatItems){
-      // borrar de los que se ven el primero y añadirlo a los pausados
-      if(!_isPaused){
-        _chatWidgets.removeAt(0);
-        _messageCountToPaint = _maxChatItems;
+    if(eventsOnly){
+      if(( _chatEventsOnlyWidgets.length) > _maxChatItems){
+        // borrar de los que se ven el primero y añadirlo a los pausados
+        if(!_isPaused){
+          _chatEventsOnlyWidgets.removeAt(0);
+          _messageCountToPaint = _maxChatItems;
+        }
+        
       }
-      
+    }else{
+      if(( _chatWidgets.length) > _maxChatItems){
+        // borrar de los que se ven el primero y añadirlo a los pausados
+        if(!_isPaused){
+          _chatWidgets.removeAt(0);
+          _messageCountToPaint = _maxChatItems;
+        }
+        
+      }
     }
-    _widgetChatStreamController.add(_chatWidgets);
+   
+    _widgetChatStreamController.add(eventsOnly ?_chatEventsOnlyWidgets : _chatWidgets);
   }
   
   /// borra todos los mensajes si user es null
@@ -323,10 +370,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       _messageCountToPaint -= chatWidgetUser.length;// restar los que se van a borrar
       // eliminar mensajes
       _chatWidgets.removeWhere((element){
-   
+        print("BAN USER ----------------------------");
+        print((element is TwitchChatPrivateMessage) ? "BAN USER -- Disp ${element.privateMessage.user.displayName.toLowerCase()}" : "BAN USER -- ------");
+        print((element is TwitchChatPrivateMessage) ? "BAN USER -- USER ${user}" : "BAN USER -- ------");
+        print((element is TwitchChatPrivateMessage) ? "BAN USER -- USER ${element.privateMessage.user.displayName.toLowerCase().compareTo(user)}" : "BAN USER -- ------");
+        print("BAN USER ----------------------------");
 
         if(element is TwitchChatPrivateMessage && element.privateMessage.user.displayName.toLowerCase().compareTo(user)==0){
-          print("BAN USER -- borrar");
           return true;
         }else{
           return false;
@@ -362,5 +412,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _widgetChatStreamController.add(_chatWidgets);
   }
   
+  void _addWelcomeMessage(){
+    _addNewMessage(const TwitchChatNoticeMessage(noticeMessage: texts.welcomeChat));
+  }
  
 }

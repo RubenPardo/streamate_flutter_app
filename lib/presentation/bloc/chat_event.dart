@@ -39,4 +39,9 @@ class ChangeChatSettings extends ChatEvent{
   ChangeChatSettings(this.chatSetting);
 }
 
+class FilterChat extends ChatEvent{
+  bool eventsOnly;
+  FilterChat(this.eventsOnly);
+}
+
 

@@ -24,7 +24,7 @@ packages:
       sha256: "139d809800a412ebb26a3892da228b2d0ba36f0ef5d9a82166e5e52ec8d61611"
       url: "https://pub.dev"
     source: hosted
-    version: "2.3.2"
+    version: "2.4.0"
   async:
     dependency: transitive
     description:
@@ -247,6 +247,14 @@ packages:
       sha256: "5528c2f391ededb7775ec1daa69e65a2d61276f7552de2b5f7b8d34ee9fd4ab7"
       url: "https://pub.dev"
     source: hosted
+    version: "0.6.4"
+  json_annotation:
+    dependency: transitive
+    description:
+      name: json_annotation
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "4.8.0"
     version: "0.6.5"
   lints:
     dependency: transitive
@@ -264,6 +272,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
+  loggy:
+    dependency: transitive
+    description:
+      name: loggy
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.0.3"
   matcher:
     dependency: transitive
     description:
@@ -320,6 +335,13 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
+  obs_websocket:
+    dependency: "direct main"
+    description:
+      name: obs_websocket
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "5.1.0+1"
   package_config:
     dependency: transitive
     description:
@@ -597,6 +619,27 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.3.1"
+  universal_io:
+    dependency: transitive
+    description:
+      name: universal_io
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "2.2.0"
+  uuid:
+    dependency: transitive
+    description:
+      name: uuid
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.7"
+  validators:
+    dependency: transitive
+    description:
+      name: validators
+      url: "https://pub.dartlang.org"
+    source: hosted
+    version: "3.0.0"
   vector_math:
     dependency: transitive
     description:
