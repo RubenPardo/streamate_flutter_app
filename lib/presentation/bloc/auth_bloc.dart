@@ -1,6 +1,7 @@
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
+import 'package:streamate_flutter_app/data/model/user.dart';
 import 'package:streamate_flutter_app/domain/usecases/check_session_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/log_in_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/log_out_use_case.dart';
@@ -9,6 +10,7 @@ import 'package:streamate_flutter_app/presentation/bloc/auth_sate.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   
+
   final LogInUseCase _loginCasoUso = serviceLocator<LogInUseCase>();
   final CheckSessionUseCase _comprobarSesionCasoUso = serviceLocator<CheckSessionUseCase>();
   final LogOutUseCase _logoutUseCase = serviceLocator<LogOutUseCase>();
@@ -62,7 +64,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
                 if(autenticado){
                   emit(AuthAuthenticated());// ------------> Autenticado
                 }else{
-                  emit(AuthUnauthenticated());// ------------> Autenticado
+                  emit(AuthUnauthenticated());// ------------> NO Autenticado
                 }
                 
               }

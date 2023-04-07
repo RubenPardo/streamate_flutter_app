@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 import 'colors.dart';
+import 'extension_color.dart';
 
 const TextStyle _textStyleTitleApp = TextStyle(
   fontWeight: FontWeight.bold,
@@ -37,12 +38,67 @@ const TextStyle textStyleButton = TextStyle(
   fontSize: 20
 );
 
+const TextStyle textStyleAlertDialogTitle = TextStyle(
+  fontWeight: FontWeight.bold,
+  fontFamily: 'Quicksand',
+  color: MyColors.textoSobreClaro,
+  fontSize: 20
+);
+
+const TextStyle textStyleAlertDialogBody = TextStyle(
+  fontWeight: FontWeight.w500,
+  fontFamily: 'Quicksand',
+  color: MyColors.textoSobreClaro,
+  fontSize: 16
+);
+
+const TextStyle textStyleChat = TextStyle(
+  fontFamily: 'Roobert',
+  color: MyColors.textoSobreOscuro,
+  fontSize: 18
+);
+
+const TextStyle textStyleChatNotice = TextStyle(
+  fontFamily: 'Roobert',
+  color: MyColors.textoSobreOscuroNotice,
+  fontSize: 16
+);
+
+const TextStyle textStyleChatUserNoticeTitleSub = TextStyle(
+  fontFamily: 'Roobert',
+  color: MyColors.secondaryColor,
+  fontWeight: FontWeight.bold,
+  fontSize: 16
+);
+
+const TextStyle textStyleChatUserNoticeTitleGiftMyster = TextStyle(
+  fontFamily: 'Roobert',
+  color: MyColors.textoSobreOscuro,
+  fontWeight: FontWeight.bold,
+  fontSize: 24
+);
+
+
+const TextStyle textStyleChatUserNoticeBody = TextStyle(
+  fontFamily: 'Roobert',
+  color: MyColors.textoSobreOscuro,
+  fontSize: 16
+);
+
+TextStyle textStyleChatName(String color){
+  return TextStyle(
+    color: HexColor.fromHex(color),
+    fontFamily: 'Roobert',
+    fontWeight: FontWeight.bold,
+    fontSize: 18
+  ); 
+}
 
 const TextStyle textError = TextStyle(
   fontWeight: FontWeight.bold,
   fontFamily: 'Quicksand',
   color: MyColors.textoError,
-  fontSize: 18
+  fontSize: 16
 );
 
 
