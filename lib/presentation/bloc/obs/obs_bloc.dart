@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:obs_websocket/obs_websocket.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:streamate_flutter_app/core/utils.dart';
+import 'package:streamate_flutter_app/data/model/obs_audio_track.dart';
 import 'package:streamate_flutter_app/data/model/obs_connection.dart';
 import 'package:streamate_flutter_app/data/model/obs_event_type.dart';
 import 'package:streamate_flutter_app/data/model/obs_scene.dart';
@@ -14,17 +15,64 @@ import 'package:streamate_flutter_app/presentation/bloc/obs/obs_state.dart';
 
 class OBSBloc extends Bloc<OBSEvent,OBSState>{
   
+  // atributos para controlar las escenas del obs ---------------------------------
   final StreamController<List<OBSScene>> _scenesStreamController = BehaviorSubject<List<OBSScene>>();
   List<OBSScene> _obsScenes = []; 
-
   Stream<List<OBSScene>> get sceneStream {
     return _scenesStreamController.stream;
+  } 
+
+  // atributos para controlar las pistas de audio del obs ----------------------------
+  final StreamController<List<OBSAudioTrack>> _audioTrackStreamController = BehaviorSubject<List<OBSAudioTrack>>();
+  List<OBSAudioTrack> _obsAudioTrack = []; 
+  Stream<List<OBSAudioTrack>> get audioTrackStream {
+    return _audioTrackStreamController.stream;
   } 
   
   OBSBloc():super(OBSUninitialized()){
 
     final OBSService obsService = OBSService();// TODO cambiar al serivce locator
 
+     /// Event -> eventHandler
+  /// 
+  /// funcion para manejer los eventos que llegan del obs
+  ///
+  void eventHandler(Event event) async{
+
+        log('type: ${event.eventType}');
+    switch(Utils.mapTextToOBSEvent(event.eventType)){
+      
+      case ObsEvent.currentProgramSceneChanged:
+        // eventData = {sceneName: Escena 3}
+        String sceneName =event.eventData!['sceneName'];
+        _obsScenes = _obsScenes.map<OBSScene>((scene) {
+          return scene..isActual  = (scene.name == sceneName);
+        }).toList();
+        _scenesStreamController.add(_obsScenes);
+        _obsAudioTrack = (await obsService.getSceneAudioTrackList(sceneName));
+        _audioTrackStreamController.add(_obsAudioTrack);
+        break;
+      case ObsEvent.inputVolumeChanged:
+        log('data: ${event.eventData}');
+        break;
+      case ObsEvent.sceneNameChanged:
+        // TODO: Handle this case.
+        break;
+      case ObsEvent.inputNameChanged:
+        // TODO: Handle this case.
+        break;
+      case ObsEvent.sceneCreated:
+        // TODO: Handle this case.
+        break;
+      case ObsEvent.sceneRemoved:
+        // TODO: Handle this case.
+        break;
+      case ObsEvent.none:
+        print('Ni idea');
+        break;
+    }
+    
+  }
 
     /// comprueba si hay una conexión guardada o no
     on<OBSInit>(
@@ -53,10 +101,13 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
                 scene.isActual = true;
               }
             }
+
+            _obsAudioTrack = (await obsService.getSceneAudioTrackList(actualSceneName));
             // escuchar los cambios del obs
             obsService.setEventHandler(eventHandler);
 
             _scenesStreamController.add(_obsScenes);
+            _audioTrackStreamController.add(_obsAudioTrack);
             emit(OBSConnected()); // ------------------------------------------> return connected
             
           }else{
@@ -86,45 +137,12 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
       },
     );
 
+
+  
+
   }
 
-  /// Event -> eventHandler
-  /// 
-  /// funcion para manejer los eventos que llegan del obs
-  ///
-  void eventHandler(Event event) {
-
-        log('type: ${event.eventType}');
-    switch(Utils.mapTextToOBSEvent(event.eventType)){
-      
-      case ObsEvent.currentProgramSceneChanged:
-        // eventData = {sceneName: Escena 3}
-        _obsScenes = _obsScenes.map<OBSScene>((scene) {
-          return scene..isActual  = (scene.name == event.eventData!['sceneName']);
-        }).toList();
-        _scenesStreamController.add(_obsScenes);
-        break;
-      case ObsEvent.inputVolumeChanged:
-        log('data: ${event.eventData}');
-        break;
-      case ObsEvent.sceneNameChanged:
-        // TODO: Handle this case.
-        break;
-      case ObsEvent.inputNameChanged:
-        // TODO: Handle this case.
-        break;
-      case ObsEvent.sceneCreated:
-        // TODO: Handle this case.
-        break;
-      case ObsEvent.sceneRemoved:
-        // TODO: Handle this case.
-        break;
-      case ObsEvent.none:
-        print('Ni idea');
-        break;
-    }
-    
-  }
+ 
 
 
 

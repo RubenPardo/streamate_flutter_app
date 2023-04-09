@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:obs_websocket/obs_websocket.dart';
+import 'package:streamate_flutter_app/data/model/obs_audio_track.dart';
 import 'package:streamate_flutter_app/data/model/obs_connection.dart';
 import 'package:streamate_flutter_app/data/model/obs_scene.dart';
 import 'package:streamate_flutter_app/data/model/token_data.dart';
@@ -49,7 +50,10 @@ class _OBSScreenState extends State<OBSScreen> {
           }
 
           if(state is OBSConnected){
-            return _buildConnected();
+            return Column(children:[
+               _buildScenes(),
+               _buildAudioTracks()
+               ]);
           }
 
           return const SizedBox();
@@ -64,9 +68,9 @@ class _OBSScreenState extends State<OBSScreen> {
 
     void _cerrarSesion() async{
       var obs = OBSService();
-     await obs.connect('192.168.1.107', 4455, 'holaxd');
+     await obs.connect('10.72.22.90', 4455, 'holaxd');
       await obs.getSceneList();
-      await obs.getAudioTrackList();
+      //await obs.getAudioTrackList();
       await obs.setVolume('Audio del escritorioxD',0);
       await obs.setVolume('Mic/Aux',0);
 
@@ -92,7 +96,7 @@ class _OBSScreenState extends State<OBSScreen> {
             LargePrimaryButton(
                 child: Text(texts.linkObs,style:Theme.of(context).textTheme.bodyLarge,),
                 onPressed: () {
-                   context.read<OBSBloc>().add(OBSConnect(connection: OBSConnection(address: '192.168.1.107',password: 'holaxd')));
+                   context.read<OBSBloc>().add(OBSConnect(connection: OBSConnection(address: '10.72.22.90',password: 'holaxd')));
                 }
               )
           ],
@@ -102,8 +106,8 @@ class _OBSScreenState extends State<OBSScreen> {
   }
   
 
-  /// devuelve el listado de las escenas y pistas de audio del obs
-  Widget _buildConnected() {
+  /// devuelve el listado de las escenas
+  Widget _buildScenes() {
     return StreamBuilder(
       stream: context.read<OBSBloc>().sceneStream,
       builder: (context, scenesSnapshot) {
@@ -111,6 +115,7 @@ class _OBSScreenState extends State<OBSScreen> {
           List<OBSScene> scenes = scenesSnapshot.data!;
           log('DATOS');
           return GridView.builder(
+            shrinkWrap: true,
             padding: const EdgeInsets.all(8),
             itemCount: scenes.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -127,6 +132,34 @@ class _OBSScreenState extends State<OBSScreen> {
       },
     );
   }
+
+  /// devuelve el listado de las escenas
+  Widget _buildAudioTracks() {
+    return StreamBuilder(
+      stream: context.read<OBSBloc>().audioTrackStream,
+      builder: (context, scenesSnapshot) {
+        if(scenesSnapshot.hasData){
+          List<OBSAudioTrack> audioTracks = scenesSnapshot.data!;
+          log('DATOS');
+          return GridView.builder(
+            shrinkWrap: true,
+            padding: const EdgeInsets.all(8),
+            itemCount: audioTracks.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 4, crossAxisSpacing: 8, mainAxisSpacing: 8
+            ), 
+            itemBuilder: (context, index) {
+              return Container(child: Text('${audioTracks[index].name}  ${audioTracks[index].volumenDB}dB'),);
+            },
+          );
+        }
+          log('NADA');
+
+        return const SizedBox();
+      },
+    );
+  }
+
 
   Widget _buildSceneItem(OBSScene scene){
     return GestureDetector(

@@ -120,4 +120,10 @@ class Utils{
         );
     });
   }
+
+
+  static bool isAudioSource(String sourceType){
+    return ['screen_capture','coreaudio_input_capture','coreaudio_output_capture','coreaudio_output_capture',].contains(sourceType);
+  }
+
 }
