@@ -96,7 +96,7 @@ class _OBSScreenState extends State<OBSScreen> {
             LargePrimaryButton(
                 child: Text(texts.linkObs,style:Theme.of(context).textTheme.bodyLarge,),
                 onPressed: () {
-                   context.read<OBSBloc>().add(OBSConnect(connection: OBSConnection(address: '10.72.22.90',password: 'holaxd')));
+                   context.read<OBSBloc>().add(OBSConnect(connection: OBSConnection(address: '192.168.43.195',password: 'holaxd')));
                 }
               )
           ],

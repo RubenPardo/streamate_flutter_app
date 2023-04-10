@@ -33,7 +33,35 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
 
     final OBSService obsService = OBSService();// TODO cambiar al serivce locator
 
-     /// Event -> eventHandler
+
+   void sceneNameChanged(Map<String, dynamic> data) async{
+    // event.eventData: {oldSceneName: Escena b, sceneName: Escena a}
+    String oldSceneName = data['oldSceneName'];
+        String sceneName =data['sceneName'];
+        OBSScene oldScene = _obsScenes.firstWhere((element) => element.name == oldSceneName);
+        int oldIndex = _obsScenes.indexOf(oldScene);
+        OBSScene newScene = OBSScene(name: sceneName, index: oldScene.index, isActual: oldScene.isActual);
+        _obsScenes.insert(oldIndex,newScene);
+        _obsScenes.remove(oldScene);
+        _scenesStreamController.add(_obsScenes);
+        _obsAudioTrack = (await obsService.getSceneAudioTrackList(sceneName));
+        _audioTrackStreamController.add(_obsAudioTrack);
+  }
+
+  void sceneChanged(Map<String, dynamic> data) async{
+    // eventData = {sceneName: Escena 3}
+    String sceneName = data['sceneName'];
+    _obsScenes = _obsScenes.map<OBSScene>((scene) {
+      return scene..isActual  = (scene.name == sceneName);
+    }).toList();
+    _scenesStreamController.add(_obsScenes);
+    _obsAudioTrack = (await obsService.getSceneAudioTrackList(sceneName));
+    _audioTrackStreamController.add(_obsAudioTrack);
+    
+  }
+
+
+  /// Event -> eventHandler
   /// 
   /// funcion para manejer los eventos que llegan del obs
   ///
@@ -43,20 +71,13 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
     switch(Utils.mapTextToOBSEvent(event.eventType)){
       
       case ObsEvent.currentProgramSceneChanged:
-        // eventData = {sceneName: Escena 3}
-        String sceneName =event.eventData!['sceneName'];
-        _obsScenes = _obsScenes.map<OBSScene>((scene) {
-          return scene..isActual  = (scene.name == sceneName);
-        }).toList();
-        _scenesStreamController.add(_obsScenes);
-        _obsAudioTrack = (await obsService.getSceneAudioTrackList(sceneName));
-        _audioTrackStreamController.add(_obsAudioTrack);
+        sceneChanged(event.eventData!);  
         break;
       case ObsEvent.inputVolumeChanged:
-        log('data: ${event.eventData}');
+       
         break;
       case ObsEvent.sceneNameChanged:
-        // TODO: Handle this case.
+        sceneNameChanged(event.eventData!);
         break;
       case ObsEvent.inputNameChanged:
         // TODO: Handle this case.
@@ -141,9 +162,6 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
   
 
   }
-
- 
-
 
 
 }

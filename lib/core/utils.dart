@@ -64,6 +64,9 @@ class Utils{
       case "InputVolumeChanged":
         event = ObsEvent.inputVolumeChanged;
         break;
+      case "SceneNameChanged":
+        event = ObsEvent.sceneNameChanged;
+        break;
       default:
        event = ObsEvent.none;
     }
