@@ -34,7 +34,9 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
     final OBSService obsService = OBSService();// TODO cambiar al serivce locator
 
 
-   void sceneNameChanged(Map<String, dynamic> data) async{
+  /// {oldSceneName: Escena b, sceneName: Escena a} -> sceneNameChanged
+  /// callback cuando el event handler detecta que una escena ha cambiado el nombre 
+  void sceneNameChanged(Map<String, dynamic> data) async{
     // event.eventData: {oldSceneName: Escena b, sceneName: Escena a}
     String oldSceneName = data['oldSceneName'];
         String sceneName =data['sceneName'];
@@ -48,8 +50,10 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
         _audioTrackStreamController.add(_obsAudioTrack);
   }
 
+  /// {sceneName: Escena 3} -> sceneChanged
+  /// callback cuando el event handler detecta que se ha cambiado la escena
   void sceneChanged(Map<String, dynamic> data) async{
-    // eventData = {sceneName: Escena 3}
+    // data = {sceneName: Escena 3}
     String sceneName = data['sceneName'];
     _obsScenes = _obsScenes.map<OBSScene>((scene) {
       return scene..isActual  = (scene.name == sceneName);
@@ -59,6 +63,24 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
     _audioTrackStreamController.add(_obsAudioTrack);
     
   }
+
+  /// {isGroup: false, sceneName: Escena 1} -> sceneChanged
+  /// callback cuando el event handler detecta que se ha creado una escena
+  void sceneCreated(Map<String, dynamic> data) async{
+    // {isGroup: false, sceneName: Escena 1}
+    _obsScenes.add(OBSScene(name: data['sceneName'], index: _obsScenes.length));
+    _scenesStreamController.add(_obsScenes);
+    
+  }
+
+  /// {isGroup: false, sceneName: Escena 1} -> sceneChanged
+  /// callback cuando el event handler detecta que se ha borrado una escena
+  void sceneRemoved(Map<String, dynamic> data) async{
+    // {isGroup: false, sceneName: Escena 23}
+    _obsScenes.removeWhere((element) => element.name == data['sceneName']);
+    _scenesStreamController.add(_obsScenes);
+  }
+
 
 
   /// Event -> eventHandler
@@ -83,10 +105,10 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
         // TODO: Handle this case.
         break;
       case ObsEvent.sceneCreated:
-        // TODO: Handle this case.
+        sceneCreated(event.eventData!);
         break;
       case ObsEvent.sceneRemoved:
-        // TODO: Handle this case.
+        sceneRemoved(event.eventData!);
         break;
       case ObsEvent.none:
         print('Ni idea');

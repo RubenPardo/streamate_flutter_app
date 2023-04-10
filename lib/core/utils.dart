@@ -67,6 +67,12 @@ class Utils{
       case "SceneNameChanged":
         event = ObsEvent.sceneNameChanged;
         break;
+      case "SceneRemoved":
+        event = ObsEvent.sceneRemoved;
+        break;
+      case "SceneCreated":
+        event = ObsEvent.sceneCreated;
+        break;
       default:
        event = ObsEvent.none;
     }
