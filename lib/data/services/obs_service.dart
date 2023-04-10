@@ -100,8 +100,8 @@ class OBSService {
   
 
   Future<void> setVolume(String trackName, double volume) async {
-    String request = jsonEncode({"request-type": "SetInputVolume", "inputName": trackName, "inputVolumeDb": volume});
-    print( (await _obsWebSocket!.send(request))!.responseData);
+
+    await _obsWebSocket!.send('SetInputVolume',{'inputName':trackName, 'inputVolumeDb':volume});
   }
 
   /// Function(Event e) -> setEventHandler

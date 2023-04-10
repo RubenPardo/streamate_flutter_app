@@ -96,7 +96,18 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
         sceneChanged(event.eventData!);  
         break;
       case ObsEvent.inputVolumeChanged:
-       
+        log(event.eventData!.toString());
+        // {inputName: audio E1, inputVolumeDb: -1.383665680885315, inputVolumeMul: 0.8527401685714722}
+        Map<String, dynamic> data = event.eventData!;
+        _obsAudioTrack = _obsAudioTrack.map(
+          (element){
+            if(element.name == data['inputName']){
+              return OBSAudioTrack(name: element.name, volumenDB: data['inputVolumeDb']);
+            }else{
+              return element;
+            }
+          }).toList();
+          _audioTrackStreamController.add(_obsAudioTrack);
         break;
       case ObsEvent.sceneNameChanged:
         sceneNameChanged(event.eventData!);
@@ -172,6 +183,23 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
           OBSScene scene = event.scene;
           
           obsService.setCurrentScene(scene.name);
+          
+        }catch(e){
+
+          emit(OBSError(message: 'Error al cambiar la escena en el obs $e'));
+        }
+      },
+    );
+
+    /// audioTrackName:Texto,newVolumen:double -> OBSChangeTrackVolumen
+    /// cambiar el volumen de una pista de audio
+    on<OBSChangeTrackVolumen>(
+      (event, emit) async{
+        try{
+          String audioTrackName = event.audioTrackName;
+          double newVolumen = event.newVolumen;
+          
+          obsService.setVolume(audioTrackName,newVolumen);
           
         }catch(e){
 

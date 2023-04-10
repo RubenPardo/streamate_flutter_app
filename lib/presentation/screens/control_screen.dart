@@ -1,8 +1,9 @@
-import 'dart:developer';
+
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:obs_websocket/obs_websocket.dart';
+import 'package:non_linear_slider/models/interval.dart';
 import 'package:streamate_flutter_app/data/model/obs_audio_track.dart';
 import 'package:streamate_flutter_app/data/model/obs_connection.dart';
 import 'package:streamate_flutter_app/data/model/obs_scene.dart';
@@ -16,6 +17,7 @@ import 'package:streamate_flutter_app/presentation/bloc/obs/obs_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/obs/obs_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/obs/obs_state.dart';
 import 'package:streamate_flutter_app/shared/widgets/large_primary_button.dart';
+import 'package:non_linear_slider/non_linear_slider.dart';
 
 class OBSScreen extends StatefulWidget {
 
@@ -60,7 +62,7 @@ class _OBSScreenState extends State<OBSScreen> {
         },
         listener: (context, state) {
           if(state is OBSError){
-            log('XDDDD ${state.message}');
+            print('XDDDD ${state.message}');
           }
         },
     );
@@ -113,7 +115,7 @@ class _OBSScreenState extends State<OBSScreen> {
       builder: (context, scenesSnapshot) {
         if(scenesSnapshot.hasData){
           List<OBSScene> scenes = scenesSnapshot.data!;
-          log('DATOS');
+     
           return GridView.builder(
             shrinkWrap: true,
             padding: const EdgeInsets.all(8),
@@ -126,7 +128,7 @@ class _OBSScreenState extends State<OBSScreen> {
             },
           );
         }
-          log('NADA');
+     
 
         return const SizedBox();
       },
@@ -140,26 +142,51 @@ class _OBSScreenState extends State<OBSScreen> {
       builder: (context, scenesSnapshot) {
         if(scenesSnapshot.hasData){
           List<OBSAudioTrack> audioTracks = scenesSnapshot.data!;
-          log('DATOS');
-          return GridView.builder(
+
+          return ListView.builder(
             shrinkWrap: true,
             padding: const EdgeInsets.all(8),
             itemCount: audioTracks.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4, crossAxisSpacing: 8, mainAxisSpacing: 8
-            ), 
+             
             itemBuilder: (context, index) {
-              return Container(child: Text('${audioTracks[index].name}  ${audioTracks[index].volumenDB}dB'),);
+              return _buildAudioTrackSlider(audioTracks[index]);
             },
           );
         }
-          log('NADA');
+
 
         return const SizedBox();
       },
     );
   }
 
+
+  Widget _buildAudioTrackSlider(OBSAudioTrack audioTrack){
+    return Row(
+      children: [
+        const Icon(Icons.volume_up),
+        const SizedBox(width: 8,),
+        Text(audioTrack.name),
+        NonLinearSlider(
+          
+          intervals: [
+            NLSInterval(-100,-33, 0.25),
+            NLSInterval(-33, -12, 0.25),
+            NLSInterval(-12,-5, 0.25),
+            NLSInterval(-5, 1, 0.25),
+          ],
+          //overlayColor: Colors.amber,
+          value: audioTrack.volumenDB, //_linearValue(audioTrack.volumenDB), 
+          onChanged: (newVolumen){
+            context.read<OBSBloc>().add(OBSChangeTrackVolumen(
+                audioTrackName:audioTrack.name, 
+                newVolumen: newVolumen));
+          }
+          
+        )
+      ],
+    );
+  }
 
   Widget _buildSceneItem(OBSScene scene){
     return GestureDetector(
