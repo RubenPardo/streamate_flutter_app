@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer';
 
+import 'package:either_dart/either.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:obs_websocket/obs_websocket.dart';
 import 'package:rxdart/rxdart.dart';
@@ -11,6 +12,7 @@ import 'package:streamate_flutter_app/data/model/obs_connection.dart';
 import 'package:streamate_flutter_app/data/model/obs_event_type.dart';
 import 'package:streamate_flutter_app/data/model/obs_scene.dart';
 import 'package:streamate_flutter_app/data/services/obs_service.dart';
+import 'package:streamate_flutter_app/domain/usecases/obs_usecases/get_obs_audio_tracks_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/obs_usecases/get_obs_scenes_use_case.dart';
 import 'package:streamate_flutter_app/presentation/bloc/obs/obs_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/obs/obs_state.dart';
@@ -66,9 +68,14 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
       return scene..isActual  = (scene.name == sceneName);
     }).toList();
     _scenesStreamController.add(_obsScenes);
-    _obsAudioTrack = (await obsService.getSceneAudioTrackList(sceneName));
-    _obsAudioTrack.addAll((await obsService.getGlobalAudioTrackList()));
-    _audioTrackStreamController.add(_obsAudioTrack);
+    // obtener las nuevas pistas de auido
+    await GetOBSAudioTracksUseCase().call(actualSceneName).fold(
+      (obsAudioTracks){
+        _obsAudioTrack = obsAudioTracks;
+        _audioTrackStreamController.add(_obsAudioTrack);
+      }, 
+      (error) => null
+    );
     
   }
 
@@ -181,8 +188,6 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
   /// funcion para manejer los eventos que llegan del obs
   ///
   void eventHandler(Event event) async{
-
-        log('type: ${event.eventType}');
     switch(Utils.mapTextToOBSEvent(event.eventType)){
       
       case ObsEvent.currentProgramSceneChanged:
@@ -233,26 +238,40 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
     on<OBSConnect>(
       (event, emit) async{
         try{
-          // TODO pasar a caso de uso con el either
-          OBSConnection connection = event.connection;
 
+          OBSConnection connection = event.connection;
           bool connected = await obsService.connect(connection.address, connection.port, connection.password);
+
           if(connected){
 
-            var res = await GetOBSScenesUseCase().call();
-            res.fold(
-              (obsScenes) => _obsScenes = obsScenes, 
+            await GetOBSScenesUseCase().call().fold(
+              (obsScenes) async{
+                // las guardamos en memoria
+                _obsScenes = obsScenes;
+                await GetOBSAudioTracksUseCase().call(actualSceneName).fold(
+                  (obsAudioTracks){
+                    // escuchar los cambios del obs
+                    obsService.setEventHandler(eventHandler);
+
+                    // las guardamos en memoria
+                    _obsAudioTrack = obsAudioTracks;
+
+                    // las emitimos a los streams
+                    _scenesStreamController.add(_obsScenes);
+                    _audioTrackStreamController.add(_obsAudioTrack);
+
+                    // avisamos a la vista que esta todo listo
+                    emit(OBSConnected()); // ------------------------------------------> return connected
+                  }, 
+                  (error) => emit(OBSError(message: error.message))
+                );
+                
+              
+              }, 
               (error) => emit(OBSError(message: error.message))
             );
 
-            _obsAudioTrack = (await obsService.getSceneAudioTrackList(actualSceneName));
-            _obsAudioTrack.addAll((await obsService.getGlobalAudioTrackList()));
-            // escuchar los cambios del obs
-            obsService.setEventHandler(eventHandler);
-
-            _scenesStreamController.add(_obsScenes);
-            _audioTrackStreamController.add(_obsAudioTrack);
-            emit(OBSConnected()); // ------------------------------------------> return connected
+            
 
             //guardar la conexion
 
