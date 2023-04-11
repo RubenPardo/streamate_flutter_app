@@ -4,12 +4,14 @@ import 'dart:developer';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:obs_websocket/obs_websocket.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:streamate_flutter_app/core/utils.dart';
 import 'package:streamate_flutter_app/data/model/obs_audio_track.dart';
 import 'package:streamate_flutter_app/data/model/obs_connection.dart';
 import 'package:streamate_flutter_app/data/model/obs_event_type.dart';
 import 'package:streamate_flutter_app/data/model/obs_scene.dart';
 import 'package:streamate_flutter_app/data/services/obs_service.dart';
+import 'package:streamate_flutter_app/domain/usecases/obs_usecases/get_obs_scenes_use_case.dart';
 import 'package:streamate_flutter_app/presentation/bloc/obs/obs_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/obs/obs_state.dart';
 import 'package:collection/collection.dart';
@@ -30,10 +32,12 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
   Stream<List<OBSAudioTrack>> get audioTrackStream {
     return _audioTrackStreamController.stream;
   } 
+
+  String get actualSceneName => _obsScenes.firstWhere((element) => element.isActual).name;
   
   OBSBloc():super(OBSUninitialized()){
 
-    final OBSService obsService = OBSService();// TODO cambiar al serivce locator
+    final OBSService obsService = serviceLocator<OBSService>();
 
 
   /// {oldSceneName: Escena b, sceneName: Escena a} -> sceneNameChanged
@@ -170,6 +174,8 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
         
   }
 
+  
+
   /// Event -> eventHandler
   /// 
   /// funcion para manejer los eventos que llegan del obs
@@ -233,14 +239,11 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
           bool connected = await obsService.connect(connection.address, connection.port, connection.password);
           if(connected){
 
-            _obsScenes = (await obsService.getSceneList()).reversed.toList(); // llega al reves
-            String actualSceneName = await obsService.getCurrentNameScene();
-            /// marcar cual es la actual
-            for (var scene in _obsScenes) {
-              if(scene.name == actualSceneName){
-                scene.isActual = true;
-              }
-            }
+            var res = await GetOBSScenesUseCase().call();
+            res.fold(
+              (obsScenes) => _obsScenes = obsScenes, 
+              (error) => emit(OBSError(message: error.message))
+            );
 
             _obsAudioTrack = (await obsService.getSceneAudioTrackList(actualSceneName));
             _obsAudioTrack.addAll((await obsService.getGlobalAudioTrackList()));
@@ -250,6 +253,9 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
             _scenesStreamController.add(_obsScenes);
             _audioTrackStreamController.add(_obsAudioTrack);
             emit(OBSConnected()); // ------------------------------------------> return connected
+
+            //guardar la conexion
+
             
           }else{
 

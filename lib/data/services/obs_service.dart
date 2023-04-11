@@ -8,15 +8,27 @@ import 'package:streamate_flutter_app/data/model/obs_event_type.dart';
 import 'package:streamate_flutter_app/data/model/obs_scene.dart';
 import 'package:web_socket_channel/io.dart';
 
-class OBSService {
+abstract class OBSService{
+  Future<bool> connect(String address, int port, String? password);
+  void close();
+  Future<List<OBSScene>> getSceneList();
+  Future<String> getCurrentNameScene();
+  Future<void> setCurrentScene(String sceneName);
+  Future<List<OBSAudioTrack>> getSceneAudioTrackList(String sceneName);
+  Future<List<OBSAudioTrack>> getGlobalAudioTrackList();
+  Future<double> getAudioTrackVolumeDB(String trackName);
+  Future<bool> getMuteStatusAudioTrack(String trackName);
+  Future<void> setMuteStatusAudioTrack(String trackName, bool mute);
+  Future<void> setVolume(String trackName, double volume);
+  void setEventHandler(Function(Event) handler);
+}
+
+class OBSServiceImpl implements OBSService {
   ObsWebSocket? _obsWebSocket;
 
   late StreamStatusResponse obsStatus;
-
   
-  
-
-  
+  @override
   Future<bool> connect(String address, int port, String? password) async {
    if(_obsWebSocket == null){
       _obsWebSocket = await ObsWebSocket.connect(
@@ -32,6 +44,7 @@ class OBSService {
       
   }
 
+  @override
   void close() async {
    _obsWebSocket!.close();   
   }
@@ -41,6 +54,7 @@ class OBSService {
   /// 
   /// getSceneList() -> List<[OBSScene]>
   ///
+  @override
   Future<List<OBSScene>> getSceneList() async {
     final sceneList = await _obsWebSocket!.scenes.getSceneList();
     return sceneList.scenes.map((scene) => OBSScene.fromJson(scene.toJson())).toList();
@@ -50,6 +64,7 @@ class OBSService {
   ///
   ///getCurrentNameScene() -> Text
   ///
+  @override
   Future<String> getCurrentNameScene() async {
     String scene = await _obsWebSocket!.scenes.getCurrentProgramScene();
     return scene;
@@ -58,12 +73,14 @@ class OBSService {
 
   /// cambia la escena actual del obs
   /// text -> setCurrentScene
+  @override
   Future<void> setCurrentScene(String sceneName) async {
     await _obsWebSocket!.scenes.setCurrentProgramScene(sceneName);
   }
 
   /// obtiene las pistas de audio del obs 
   /// Texto -> getAudioTrackList -> List[OBSAudioTrack]
+  @override
   Future<List<OBSAudioTrack>> getSceneAudioTrackList(String sceneName) async {
     if(_obsWebSocket!=null){
       final response = await _obsWebSocket!.send('GetSceneItemList',{'sceneName':sceneName});
@@ -88,6 +105,7 @@ class OBSService {
     return [];
   }
 
+  @override
   Future<List<OBSAudioTrack>> getGlobalAudioTrackList() async {
     if(_obsWebSocket!=null){
       //{desktop1: null, desktop2: null, mic1: Micro global, mic2: null, mic3: null, mic4: null}
@@ -110,21 +128,25 @@ class OBSService {
   }
 
   /// Texto -> getAudioTrackVolumeDB() -> R
+  @override
   Future<double> getAudioTrackVolumeDB(String trackName) async {
     return (await _obsWebSocket!.send('GetInputVolume',{'inputName':trackName}))!.responseData!['inputVolumeDb'];
   }
   
   /// Texto -> getMuteStatusAudioTrack() -> R
+  @override
   Future<bool> getMuteStatusAudioTrack(String trackName) async {
     return (await _obsWebSocket!.send('GetInputMute',{'inputName':trackName,}))!.responseData!['inputMuted'];
   }
 
   /// trackName:Texto, mute:T/F -> setMuteStatusAudioTrack()
+  @override
   Future<void> setMuteStatusAudioTrack(String trackName, bool mute) async {
      _obsWebSocket!.send('SetInputMute',{'inputName':trackName,'inputMuted':mute});
   }
   
 
+  @override
   Future<void> setVolume(String trackName, double volume) async {
 
     await _obsWebSocket!.send('SetInputVolume',{'inputName':trackName, 'inputVolumeDb':volume});
@@ -133,6 +155,7 @@ class OBSService {
   /// Function(Event e) -> setEventHandler
   /// añadir un manejador de eventos para poder escuchar los 
   /// cambios que se realizan desde el obs
+  @override
   void setEventHandler(Function(Event) handler){
     if(  _obsWebSocket!=null && _obsWebSocket!.fallbackHandlers.isNotEmpty){
        _obsWebSocket?.fallbackHandlers.removeLast();

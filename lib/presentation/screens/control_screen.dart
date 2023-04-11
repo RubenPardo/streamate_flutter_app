@@ -72,7 +72,7 @@ class _OBSScreenState extends State<OBSScreen> {
   }
 
     void _cerrarSesion() async{
-      var obs = OBSService();
+      var obs = OBSServiceImpl();
      await obs.connect('10.72.22.90', 4455, 'holaxd');
       await obs.getSceneList();
       //await obs.getAudioTrackList();

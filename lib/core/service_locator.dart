@@ -1,6 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:streamate_flutter_app/core/request.dart';
+import 'package:streamate_flutter_app/data/services/obs_service.dart';
 import 'package:streamate_flutter_app/data/services/twitch_api_service.dart';
 import 'package:streamate_flutter_app/data/services/twitch_irc_service.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_auth_repository.dart';
@@ -38,6 +39,8 @@ Future<void> setUpServiceLocator() async {
       () => TwitchApiServiceImpl());
   serviceLocator.registerFactory<TwitchIRCService>(
       () => TwitchIRCServiceImpl());
+
+  serviceLocator.registerSingleton<OBSService>(OBSServiceImpl());
 
   //repositories
   serviceLocator
