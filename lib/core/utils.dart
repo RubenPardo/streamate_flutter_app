@@ -83,6 +83,9 @@ class Utils{
       case "InputRemoved":
         event = ObsEvent.inputRemoved;
         break;
+      case "InputMuteStateChanged":
+        event = ObsEvent.inputMuteStateChanged;
+        break;
       default:
        event = ObsEvent.none;
     }

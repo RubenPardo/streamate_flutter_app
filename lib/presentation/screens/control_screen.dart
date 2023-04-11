@@ -179,7 +179,9 @@ class _OBSScreenState extends State<OBSScreen> {
         Row(
           mainAxisSize: MainAxisSize.max,
           children: [
-            const Icon(Icons.volume_up),
+            GestureDetector(
+              onTap: () => context.read<OBSBloc>().add(OBSChangeTrackMute(audioTrackName: audioTrack.name, isMuted: !audioTrack.isMuted)),
+              child: Icon(audioTrack.isMuted ? Icons.volume_off : Icons.volume_up)),
             const SizedBox(width: 8,),
            
             Expanded(

@@ -82,8 +82,10 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
     // {isGroup: false, sceneName: Escena 1}
     log(data.toString());
     if(Utils.isAudioSource(data['inputKind'])){
+      // TODO pasar a caso de uso
       double volumen = await obsService.getAudioTrackVolumeDB(data['inputName']); 
-      _obsAudioTrack.add(OBSAudioTrack(volumenDB:volumen,name: data['inputName']));
+      bool isMuted = await obsService.getMuteStatusAudioTrack(data['inputName']); 
+      _obsAudioTrack.add(OBSAudioTrack(volumenDB:volumen,name: data['inputName'],isMuted: isMuted));
       _audioTrackStreamController.add(_obsAudioTrack);
     }
     
@@ -116,7 +118,7 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
     _obsAudioTrack = _obsAudioTrack.map(
       (element){
         if(element.name == data['inputName']){
-          return OBSAudioTrack(name: element.name, volumenDB: data['inputVolumeDb']);
+          return OBSAudioTrack(name: element.name, volumenDB: data['inputVolumeDb'], isMuted: element.isMuted);
         }else{
           return element;
         }
@@ -129,19 +131,40 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
   /// callback cuando el event handler detecta que un input ha cambiado el nombre 
   void inputNameChanged(Map<String, dynamic> data) async{
     String oldInputeName = data['oldInputName'];
-        String newInputName =data['inputName'];
-        // obtener el input antiguo
-        OBSAudioTrack? oldInput = _obsAudioTrack.firstWhereOrNull((element) => element.name == oldInputeName);
-        // puede que lo que haya cambiado no sea un audio source, por lo que puede no encontrarlo, en ese caso devuelve null
-        if(oldInput!=null){
-          // crear la nueva pista de audio
-          OBSAudioTrack newInput = OBSAudioTrack(name: newInputName,volumenDB: oldInput.volumenDB);
-          // insertarla en la misma posicion que la antigua
-          int oldIndex = _obsAudioTrack.indexOf(oldInput);
-          _obsAudioTrack.insert(oldIndex,newInput);
-          _obsAudioTrack.remove(oldInput);
-          _audioTrackStreamController.add(_obsAudioTrack);
-        }
+    String newInputName =data['inputName'];
+    // obtener el input antiguo
+    OBSAudioTrack? oldInput = _obsAudioTrack.firstWhereOrNull((element) => element.name == oldInputeName);
+    // puede que lo que haya cambiado no sea un audio source, por lo que puede no encontrarlo, en ese caso devuelve null
+    if(oldInput!=null){
+      // crear la nueva pista de audio
+      OBSAudioTrack newInput = OBSAudioTrack(name: newInputName,volumenDB: oldInput.volumenDB, isMuted: oldInput.isMuted);
+      // insertarla en la misma posicion que la antigua
+      int oldIndex = _obsAudioTrack.indexOf(oldInput);
+      _obsAudioTrack.insert(oldIndex,newInput);
+      _obsAudioTrack.remove(oldInput);
+      _audioTrackStreamController.add(_obsAudioTrack);
+    }
+        
+  }
+
+  /// data:{inputMuted: true, inputName: captura E1} -> inputMuteStateChanged
+  /// callback cuando el event handler detecta que un input ha cambiado el estado del mute
+  void inputMuteStateChanged(Map<String, dynamic> data) async{
+    
+    String inputName =data['inputName'];
+    bool isMuted =data['inputMuted'];
+    // obtener el input antiguo
+    OBSAudioTrack? oldInput = _obsAudioTrack.firstWhereOrNull((element) => element.name == inputName);
+    // puede que lo que haya cambiado no sea un audio source, por lo que puede no encontrarlo, en ese caso devuelve null
+    if(oldInput!=null){
+      // crear la nueva pista de audio
+      OBSAudioTrack newInput = OBSAudioTrack(name: inputName,volumenDB: oldInput.volumenDB, isMuted: isMuted);
+      // insertarla en la misma posicion que la antigua
+      int oldIndex = _obsAudioTrack.indexOf(oldInput);
+      _obsAudioTrack.insert(oldIndex,newInput);
+      _obsAudioTrack.remove(oldInput);
+      _audioTrackStreamController.add(_obsAudioTrack);
+    }
         
   }
 
@@ -179,6 +202,9 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
         break;
       case ObsEvent.inputRemoved:
         inputRemoved(event.eventData!);
+        break;
+      case ObsEvent.inputMuteStateChanged:
+        inputMuteStateChanged(event.eventData!);
         break;
       case ObsEvent.none:
         break;
@@ -258,6 +284,23 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
           double newVolumen = event.newVolumen;
           
           obsService.setVolume(audioTrackName,newVolumen);
+          
+        }catch(e){
+
+          emit(OBSError(message: 'Error al cambiar la escena en el obs $e'));
+        }
+      },
+    );
+
+    /// audioTrackName:Texto,isMuted:bool -> OBSChangeTrackMute
+    /// cambiar el estado de mute de una pista de audio
+    on<OBSChangeTrackMute>(
+      (event, emit) async{
+        try{
+          String audioTrackName = event.audioTrackName;
+          bool isMuted = event.isMuted;
+          
+          obsService.setMuteStatusAudioTrack(audioTrackName,isMuted);
           
         }catch(e){
 

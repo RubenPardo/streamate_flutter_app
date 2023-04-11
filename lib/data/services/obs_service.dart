@@ -71,7 +71,7 @@ class OBSService {
       final response3 = await _obsWebSocket!.send('GetSpecialInputs',);
       final response4 = await _obsWebSocket!.send('GetInputKindList',);
 
-      log(response4!.responseData!.toString());
+      log(response!.responseData!.toString());
 
       if(response!=null){
         var a1 = (response.responseData!.entries.toList()[0].value as List)
@@ -81,7 +81,8 @@ class OBSService {
             .map((input) async{
               // obtener el audio por pista
               double volumen = await getAudioTrackVolumeDB(input['sourceName']); 
-              return OBSAudioTrack(volumenDB:volumen,name: input['sourceName']);
+              bool isMuted = await getMuteStatusAudioTrack(input['sourceName']); 
+              return OBSAudioTrack(volumenDB:volumen,name: input['sourceName'],isMuted:isMuted);
             })); // transformarlo en una lista de obsaudiotrack
 
         log("-------- aqui");
@@ -96,6 +97,16 @@ class OBSService {
   /// Texto -> getAudioTrackVolumeDB() -> R
   Future<double> getAudioTrackVolumeDB(String trackName) async {
     return (await _obsWebSocket!.send('GetInputVolume',{'inputName':trackName}))!.responseData!['inputVolumeDb'];
+  }
+  
+  /// Texto -> getMuteStatusAudioTrack() -> R
+  Future<bool> getMuteStatusAudioTrack(String trackName) async {
+    return (await _obsWebSocket!.send('GetInputMute',{'inputName':trackName,}))!.responseData!['inputMuted'];
+  }
+
+  /// trackName:Texto, mute:T/F -> setMuteStatusAudioTrack()
+  Future<void> setMuteStatusAudioTrack(String trackName, bool mute) async {
+     _obsWebSocket!.send('SetInputMute',{'inputName':trackName,'inputMuted':mute});
   }
   
 

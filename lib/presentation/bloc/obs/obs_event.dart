@@ -1,4 +1,4 @@
-import 'package:streamate_flutter_app/data/model/obs_audio_track.dart';
+
 import 'package:streamate_flutter_app/data/model/obs_connection.dart';
 import 'package:streamate_flutter_app/data/model/obs_scene.dart';
 
@@ -21,4 +21,11 @@ class OBSChangeTrackVolumen extends OBSEvent{
   final double newVolumen;
 
   OBSChangeTrackVolumen({required this.audioTrackName, required this.newVolumen});
+}
+
+class OBSChangeTrackMute extends OBSEvent{
+  final String audioTrackName;
+  final bool isMuted;
+
+  OBSChangeTrackMute({required this.audioTrackName, required this.isMuted});
 }
