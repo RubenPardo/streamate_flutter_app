@@ -146,15 +146,14 @@ class _OBSScreenState extends State<OBSScreen> {
         if(scenesSnapshot.hasData){
           List<OBSAudioTrack> audioTracks = scenesSnapshot.data!;
 
-          return ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            padding: const EdgeInsets.all(8),
-            itemCount: audioTracks.length,
-             
-            itemBuilder: (context, index) {
-              return _buildAudioTrackSlider(audioTracks[index]);
-            },
+          return Column(
+            children: [
+              const Text('Audio general'),
+              _buildListAudioTracks(audioTracks.where((element) => element.isGlobal).toList()),
+              const Text('Audio de la escena'),
+              _buildListAudioTracks(audioTracks.where((element) => !element.isGlobal).toList()),
+            
+            ],
           );
         }
 
@@ -164,6 +163,18 @@ class _OBSScreenState extends State<OBSScreen> {
     );
   }
 
+  Widget _buildListAudioTracks(List<OBSAudioTrack> audioTracks){
+    return ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            padding: const EdgeInsets.all(8),
+            itemCount: audioTracks.length,
+             
+            itemBuilder: (context, index) {
+              return _buildAudioTrackSlider(audioTracks[index]);
+            },
+          );
+  }
 
   Widget _buildAudioTrackSlider(OBSAudioTrack audioTrack){
     return Column(

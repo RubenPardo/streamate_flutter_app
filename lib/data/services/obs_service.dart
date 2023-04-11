@@ -67,11 +67,6 @@ class OBSService {
   Future<List<OBSAudioTrack>> getSceneAudioTrackList(String sceneName) async {
     if(_obsWebSocket!=null){
       final response = await _obsWebSocket!.send('GetSceneItemList',{'sceneName':sceneName});
-      // global
-      final response3 = await _obsWebSocket!.send('GetSpecialInputs',);
-      final response4 = await _obsWebSocket!.send('GetInputKindList',);
-
-      log(response!.responseData!.toString());
 
       if(response!=null){
         var a1 = (response.responseData!.entries.toList()[0].value as List)
@@ -82,10 +77,30 @@ class OBSService {
               // obtener el audio por pista
               double volumen = await getAudioTrackVolumeDB(input['sourceName']); 
               bool isMuted = await getMuteStatusAudioTrack(input['sourceName']); 
-              return OBSAudioTrack(volumenDB:volumen,name: input['sourceName'],isMuted:isMuted);
+              return OBSAudioTrack(volumenDB:volumen,name: input['sourceName'],isMuted:isMuted,);
             })); // transformarlo en una lista de obsaudiotrack
 
-        log("-------- aqui");
+        return audioTracks;
+        
+      }
+    }
+    
+    return [];
+  }
+
+  Future<List<OBSAudioTrack>> getGlobalAudioTrackList() async {
+    if(_obsWebSocket!=null){
+      //{desktop1: null, desktop2: null, mic1: Micro global, mic2: null, mic3: null, mic4: null}
+      final response = await _obsWebSocket!.send('GetSpecialInputs',);
+      if(response!=null){
+         List inputName =  response.responseData!.values.where((element) => element!=null).toList();
+       List<OBSAudioTrack> audioTracks = await Future.wait( // filtrar los audio tracks
+            inputName.map((input) async{
+              // obtener el audio por pista
+              double volumen = await getAudioTrackVolumeDB(input); 
+              bool isMuted = await getMuteStatusAudioTrack(input); 
+              return OBSAudioTrack(volumenDB:volumen,name: input,isMuted:isMuted, isGlobal: true);
+            })); // transformarlo en una lista de obsaudiotrack
         return audioTracks;
         
       }

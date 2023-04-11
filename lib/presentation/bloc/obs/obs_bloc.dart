@@ -49,6 +49,7 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
         _obsScenes.remove(oldScene);
         _scenesStreamController.add(_obsScenes);
         _obsAudioTrack = (await obsService.getSceneAudioTrackList(sceneName));
+        _obsAudioTrack.addAll((await obsService.getGlobalAudioTrackList()));
         _audioTrackStreamController.add(_obsAudioTrack);
   }
 
@@ -62,6 +63,7 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
     }).toList();
     _scenesStreamController.add(_obsScenes);
     _obsAudioTrack = (await obsService.getSceneAudioTrackList(sceneName));
+    _obsAudioTrack.addAll((await obsService.getGlobalAudioTrackList()));
     _audioTrackStreamController.add(_obsAudioTrack);
     
   }
@@ -85,7 +87,7 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
       // TODO pasar a caso de uso
       double volumen = await obsService.getAudioTrackVolumeDB(data['inputName']); 
       bool isMuted = await obsService.getMuteStatusAudioTrack(data['inputName']); 
-      _obsAudioTrack.add(OBSAudioTrack(volumenDB:volumen,name: data['inputName'],isMuted: isMuted));
+      _obsAudioTrack.add(OBSAudioTrack(volumenDB:volumen,name: data['inputName'],isMuted: isMuted,));
       _audioTrackStreamController.add(_obsAudioTrack);
     }
     
@@ -118,7 +120,7 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
     _obsAudioTrack = _obsAudioTrack.map(
       (element){
         if(element.name == data['inputName']){
-          return OBSAudioTrack(name: element.name, volumenDB: data['inputVolumeDb'], isMuted: element.isMuted);
+          return OBSAudioTrack(name: element.name, volumenDB: data['inputVolumeDb'], isMuted: element.isMuted, isGlobal: element.isGlobal);
         }else{
           return element;
         }
@@ -137,7 +139,7 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
     // puede que lo que haya cambiado no sea un audio source, por lo que puede no encontrarlo, en ese caso devuelve null
     if(oldInput!=null){
       // crear la nueva pista de audio
-      OBSAudioTrack newInput = OBSAudioTrack(name: newInputName,volumenDB: oldInput.volumenDB, isMuted: oldInput.isMuted);
+      OBSAudioTrack newInput = OBSAudioTrack(name: newInputName,volumenDB: oldInput.volumenDB, isMuted: oldInput.isMuted, isGlobal: oldInput.isGlobal);
       // insertarla en la misma posicion que la antigua
       int oldIndex = _obsAudioTrack.indexOf(oldInput);
       _obsAudioTrack.insert(oldIndex,newInput);
@@ -158,7 +160,7 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
     // puede que lo que haya cambiado no sea un audio source, por lo que puede no encontrarlo, en ese caso devuelve null
     if(oldInput!=null){
       // crear la nueva pista de audio
-      OBSAudioTrack newInput = OBSAudioTrack(name: inputName,volumenDB: oldInput.volumenDB, isMuted: isMuted);
+      OBSAudioTrack newInput = OBSAudioTrack(name: inputName,volumenDB: oldInput.volumenDB, isMuted: isMuted, isGlobal: oldInput.isGlobal);
       // insertarla en la misma posicion que la antigua
       int oldIndex = _obsAudioTrack.indexOf(oldInput);
       _obsAudioTrack.insert(oldIndex,newInput);
@@ -241,6 +243,7 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
             }
 
             _obsAudioTrack = (await obsService.getSceneAudioTrackList(actualSceneName));
+            _obsAudioTrack.addAll((await obsService.getGlobalAudioTrackList()));
             // escuchar los cambios del obs
             obsService.setEventHandler(eventHandler);
 
