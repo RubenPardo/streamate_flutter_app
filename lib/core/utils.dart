@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:streamate_flutter_app/data/model/irc_message/irc_message.dart';
@@ -73,6 +74,15 @@ class Utils{
       case "SceneCreated":
         event = ObsEvent.sceneCreated;
         break;
+      case "InputNameChanged":
+        event = ObsEvent.inputNameChanged;
+        break;
+      case "InputCreated":
+        event = ObsEvent.inputCreated;
+        break;
+      case "InputRemoved":
+        event = ObsEvent.inputRemoved;
+        break;
       default:
        event = ObsEvent.none;
     }
@@ -93,6 +103,10 @@ class Utils{
 
     return mappedTags;
 
+  }
+  static double roundDouble(double value, int places){ 
+   double mod = pow(10.0, places).toDouble(); 
+   return ((value * mod).round().toDouble() / mod); 
   }
 
   static void showModal(BuildContext context,{required UserInfoWidget widgetBody}) {
@@ -132,7 +146,7 @@ class Utils{
 
 
   static bool isAudioSource(String sourceType){
-    return ['screen_capture','coreaudio_input_capture','coreaudio_output_capture','coreaudio_output_capture',].contains(sourceType);
+    return ['screen_capture','coreaudio_input_capture','coreaudio_output_capture','coreaudio_output_capture','ffmpeg_source',].contains(sourceType);
   }
 
 }

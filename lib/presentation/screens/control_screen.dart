@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:non_linear_slider/models/interval.dart';
+import 'package:streamate_flutter_app/core/utils.dart';
 import 'package:streamate_flutter_app/data/model/obs_audio_track.dart';
 import 'package:streamate_flutter_app/data/model/obs_connection.dart';
 import 'package:streamate_flutter_app/data/model/obs_scene.dart';
@@ -52,10 +53,12 @@ class _OBSScreenState extends State<OBSScreen> {
           }
 
           if(state is OBSConnected){
-            return Column(children:[
+            return ListView(
+              children:[
                _buildScenes(),
                _buildAudioTracks()
-               ]);
+               ]
+            );
           }
 
           return const SizedBox();
@@ -98,7 +101,7 @@ class _OBSScreenState extends State<OBSScreen> {
             LargePrimaryButton(
                 child: Text(texts.linkObs,style:Theme.of(context).textTheme.bodyLarge,),
                 onPressed: () {
-                   context.read<OBSBloc>().add(OBSConnect(connection: OBSConnection(address: '192.168.43.195',password: 'holaxd')));
+                   context.read<OBSBloc>().add(OBSConnect(connection: OBSConnection(address: '192.168.10.60',password: 'holaxd')));
                 }
               )
           ],
@@ -144,6 +147,7 @@ class _OBSScreenState extends State<OBSScreen> {
           List<OBSAudioTrack> audioTracks = scenesSnapshot.data!;
 
           return ListView.builder(
+            physics: const NeverScrollableScrollPhysics(),
             shrinkWrap: true,
             padding: const EdgeInsets.all(8),
             itemCount: audioTracks.length,
@@ -162,28 +166,43 @@ class _OBSScreenState extends State<OBSScreen> {
 
 
   Widget _buildAudioTrackSlider(OBSAudioTrack audioTrack){
-    return Row(
+    return Column(
       children: [
-        const Icon(Icons.volume_up),
-        const SizedBox(width: 8,),
-        Text(audioTrack.name),
-        NonLinearSlider(
-          
-          intervals: [
-            NLSInterval(-100,-33, 0.25),
-            NLSInterval(-33, -12, 0.25),
-            NLSInterval(-12,-5, 0.25),
-            NLSInterval(-5, 1, 0.25),
+        Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            Text(audioTrack.name),
+            Text('${Utils.roundDouble(audioTrack.volumenDB, 2)} dB'),
           ],
-          //overlayColor: Colors.amber,
-          value: audioTrack.volumenDB, //_linearValue(audioTrack.volumenDB), 
-          onChanged: (newVolumen){
-            context.read<OBSBloc>().add(OBSChangeTrackVolumen(
-                audioTrackName:audioTrack.name, 
-                newVolumen: newVolumen));
-          }
-          
-        )
+        ),
+        Row(
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            const Icon(Icons.volume_up),
+            const SizedBox(width: 8,),
+           
+            Expanded(
+              child: NonLinearSlider(
+                
+                intervals: [
+                  NLSInterval(-100,-33, 0.25),
+                  NLSInterval(-33, -12, 0.25),
+                  NLSInterval(-12,-5, 0.25),
+                  NLSInterval(-5, 1, 0.25),
+                ],
+                //overlayColor: Colors.amber,
+                value: audioTrack.volumenDB , //_linearValue(audioTrack.volumenDB), 
+                onChanged: (newVolumen){
+                  context.read<OBSBloc>().add(OBSChangeTrackVolumen(
+                      audioTrackName:audioTrack.name, 
+                      newVolumen: newVolumen));
+                }
+                
+              ),
+            )
+          ],
+        ),
       ],
     );
   }

@@ -12,6 +12,8 @@ import 'package:streamate_flutter_app/data/model/obs_scene.dart';
 import 'package:streamate_flutter_app/data/services/obs_service.dart';
 import 'package:streamate_flutter_app/presentation/bloc/obs/obs_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/obs/obs_state.dart';
+import 'package:collection/collection.dart';
+
 
 class OBSBloc extends Bloc<OBSEvent,OBSState>{
   
@@ -73,6 +75,30 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
     
   }
 
+  /// data:{defaultInputSettings: {device_id: default}, inputKind: coreaudio_input_capture, inputName: Captura de entrada audio, inputSettings: {}, unversionedInputKind: coreaudio_input_capture}
+  ///    -> sceneChanged
+  /// callback cuando el event handler detecta que se ha creado una input
+  void inputCreated(Map<String, dynamic> data) async{
+    // {isGroup: false, sceneName: Escena 1}
+    log(data.toString());
+    if(Utils.isAudioSource(data['inputKind'])){
+      double volumen = await obsService.getAudioTrackVolumeDB(data['inputName']); 
+      _obsAudioTrack.add(OBSAudioTrack(volumenDB:volumen,name: data['inputName']));
+      _audioTrackStreamController.add(_obsAudioTrack);
+    }
+    
+  }
+
+  /// {inputName: Captura de entrada audio} -> inputRemoved
+  /// callback cuando el event handler detecta que se ha creado una input
+  void inputRemoved(Map<String, dynamic> data) async{
+    // {inputName: Captura de entrada audio}
+    _obsAudioTrack.removeWhere((element) => element.name == data['inputName']);
+    _audioTrackStreamController.add(_obsAudioTrack);
+    
+  }
+
+
   /// {isGroup: false, sceneName: Escena 1} -> sceneChanged
   /// callback cuando el event handler detecta que se ha borrado una escena
   void sceneRemoved(Map<String, dynamic> data) async{
@@ -81,7 +107,43 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
     _scenesStreamController.add(_obsScenes);
   }
 
+  /// data:{inputName: audio E1, inputVolumeDb: -1.383665680885315, inputVolumeMul: 0.8527401685714722}
+  ///  -> inputVolumeChanged()
+  /// callback cuando el event hanlder detecta que un input de auido ha cambiado su volumen
+  void inputVolumeChanged(Map<String, dynamic> data){
 
+        // {inputName: audio E1, inputVolumeDb: -1.383665680885315, inputVolumeMul: 0.8527401685714722}
+    _obsAudioTrack = _obsAudioTrack.map(
+      (element){
+        if(element.name == data['inputName']){
+          return OBSAudioTrack(name: element.name, volumenDB: data['inputVolumeDb']);
+        }else{
+          return element;
+        }
+      }).toList();
+      _audioTrackStreamController.add(_obsAudioTrack);
+  }
+
+
+  /// data:{inputName: a, oldInputName: audio E1} -> inputNameChanged
+  /// callback cuando el event handler detecta que un input ha cambiado el nombre 
+  void inputNameChanged(Map<String, dynamic> data) async{
+    String oldInputeName = data['oldInputName'];
+        String newInputName =data['inputName'];
+        // obtener el input antiguo
+        OBSAudioTrack? oldInput = _obsAudioTrack.firstWhereOrNull((element) => element.name == oldInputeName);
+        // puede que lo que haya cambiado no sea un audio source, por lo que puede no encontrarlo, en ese caso devuelve null
+        if(oldInput!=null){
+          // crear la nueva pista de audio
+          OBSAudioTrack newInput = OBSAudioTrack(name: newInputName,volumenDB: oldInput.volumenDB);
+          // insertarla en la misma posicion que la antigua
+          int oldIndex = _obsAudioTrack.indexOf(oldInput);
+          _obsAudioTrack.insert(oldIndex,newInput);
+          _obsAudioTrack.remove(oldInput);
+          _audioTrackStreamController.add(_obsAudioTrack);
+        }
+        
+  }
 
   /// Event -> eventHandler
   /// 
@@ -97,23 +159,14 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
         break;
       case ObsEvent.inputVolumeChanged:
         log(event.eventData!.toString());
-        // {inputName: audio E1, inputVolumeDb: -1.383665680885315, inputVolumeMul: 0.8527401685714722}
         Map<String, dynamic> data = event.eventData!;
-        _obsAudioTrack = _obsAudioTrack.map(
-          (element){
-            if(element.name == data['inputName']){
-              return OBSAudioTrack(name: element.name, volumenDB: data['inputVolumeDb']);
-            }else{
-              return element;
-            }
-          }).toList();
-          _audioTrackStreamController.add(_obsAudioTrack);
+        inputVolumeChanged(data);
         break;
       case ObsEvent.sceneNameChanged:
         sceneNameChanged(event.eventData!);
         break;
       case ObsEvent.inputNameChanged:
-        // TODO: Handle this case.
+        inputNameChanged(event.eventData!);
         break;
       case ObsEvent.sceneCreated:
         sceneCreated(event.eventData!);
@@ -121,8 +174,13 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
       case ObsEvent.sceneRemoved:
         sceneRemoved(event.eventData!);
         break;
+      case ObsEvent.inputCreated:
+        inputCreated(event.eventData!);
+        break;
+      case ObsEvent.inputRemoved:
+        inputRemoved(event.eventData!);
+        break;
       case ObsEvent.none:
-        print('Ni idea');
         break;
     }
     
