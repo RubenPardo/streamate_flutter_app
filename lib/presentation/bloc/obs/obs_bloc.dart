@@ -11,6 +11,7 @@ import 'package:streamate_flutter_app/data/model/obs_audio_track.dart';
 import 'package:streamate_flutter_app/data/model/obs_connection.dart';
 import 'package:streamate_flutter_app/data/model/obs_event_type.dart';
 import 'package:streamate_flutter_app/data/model/obs_scene.dart';
+import 'package:streamate_flutter_app/data/model/obs_stream_status.dart';
 import 'package:streamate_flutter_app/data/services/obs_service.dart';
 import 'package:streamate_flutter_app/domain/usecases/obs_usecases/get_obs_audio_tracks_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/obs_usecases/get_obs_scenes_use_case.dart';
@@ -33,6 +34,12 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
   List<OBSAudioTrack> _obsAudioTrack = []; 
   Stream<List<OBSAudioTrack>> get audioTrackStream {
     return _audioTrackStreamController.stream;
+  } 
+
+  final StreamController<OBSStreamStatus> _streamingTimeStreamController = BehaviorSubject<OBSStreamStatus>.seeded(OBSStreamStatus.initValue());
+  OBSStreamStatus _streamingTime = OBSStreamStatus.initValue(); 
+  Stream<OBSStreamStatus> get streamingTimeStream {
+    return _streamingTimeStreamController.stream;
   } 
 
   String get actualSceneName => _obsScenes.firstWhere((element) => element.isActual).name;
@@ -181,6 +188,13 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
         
   }
 
+
+  void updateStreamingTime() async{
+   
+    _streamingTime = await obsService.getStreamingStatus();
+    _streamingTimeStreamController.add(_streamingTime);
+    Future.delayed(const Duration(seconds: 1), () => updateStreamingTime());
+  }
   
 
   /// Event -> eventHandler
@@ -188,6 +202,7 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
   /// funcion para manejer los eventos que llegan del obs
   ///
   void eventHandler(Event event) async{
+    log(event.eventType.toString());
     switch(Utils.mapTextToOBSEvent(event.eventType)){
       
       case ObsEvent.currentProgramSceneChanged:
@@ -259,6 +274,7 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
                     // las emitimos a los streams
                     _scenesStreamController.add(_obsScenes);
                     _audioTrackStreamController.add(_obsAudioTrack);
+                    updateStreamingTime();
 
                     // avisamos a la vista que esta todo listo
                     emit(OBSConnected()); // ------------------------------------------> return connected

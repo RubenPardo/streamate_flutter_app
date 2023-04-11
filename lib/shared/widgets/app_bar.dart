@@ -17,9 +17,9 @@ PreferredSizeWidget _buildBottom(Widget bottom) {
   return PreferredSize(
       preferredSize: const Size.fromHeight(24),
       child: SizedBox(
-        height: 24,
+        height: 32,
         child:  Container(
-            padding: const EdgeInsets.all(8),
+            //padding: const EdgeInsets.all(8),
             width: double.maxFinite,
             color: MyColors.backgroundColorSecondary,
             child: bottom,

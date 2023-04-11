@@ -4,6 +4,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
+import 'package:streamate_flutter_app/data/model/obs_stream_status.dart';
 import 'package:streamate_flutter_app/data/model/token_data.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_auth_repository.dart';
@@ -12,6 +13,7 @@ import 'package:streamate_flutter_app/presentation/bloc/auth_sate.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_state.dart';
+import 'package:streamate_flutter_app/presentation/bloc/obs/obs_bloc.dart';
 import 'package:streamate_flutter_app/presentation/screens/chat_screen.dart';
 import 'package:streamate_flutter_app/presentation/screens/control_screen.dart';
 import 'package:streamate_flutter_app/presentation/screens/login/log_in_screen.dart';
@@ -132,7 +134,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: buildAppBar(appTitle, bottom: Center(child: Text("PRUEBA"),),
+      appBar: buildAppBar(appTitle, bottom: _buildStreamingTimeCounter(),
         actions: [
           _selectedIndex == _chatIndex 
             ? _buildPauseChatButton() : Container(),
@@ -189,5 +191,33 @@ class _HomeScreenState extends State<HomeScreen> {
     }, icon: Icon(_isEventsOnly ? Icons.filter_alt_off  : Icons.filter_alt));
   }
 
+  Widget _buildStreamingTimeCounter(){
+    return StreamBuilder(
+      stream: context.read<OBSBloc>().streamingTimeStream,
+      builder: (context, snapshot) {
+        OBSStreamStatus status = snapshot.data ?? OBSStreamStatus.initValue();
+        return Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.max,
+          children: [
+            const Spacer(),
+            // circle
+            Container(
+              width: 12,
+              height: 12,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(100),
+                color: status.isActive ? Colors.red : Colors.grey
+              ),
+            ),
+            const SizedBox(width: 8,),
+            Center(child: Text(status.time),),
+            const Spacer(),
+
+          ],
+        );
+      },
+    );
+  }
 
 }

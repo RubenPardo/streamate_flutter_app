@@ -6,9 +6,12 @@ import 'package:streamate_flutter_app/core/utils.dart';
 import 'package:streamate_flutter_app/data/model/obs_audio_track.dart';
 import 'package:streamate_flutter_app/data/model/obs_event_type.dart';
 import 'package:streamate_flutter_app/data/model/obs_scene.dart';
+import 'package:streamate_flutter_app/data/model/obs_stream_status.dart';
 import 'package:web_socket_channel/io.dart';
 
 abstract class OBSService{
+
+
   Future<bool> connect(String address, int port, String? password);
   void close();
   Future<List<OBSScene>> getSceneList();
@@ -21,12 +24,11 @@ abstract class OBSService{
   Future<void> setMuteStatusAudioTrack(String trackName, bool mute);
   Future<void> setVolume(String trackName, double volume);
   void setEventHandler(Function(Event) handler);
+  Future<OBSStreamStatus> getStreamingStatus();
 }
 
 class OBSServiceImpl implements OBSService {
   ObsWebSocket? _obsWebSocket;
-
-  late StreamStatusResponse obsStatus;
   
   @override
   Future<bool> connect(String address, int port, String? password) async {
@@ -37,11 +39,19 @@ class OBSServiceImpl implements OBSService {
       );
       // tell obsWebSocket to listen to events, since the default is to ignore them
       await _obsWebSocket!.listen(EventSubscription.all.index);
-      obsStatus = await _obsWebSocket!.stream.status;
    }
 
     return true;
       
+  }
+
+  /// obtener el tiempo que lleva en directo
+  /// getStreamingTime -> Texto
+  @override
+  Future<OBSStreamStatus> getStreamingStatus() async {
+    String streamingTime = (await _obsWebSocket?.stream.status)?.outputTimecode.split('.')[0] ?? '--:--:--';
+    bool isActive = (await _obsWebSocket?.stream.status)?.outputActive ?? false;
+   return OBSStreamStatus(time: streamingTime, isActive: isActive);
   }
 
   @override
