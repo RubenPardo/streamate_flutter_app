@@ -1,5 +1,6 @@
 
-import 'dart:math';
+
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,6 +20,7 @@ import 'package:streamate_flutter_app/presentation/bloc/obs/obs_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/obs/obs_state.dart';
 import 'package:streamate_flutter_app/shared/widgets/large_primary_button.dart';
 import 'package:non_linear_slider/non_linear_slider.dart';
+import 'package:reactive_forms/reactive_forms.dart';
 
 class OBSScreen extends StatefulWidget {
 
@@ -34,6 +36,22 @@ class OBSScreen extends StatefulWidget {
 
 class _OBSScreenState extends State<OBSScreen> {
 
+  FormGroup buildForm() => fb.group(<String, Object>{
+        'password': FormControl<String>(
+          validators: []
+        ),
+        'ip': FormControl<String>(
+          validators: [
+            
+          ]
+        ),
+        'port': FormControl<String>(
+          value: '4455',
+          validators: []
+        ),
+      });
+  bool _passwordVisible = false;
+  OBSConnection? lastConnection;
 
   @override
   void initState() {
@@ -48,13 +66,16 @@ class _OBSScreenState extends State<OBSScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<OBSBloc,OBSState>(
         builder: (context, state) {
-          if(state is OBSInitialized){
-            return _buildInitialized(state.lastConnection);
+          if(state is OBSInitialized ){
+            return _buildInitialized(lastConnection);
           }
-
+          if(state is OBSError){
+            return _buildInitialized(lastConnection);
+          }
           if(state is OBSConnected){
             return ListView(
               children:[
+                _closeConnection(),
                _buildScenes(),
                _buildAudioTracks()
                ]
@@ -65,7 +86,13 @@ class _OBSScreenState extends State<OBSScreen> {
         },
         listener: (context, state) {
           if(state is OBSError){
-            print('XDDDD ${state.message}');
+            log(state.message.toString());
+            Utils.showSnackBar(context, 'Error al vincular al obs');
+          }
+          if(state is OBSInitialized){
+            setState(() {
+              lastConnection = state.lastConnection;
+            });
           }
         },
     );
@@ -113,10 +140,29 @@ class _OBSScreenState extends State<OBSScreen> {
               ],
             ),
             const SizedBox(height: 40,),
-            LargePrimaryButton(
+            LargeButton(
                 child: Text(texts.linkObs,style:Theme.of(context).textTheme.bodyLarge,),
                 onPressed: () {
-                   context.read<OBSBloc>().add(OBSConnect(connection: OBSConnection(address: '192.168.10.60',password: 'holaxd')));
+                   _showOBSLinkDialog();
+                  
+                   
+                }
+              ),
+            const SizedBox(height: 40,),
+            Text(texts.lastConnection,style:Theme.of(context).textTheme.bodyLarge,),
+            const SizedBox(height: 24,),
+            LargeButton(
+                backgroundColor: MyColors.textoSobreClaro,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.tv),
+                    const SizedBox(width: 24,),
+                    Text('${lastConnection?.address}:${lastConnection?.port}',style:Theme.of(context).textTheme.bodyLarge,)
+                  ],
+                ),
+                onPressed: () {
+                   context.read<OBSBloc>().add(OBSConnect(connection: lastConnection!));        
                 }
               )
           ],
@@ -134,7 +180,7 @@ class _OBSScreenState extends State<OBSScreen> {
         backgroundColor: Colors.white,
         titleTextStyle:Theme.of(context).textTheme.headlineMedium?.copyWith(color: MyColors.textoSobreClaro,fontSize: 24,fontWeight: FontWeight.bold),
         contentTextStyle: Theme.of(context).textTheme.bodySmall?.copyWith(color: MyColors.textoSobreClaro),
-        title: const Text('Ayuda vincular OBS'),
+        title: const Text(texts.helpObsTitleDialog),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -152,6 +198,143 @@ class _OBSScreenState extends State<OBSScreen> {
     },);
   }
 
+  /// muestra un dialog con el formulario de la conexión a obs
+  /// Si el formulario es correcto añadirá el evento
+  void _showOBSLinkDialog(){
+   showDialog(context: context,
+    builder: (context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: Colors.white,
+        titleTextStyle:Theme.of(context).textTheme.headlineMedium?.copyWith(color: MyColors.textoSobreClaro,fontSize: 24,fontWeight: FontWeight.bold),
+        contentTextStyle: Theme.of(context).textTheme.bodySmall?.copyWith(color: MyColors.textoSobreClaro),
+        title: const Text(texts.linkObsTitleDialog),
+        content:  StatefulBuilder(
+          builder: (context,setState) {
+            return SizedBox(
+              width: MediaQuery.of(context).size.width*0.8,
+              child: ReactiveFormBuilder(
+                form: buildForm, 
+                builder: (context, formGroup, child) {
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      
+            
+                      Row(
+            
+                        children: [
+                          // ----------------------------------- ip
+                          Flexible(
+                            flex: 3,
+                            child: ReactiveTextField<String>(
+                              formControlName: 'ip',
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.next,
+                              style: const TextStyle(color: MyColors.textoSobreClaro) ,
+                              decoration:  const InputDecoration(
+                                labelText: texts.ip,
+                                errorBorder: OutlineInputBorder(borderSide: BorderSide(color:MyColors.textoError),borderRadius: BorderRadius.all(Radius.circular(12))),
+                                errorMaxLines: 2,
+                                fillColor:  Colors.white,
+                                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: MyColors.textoSobreClaro), borderRadius: BorderRadius.all(Radius.circular(12))),
+                                filled: true,
+                                labelStyle: TextStyle(color: MyColors.textoSobreClaro) ,
+                                border: OutlineInputBorder(borderSide: BorderSide(color: Colors.red),borderRadius: BorderRadius.all(Radius.circular(12))),
+                                
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8,),
+                          // ----------------------------------- puerto
+                          Flexible(
+                            flex: 1,
+                            child: ReactiveTextField<String>(
+                              formControlName: 'port',
+                              keyboardType: TextInputType.number,
+                              textInputAction: TextInputAction.next,
+                              style: const TextStyle(color: MyColors.textoSobreClaro) ,
+                              decoration:  const InputDecoration(
+                                labelText: texts.port,
+                                enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: MyColors.textoSobreClaro), borderRadius: BorderRadius.all(Radius.circular(12))),
+                                errorBorder: OutlineInputBorder(borderSide: BorderSide(color:MyColors.textoError),borderRadius: BorderRadius.all(Radius.circular(12))),
+                                errorMaxLines: 2,
+                                fillColor:  Colors.white,
+                                filled: true,
+                                labelStyle: TextStyle(color: MyColors.textoSobreClaro) ,
+                                border: OutlineInputBorder(borderSide: BorderSide(color: MyColors.textoSobreClaro),borderRadius: BorderRadius.all(Radius.circular(12))),
+                                
+                              ),
+                            ),
+                          ),
+                      
+                        ],
+                      ),
+                      
+                      const SizedBox(height: 8,),
+                      
+                      // ----------------------------------- password
+                      ReactiveTextField<String>(
+                        formControlName: 'password',
+                        obscureText: !_passwordVisible,
+                        textInputAction: TextInputAction.done,
+                        style: const TextStyle(color: MyColors.textoSobreClaro) ,
+                        decoration:  InputDecoration(
+                          labelText: texts.password,
+                          errorBorder: const OutlineInputBorder(borderSide: BorderSide(color:MyColors.textoError),borderRadius: BorderRadius.all(Radius.circular(12))),
+                          errorMaxLines: 2,
+                          fillColor:  Colors.white,
+                          filled: true,
+                          labelStyle: const TextStyle(color: MyColors.textoSobreClaro) ,
+                          border: const OutlineInputBorder(borderSide: BorderSide(color: MyColors.textoSobreClaro), borderRadius: BorderRadius.all(Radius.circular(12))),
+                          enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: MyColors.textoSobreClaro), borderRadius: BorderRadius.all(Radius.circular(12))),
+                          suffixIconColor: MyColors.textoSobreClaro,
+                          suffixIcon: IconButton(
+                            icon: Icon(_passwordVisible ? Icons.visibility: Icons.visibility_off),
+                            onPressed: () {
+                              setState(() { _passwordVisible = !_passwordVisible;});
+                            },
+                          )
+                        ),
+                      ),
+                      
+                      // ----------------------------------- conectar button
+                      const SizedBox(height: 32,),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: SizedBox(
+                              height: 48,
+                              child: ElevatedButton(onPressed: (){
+                                //_removeFocus(context);
+                                if(formGroup.valid){
+                                  
+                                  formGroup.markAllAsTouched();
+                                    Navigator.of(context).pop();
+                                    context.read<OBSBloc>().add(OBSConnect(connection: OBSConnection.fromJson(formGroup.value)));
+                                }else {
+                                  formGroup.markAllAsTouched();
+                                            
+                                }
+                               
+                              }, child: const Text(texts.connect)),
+                            ),
+                          ),
+                        ],
+                      )
+                      
+                    ],
+                  );
+                },
+              ),
+            );
+          }
+        ),
+
+      );
+    },);
+  }
   /// devuelve el listado de las escenas
   Widget _buildScenes() {
     return StreamBuilder(
@@ -277,6 +460,12 @@ class _OBSScreenState extends State<OBSScreen> {
         ),
       ),
     );
+  }
+  
+  Widget _closeConnection() {
+    return ElevatedButton(onPressed: (){
+      context.read<OBSBloc>().add(OBSClose());
+    }, child: const Text('Cerrar obs'));
   }
 
 }

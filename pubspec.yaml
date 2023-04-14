@@ -29,6 +29,8 @@ dependencies:
   rxdart: ^0.27.7
   obs_websocket: ^5.1.0+1
   non_linear_slider: ^0.0.1
+  reactive_forms: ^14.3.0
+  flutter_secure_storage: ^8.0.0
   #build_runner: ^2.2.0 # For generating code (Mocks, etc)
   #mockito: ^5.2.0 # For mocking and stubbing
 

@@ -56,7 +56,8 @@ class OBSServiceImpl implements OBSService {
 
   @override
   void close() async {
-   _obsWebSocket!.close();   
+   _obsWebSocket!.close(); 
+   _obsWebSocket = null;  
   }
   
   

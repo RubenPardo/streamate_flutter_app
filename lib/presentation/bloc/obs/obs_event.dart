@@ -11,6 +11,10 @@ class OBSConnect extends OBSEvent{
   OBSConnect({required this.connection});
 }
 
+class OBSClose extends OBSEvent{
+  OBSClose();
+}
+
 class OBSChangeScene extends OBSEvent{
   final OBSScene scene;
   OBSChangeScene({required this.scene});

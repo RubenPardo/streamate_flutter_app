@@ -16,6 +16,7 @@ class Utils{
                   SnackBar(
                     content: Text(
                       message,
+                      style: const TextStyle(color: MyColors.textoSobreOscuro),
                     ),
                   ),
                 );

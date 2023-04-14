@@ -133,7 +133,7 @@ class _LogInScreenState extends State<LogInScreen> {
               ),
              ),
               // BOTON -----------------------------------------------------------------
-              LargePrimaryButton(
+              LargeButton(
                 theresError: _isError,
                 messageError: _messageError,
                 onPressed: () {
