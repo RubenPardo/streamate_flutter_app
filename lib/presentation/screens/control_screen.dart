@@ -95,8 +95,23 @@ class _OBSScreenState extends State<OBSScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(texts.linkObsTitle,
-              textAlign: TextAlign.center,style:Theme.of(context).textTheme.bodyLarge,),
+            Row(
+              children: [
+                Flexible(
+                  flex: 11,
+                  child: Text(texts.linkObsTitle,
+                    textAlign: TextAlign.center,style:Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold),),
+                ),
+                const SizedBox(width: 8,),
+                Flexible(
+                  flex: 1,
+                  child: GestureDetector(
+                    child: Image.asset('assets/images/question_white_icon.png'),
+                    onTap: (){
+                    _showOBSHelpDialog();
+                  }))
+              ],
+            ),
             const SizedBox(height: 40,),
             LargePrimaryButton(
                 child: Text(texts.linkObs,style:Theme.of(context).textTheme.bodyLarge,),
@@ -110,6 +125,32 @@ class _OBSScreenState extends State<OBSScreen> {
     );
   }
   
+
+  void _showOBSHelpDialog(){
+    showDialog(context: context,
+    builder: (context) {
+      return AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        backgroundColor: Colors.white,
+        titleTextStyle:Theme.of(context).textTheme.headlineMedium?.copyWith(color: MyColors.textoSobreClaro,fontSize: 24,fontWeight: FontWeight.bold),
+        contentTextStyle: Theme.of(context).textTheme.bodySmall?.copyWith(color: MyColors.textoSobreClaro),
+        title: const Text('Ayuda vincular OBS'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Text(texts.obsHelp),
+            const SizedBox(height: 16,),
+            Image.asset('assets/images/obs_help.png')
+          ],
+        ),
+        actions: [
+          ElevatedButton(onPressed: (){
+            Navigator.of(context).pop();
+          }, child: const Text(texts.accept))
+        ],
+      );
+    },);
+  }
 
   /// devuelve el listado de las escenas
   Widget _buildScenes() {

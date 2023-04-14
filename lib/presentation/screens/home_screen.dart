@@ -211,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(width: 8,),
-            Center(child: Text(status.time),),
+            Center(child: Text('Directo: ${status.time}'),),
             const Spacer(),
 
           ],

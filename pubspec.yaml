@@ -62,6 +62,8 @@ flutter:
     - assets/images/sub_gift_icon.png
     - assets/images/anuncio_icono.png
     - assets/images/offline_image_default.jpg
+    - assets/images/obs_help.png
+    - assets/images/question_white_icon.png
 
   fonts:
     - family: Quicksand
