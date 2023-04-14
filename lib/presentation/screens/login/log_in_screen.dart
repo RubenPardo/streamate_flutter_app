@@ -45,7 +45,6 @@ class _LogInScreenState extends State<LogInScreen> {
         listener: (context, state) { 
           /// para enviar mensajes como el snack bar o cambiar de ruta
           /// cuando cambia el estado
-          log(state.runtimeType.toString());
           if (state is AuthError) {
             if(mounted){
               _isError = true;
@@ -58,8 +57,6 @@ class _LogInScreenState extends State<LogInScreen> {
               _messageError = "";
           }
           else if (state is AuthAuthenticated) {
-            //AutoRouter.of(context).pushNamed('/home-page');
-            // TODO cambiar a por el autorouter
             Navigator.pushReplacement(context, MaterialPageRoute(
                 builder: (context) =>  const HomeScreen(),
             ));
@@ -74,8 +71,6 @@ class _LogInScreenState extends State<LogInScreen> {
             ).then((redirectUri) {
               
               if (redirectUri!=null && redirectUri!="") {
-                print("----------------- empieza login");
-                // Obtenemos autorizacion ----> empezar con el login
                 context.read<AuthBloc>().add(LogIn(redirectUri: redirectUri));
 
               } else {
@@ -91,7 +86,7 @@ class _LogInScreenState extends State<LogInScreen> {
           /// para cambiar la vista
           /// cuando cambia el estado
           if (state is AuthUninitialized || state is AuthUnauthenticated || state is AuthAutorizacion) { // ------------------------> No inicializado
-            print("------ build body");
+            log('------');
             return _buildBody();
           }
           else if(state is AuthLoading){ // -----------------------------> Cargando
@@ -110,44 +105,52 @@ class _LogInScreenState extends State<LogInScreen> {
   Widget _buildBody(){
     return Stack(
       children: [
-        const Image(image: AssetImage("assets/images/item_fondo.png",)),
+        const Align(
+          alignment: Alignment.topLeft,
+          child: Image(image: AssetImage("assets/images/item_fondo.png",)),
+        ),
         Container(
-          padding: EdgeInsets.only(left: 32,right: 32,top: 64,bottom: MediaQuery.of(context).size.height/3),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              // Titulo ------------------------------------------------------------------
-              Text(appTitle,style: Theme.of(context).textTheme.titleLarge,),
-
-              // Texto ----------------------------------------------             
-             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 8,vertical: 32), 
-              child: Column(
-                children: [
-                  Text(loginDescription, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge,),
-                  const SizedBox(height: 16,),
-                  Text(loginBodyDescription, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium,),
-                    
-                ],
-              ),
-             ),
-              // BOTON -----------------------------------------------------------------
-              LargeButton(
-                theresError: _isError,
-                messageError: _messageError,
-                onPressed: () {
-                  context.read<AuthBloc>().add(Autorizarse()); // Empezar Login
-                },
-                child: Stack(
-                alignment: Alignment.center,
-                  children: const [
-                    Align(alignment: Alignment.centerLeft, child: Image(image: AssetImage('assets/images/logo_twitch_bw.png',),height: 48),),
-                    Text(iniciarSesion, style: textStyleButton,),
+          padding: const EdgeInsets.only(left: 32,right: 32,top: 64,),
+          child: Expanded(
+            child: Column(
+              mainAxisSize: MainAxisSize.max,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.start,
+              children: [
+                // Titulo ------------------------------------------------------------------
+                Text(appTitle,style: Theme.of(context).textTheme.titleLarge,),
+          
+                // Texto ----------------------------------------------             
+               Container(
+                padding: const EdgeInsets.only(left: 8,right: 8,top: 32), 
+                child: Column(
+                  mainAxisSize: MainAxisSize.max,
+                  children: [
+                    Text(loginDescription, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyLarge,),
+                    const SizedBox(height: 16,),
+                    Text(loginBodyDescription, textAlign: TextAlign.center, style: Theme.of(context).textTheme.bodyMedium,),
+                      
                   ],
                 ),
-              )
-            ]
+               ),
+               const SizedBox(height: 20,),
+                // BOTON -----------------------------------------------------------------
+                LargeButton(
+                  theresError: _isError,
+                  messageError: _messageError,
+                  onPressed: () {
+                    context.read<AuthBloc>().add(Autorizarse()); // Empezar Login
+                  },
+                  child: Stack(
+                  alignment: Alignment.center,
+                    children: const [
+                      Align(alignment: Alignment.centerLeft, child: Image(image: AssetImage('assets/images/logo_twitch_bw.png',),height: 48),),
+                      Text(iniciarSesion, style: textStyleButton,),
+                    ],
+                  ),
+                )
+              ]
+            ),
           ),
         ),
          Align(

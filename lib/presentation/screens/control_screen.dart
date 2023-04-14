@@ -75,8 +75,22 @@ class _OBSScreenState extends State<OBSScreen> {
           if(state is OBSConnected){
             return ListView(
               children:[
-                _closeConnection(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16,vertical: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.max,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                     const Text('Escenas OBS',style: TextStyle(fontWeight: FontWeight.bold),),
+                      _closeConnection(),
+                    ],
+                  ),
+                ),
                _buildScenes(),
+               const SizedBox(height: 8,),
+              const Expanded(child: Divider(color: Colors.white, thickness: 1, indent: 24,endIndent: 24,)),
+               const Padding( padding: EdgeInsets.all(16),
+                child: Text('Mezclador de audio',style: TextStyle(fontWeight: FontWeight.bold),)),
                _buildAudioTracks()
                ]
             );
@@ -149,20 +163,20 @@ class _OBSScreenState extends State<OBSScreen> {
                 }
               ),
             const SizedBox(height: 40,),
-            Text(texts.lastConnection,style:Theme.of(context).textTheme.bodyLarge,),
-            const SizedBox(height: 24,),
-            LargeButton(
+            if(lastConnection != null) Text(texts.lastConnection,style:Theme.of(context).textTheme.bodyLarge,),
+            if(lastConnection != null)const SizedBox(height: 24,),
+            if(lastConnection != null)LargeButton(
                 backgroundColor: MyColors.textoSobreClaro,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     const Icon(Icons.tv),
                     const SizedBox(width: 24,),
-                    Text('${lastConnection?.address}:${lastConnection?.port}',style:Theme.of(context).textTheme.bodyLarge,)
+                    Text('${lastConnection.address}:${lastConnection.port}',style:Theme.of(context).textTheme.bodyLarge,)
                   ],
                 ),
                 onPressed: () {
-                   context.read<OBSBloc>().add(OBSConnect(connection: lastConnection!));        
+                   context.read<OBSBloc>().add(OBSConnect(connection: lastConnection));        
                 }
               )
           ],
@@ -345,6 +359,7 @@ class _OBSScreenState extends State<OBSScreen> {
      
           return GridView.builder(
             shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
             padding: const EdgeInsets.all(8),
             itemCount: scenes.length,
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -389,15 +404,15 @@ class _OBSScreenState extends State<OBSScreen> {
 
   Widget _buildListAudioTracks(List<OBSAudioTrack> audioTracks){
     return ListView.builder(
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            padding: const EdgeInsets.all(8),
-            itemCount: audioTracks.length,
-             
-            itemBuilder: (context, index) {
-              return _buildAudioTrackSlider(audioTracks[index]);
-            },
-          );
+      physics: const NeverScrollableScrollPhysics(),
+      shrinkWrap: true,
+      padding: const EdgeInsets.all(16),
+      itemCount: audioTracks.length,
+        
+      itemBuilder: (context, index) {
+        return _buildAudioTrackSlider(audioTracks[index]);
+      },
+    );
   }
 
   Widget _buildAudioTrackSlider(OBSAudioTrack audioTrack){
@@ -450,12 +465,15 @@ class _OBSScreenState extends State<OBSScreen> {
         context.read<OBSBloc>().add(OBSChangeScene(scene: scene));
       },
       child: Container(
+        decoration: BoxDecoration(
+          color: scene.isActual ? MyColors.primaryColor: Colors.white,
+          borderRadius:BorderRadius.circular(12)),
         padding: const EdgeInsets.all(16),
-        color: scene.isActual ? MyColors.primaryColor: Colors.white,
         child: Center(
           child: Text(
             scene.name,
-            style: Theme.of(context).textTheme.labelLarge!.copyWith(color: !scene.isActual ? MyColors.primaryColor: Colors.white,),
+            textAlign: TextAlign.center,
+            style: Theme.of(context).textTheme.labelLarge!.copyWith(color: !scene.isActual ? MyColors.textoSobreClaro: Colors.white,),
           ),
         ),
       ),
@@ -463,9 +481,9 @@ class _OBSScreenState extends State<OBSScreen> {
   }
   
   Widget _closeConnection() {
-    return ElevatedButton(onPressed: (){
+    return GestureDetector(onTap: (){
       context.read<OBSBloc>().add(OBSClose());
-    }, child: const Text('Cerrar obs'));
+    }, child: const Text('Cerrar',style: TextStyle(color: MyColors.textoError,fontWeight: FontWeight.bold),));
   }
 
 }
