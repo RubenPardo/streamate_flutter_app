@@ -9,6 +9,7 @@ import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_state.dart';
 import 'package:streamate_flutter_app/shared/colors.dart';
 import 'package:streamate_flutter_app/shared/widgets/chat_settings_widget.dart';
+import 'package:streamate_flutter_app/shared/widgets/twitch_chat_private_message.dart';
 
 class ChatScreen extends StatefulWidget {
 
@@ -96,9 +97,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   Align(alignment: Alignment.bottomCenter,child: _buildChat(),),
 
                   // boton de pausa ----------------------------------------------------------------------------
-                  _isPaused 
+                  /*_isPaused 
                   ? Align(alignment: Alignment.bottomCenter, child: _buildIsChatPaused(),)
-                  : Container(), 
+                  : Container(), */
                   
                 ],
               ),
@@ -166,6 +167,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
                 itemBuilder: (context, index) {
+                  if(chat[index] is TwitchChatPrivateMessage){
+                    (chat[index] as TwitchChatPrivateMessage).canInteract = true;
+                  }
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 4),
                     child: chat[index]

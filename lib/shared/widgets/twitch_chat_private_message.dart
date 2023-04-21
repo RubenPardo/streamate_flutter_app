@@ -1,6 +1,7 @@
 
 
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -22,7 +23,7 @@ import 'package:streamate_flutter_app/shared/widgets/user_info_widget.dart';
 class TwitchChatPrivateMessage extends StatefulWidget {
 
   final PrivateMessage privateMessage;
-  bool isFromSub = false;
+  final bool isFromSub;
   bool canInteract;
 
 
@@ -101,6 +102,7 @@ class _TwitchChatPrivateMessageState extends State<TwitchChatPrivateMessage>{
 
   // callback cuando se pulsa un mensaje
   void _messageClicked(){
+    log('SE PULSO EL MENSAJE');
     // si se pulsa parar el chat
     setState(() {
       _isPressed = !_isPressed;
