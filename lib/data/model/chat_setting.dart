@@ -1,4 +1,6 @@
 
+import 'dart:developer';
+
 class ListChatSettings{
   late List<ChatSetting> values;
 
@@ -20,7 +22,6 @@ class ListChatSettings{
 
     // mapeamos el map a una lista de [ChatSetting]
      for(MapEntry entry in data.entries){
- 
       if(entry.key == "slow_mode_wait_time"){
         result.add(ChatSetting(ChatSettingType.slow, entry.value != null ? entry.value.toString() : "-1"));
         continue;

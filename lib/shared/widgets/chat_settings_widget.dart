@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:streamate_flutter_app/core/utils.dart';
 import 'package:streamate_flutter_app/data/model/chat_setting.dart';
@@ -6,6 +8,7 @@ import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
 import 'package:streamate_flutter_app/shared/colors.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart' as texts;
+import 'package:streamate_flutter_app/shared/styles.dart' as styles;
 
 class ChattSettingsWidget extends StatefulWidget {
 
@@ -49,7 +52,6 @@ class _ChattSettingsWidgetState extends State<ChattSettingsWidget> {
               // poner el valor contrario
               context.read<ChatBloc>().add(ChangeChatSettings(ChatSetting(chatEmoteOnly.chatSettingType, chatEmoteOnly.value == "0" ? "1" : "0")));
             },
-            text: "MODO EMOTES",
           ),
           //modo sub
            _buildChatSetting(
@@ -60,7 +62,6 @@ class _ChattSettingsWidgetState extends State<ChattSettingsWidget> {
               // poner el valor contrario
               context.read<ChatBloc>().add(ChangeChatSettings(ChatSetting(chatSubMode.chatSettingType, chatSubMode.value == "0" ? "1" : "0")));
             },
-            text: "MODO SUB",
           ),
           //modo seguidor
          _buildChatSetting(
@@ -69,11 +70,9 @@ class _ChattSettingsWidgetState extends State<ChattSettingsWidget> {
             activado: chatFollow.value != "-1",
             onTap: () {
               if(chatFollow.chatSettingType != ChatSettingType.none ) {
-                // TODO poner en cual esta
-                _buildChatSettingDialog("Modo Seguidores", "Descripcion modo seguidores", chatFollow, opcionesModoSeguidoresEnMinutos,opcionesModoSeguidoresEnTexto);
+                _buildChatSettingDialog(texts.followersOnlyTitle, texts.followersOnlyBody, chatFollow, opcionesModoSeguidoresEnMinutos,opcionesModoSeguidoresEnTexto);
               }
             },
-            text: "MODO SEGUIDORES",
           ),
           // modo slow
           _buildChatSetting(
@@ -82,28 +81,10 @@ class _ChattSettingsWidgetState extends State<ChattSettingsWidget> {
             activado: chatSlow.value != "-1",
             onTap: () {
               if(chatFollow.chatSettingType != ChatSettingType.none ) {
-                _buildChatSettingDialog("Modo Seguidores", "Descripcion modo seguidores", chatSlow, opcionesModoLentoEnSegundos, opcionesModoLentoEnTexto);
+                _buildChatSettingDialog(texts.slowModeTitle, texts.slowModeBody, chatSlow, opcionesModoLentoEnSegundos, opcionesModoLentoEnTexto);
               }
             },
-            text: "MODO LENTO",
-          ),
-
-          //adds
-          _buildChatSetting(
-            assetPrefix: "anuncios",
-            disable: !widget.isPartner,
-            activado: widget.isPartner,
-            onTap: () {
-              if(widget.isPartner){
-                // TODO cambiar, esto no funciona, la funcion esta pensada para un chat setting
-               // _buildChatSettingDialog("Reproducir anuncio", "Descripcion anuncios", chatFollow, duracionAnunciosEnSegundos);
-              }else{
-                Utils.showSnackBar(context, texts.noEresAfiliadoError);
-              }
-            },
-            text: "Anuncios",
-          ),
-          
+          )
 
         ],
       
@@ -125,26 +106,48 @@ class _ChattSettingsWidgetState extends State<ChattSettingsWidget> {
       builder: (BuildContext context) {
         // return alert dialog object
         return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          backgroundColor: Colors.white,
+          titleTextStyle:Theme.of(context).textTheme.headlineMedium?.copyWith(color: MyColors.textoSobreClaro,fontSize: 24,fontWeight: FontWeight.bold),
+          contentTextStyle: Theme.of(context).textTheme.bodySmall?.copyWith(color: MyColors.textoSobreClaro),
+          
           title:  Text(title),
           content: Column(
+            mainAxisSize: MainAxisSize.min,
             children: [
-              Text(description),
+              Text(description,style: styles.textStyleAlertDialogBody), 
+              const SizedBox(height: 32,),
+              Container(
 
-              Column(
-                children: options.map((e) {
-                return RadioListTile(
-                  title: Text(optionLabels[options.indexOf(e)]),
-                  groupValue: chatSetting.value,
-                  value: e,
-                  onChanged: (value){
-                    context.read<ChatBloc>().add(ChangeChatSettings(ChatSetting(chatSetting.chatSettingType, value!)));
-                    Navigator.pop(context);
-                  },
-              
-                );
-              }).toList(),
-              )
-              
+                decoration: BoxDecoration(
+                  color: MyColors.primaryColor, borderRadius: BorderRadius.circular(10),
+                  
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.only(left:12),
+                  child: DropdownButtonHideUnderline(
+                      child: DropdownButton<String>(
+                        isExpanded: true,
+                        value: chatSetting.value,
+                      onChanged: (value){
+                            context.read<ChatBloc>().add(ChangeChatSettings(ChatSetting(chatSetting.chatSettingType, value!)));
+                            Navigator.pop(context);
+                          },
+                        items: options.map((e) {
+                          log(optionLabels[options.indexOf(e)]);
+                          return DropdownMenuItem<String>(
+                            value: e,
+                            child: Container(
+                              padding: const EdgeInsets.all(16),
+                              child: Center(child: Text(optionLabels[options.indexOf(e)],textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodySmall?.copyWith(color: Colors.white,fontWeight: FontWeight.bold),))),
+                      
+                        );
+                      }).toList(),
+                    ),
+                  )
+                )
+              ) 
             ]
           ),
           
@@ -163,7 +166,7 @@ class _ChattSettingsWidgetState extends State<ChattSettingsWidget> {
   /// [assetPrefix] una de estas opciones: [modo_sub, modo_lento, modo_seguidores,modo_emote], con este prefijo hara la referencia al asset
   ///
   Widget _buildChatSetting(
-  { required Null Function() onTap, required String text, required bool disable, required bool activado, required assetPrefix}) {
+  { required Null Function() onTap, required bool disable, required bool activado, required assetPrefix}) {
     return Container(
       margin: const EdgeInsets.all(8),
 

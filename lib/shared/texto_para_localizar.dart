@@ -42,3 +42,7 @@ const password = 'Contraseña';
 const ip = 'Dirección IP';
 const port = 'Puerto';
 const obsHelp = 'Para acceder a los parámetros de la conexión del OBS dirigete a "Herramientas", "Ajustes de obs-websocket" y "Mostrar información de conexión"\n\nNecesitarás una versión superior a la 28 de OBS';
+const followersOnlyTitle = 'Solo seguidores';
+const followersOnlyBody = 'Los usuarios pueden chatear en tu stream si han sido seguidores durante al menos:';
+const slowModeTitle = 'Modo lento';
+const slowModeBody = 'Haz que los usuarios tengan que esperar entre un mensaje y otro';

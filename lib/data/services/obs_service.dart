@@ -36,6 +36,7 @@ class OBSServiceImpl implements OBSService {
       _obsWebSocket = await ObsWebSocket.connect(
         'ws://$address:$port', 
         password: password,
+        timeout: const Duration(seconds: 5)
       );
       // tell obsWebSocket to listen to events, since the default is to ignore them
       await _obsWebSocket!.listen(EventSubscription.all.index);

@@ -231,6 +231,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const Text(texts.timeoutUserDescription,style: styles.textStyleAlertDialogBody), 
+            const SizedBox(height: 8,),
             Container(
               decoration: BoxDecoration(
                 color: MyColors.primaryColor, borderRadius: BorderRadius.circular(10),

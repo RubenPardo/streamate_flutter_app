@@ -245,44 +245,55 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
     }
     
   }
+  
+  
+  /// OBSConnection, bool, Function(OBSEvent) -> connect()
+  /// funcion para conectar
   Future<void> connect(OBSConnection connection, bool isNewConnection, var emit) async {
     log('OBS - llama a conectar new connection: $isNewConnection');
+    emit(OBSLoading());
     bool connected = await obsService.connect(connection.address, connection.port, connection.password);
-    if(connected){
-      await GetOBSScenesUseCase().call().fold(
-        (obsScenes) async{
-          // las guardamos en memoria
-          _obsScenes = obsScenes;
-          await GetOBSAudioTracksUseCase().call(actualSceneName).fold(
-            (obsAudioTracks){
-              // escuchar los cambios del obs
-              obsService.setEventHandler(eventHandler);
+    log('OBS conectado: $connected');
+    try{
+      if(connected){
+        await GetOBSScenesUseCase().call().fold(
+          (obsScenes) async{
+            // las guardamos en memoria
+            _obsScenes = obsScenes;
+            await GetOBSAudioTracksUseCase().call(actualSceneName).fold(
+              (obsAudioTracks){
+                // escuchar los cambios del obs
+                obsService.setEventHandler(eventHandler);
 
-              // las guardamos en memoria
-              _obsAudioTrack = obsAudioTracks;
+                // las guardamos en memoria
+                _obsAudioTrack = obsAudioTracks;
 
-              // las emitimos a los streams
-              _scenesStreamController.add(_obsScenes);
-              _audioTrackStreamController.add(_obsAudioTrack);
-              updateStreamingTime();
+                // las emitimos a los streams
+                _scenesStreamController.add(_obsScenes);
+                _audioTrackStreamController.add(_obsAudioTrack);
+                updateStreamingTime();
 
-              // guardar conexion en memoria
-              serviceLocator.get<SharedPreferences>().setString(StorageKeys.lastConnection,connection.serialize());
-              
-              // avisamos a la vista que esta todo listo
-              emit(OBSConnected()); // ------------------------------------------> return connected
-            }, 
-            (error) => emit(OBSError(message: error.message))
-          );
+                // guardar conexion en memoria
+                serviceLocator.get<SharedPreferences>().setString(StorageKeys.lastConnection,connection.serialize());
+                
+                // avisamos a la vista que esta todo listo
+                emit(OBSConnected()); // ------------------------------------------> return connected
+              }, 
+              (error) => emit(OBSError(message: error.message))
+            );
+            
           
-        
-        }, 
-        (error) => emit(OBSError(message: error.message))
-      );
+          }, 
+          (error) => emit(OBSError(message: error.message))
+        );
 
-      
-    }else{
-      
+        
+      }else{
+        log('OBS - no conectado emitir error');
+        emit(OBSError(message: isNewConnection ? 'Error al conectarse al obs' : 'No se pudo conectar a la conexión anterior'));
+      }
+    }catch(e){
+      log('OBS - no conectado emitir error $e');
       emit(OBSError(message: isNewConnection ? 'Error al conectarse al obs' : 'No se pudo conectar a la conexión anterior'));
     }
   }
@@ -302,7 +313,7 @@ class OBSBloc extends Bloc<OBSEvent,OBSState>{
             log('OBS - ${lastConnection.toString()}');
             await connect(lastConnection,false, emit);
           }else{
-
+            log('OBS - serialized null');
             emit(OBSInitialized(lastConnection: lastConnection));
           }
         }catch(e){

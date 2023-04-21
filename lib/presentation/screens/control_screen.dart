@@ -66,13 +66,13 @@ class _OBSScreenState extends State<OBSScreen> {
   Widget build(BuildContext context) {
     return BlocConsumer<OBSBloc,OBSState>(
         builder: (context, state) {
-          if(state is OBSInitialized ){
-            return _buildInitialized(lastConnection);
+          if(state is OBSLoading || state is OBSUninitialized){
+            return const Center(child: CircularProgressIndicator(),);
           }
-          if(state is OBSError){
+
+          if(state is OBSInitialized || state is OBSError ){
             return _buildInitialized(lastConnection);
-          }
-          if(state is OBSConnected){
+          } else if(state is OBSConnected){
             return ListView(
               children:[
                 Padding(

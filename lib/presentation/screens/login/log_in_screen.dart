@@ -105,21 +105,26 @@ class _LogInScreenState extends State<LogInScreen> {
   Widget _buildBody(){
     return Stack(
       children: [
-        const Align(
+        Align(
           alignment: Alignment.topLeft,
-          child: Image(image: AssetImage("assets/images/item_fondo.png",)),
+          child: Stack(
+            children: [
+              // Titulo ------------------------------------------------------------------
+                const Image(image: AssetImage("assets/images/item_fondo.png",)),
+                Padding(padding: EdgeInsets.only(top: MediaQuery.of(context).size.height/11,left: 32),child: Text(appTitle,style: Theme.of(context).textTheme.titleLarge,),),
+                
+
+            ],
+          ),
         ),
         Container(
-          padding: const EdgeInsets.only(left: 32,right: 32,top: 64,),
+          padding: EdgeInsets.only(left: 32,right: 32,top: MediaQuery.of(context).size.height/4,),
           child: Expanded(
             child: Column(
               mainAxisSize: MainAxisSize.max,
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                // Titulo ------------------------------------------------------------------
-                Text(appTitle,style: Theme.of(context).textTheme.titleLarge,),
-          
+                
                 // Texto ----------------------------------------------             
                Container(
                 padding: const EdgeInsets.only(left: 8,right: 8,top: 32), 
@@ -133,7 +138,7 @@ class _LogInScreenState extends State<LogInScreen> {
                   ],
                 ),
                ),
-               const SizedBox(height: 20,),
+               const SizedBox(height: 32,),
                 // BOTON -----------------------------------------------------------------
                 LargeButton(
                   theresError: _isError,
