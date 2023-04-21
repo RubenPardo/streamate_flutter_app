@@ -11,6 +11,19 @@ const TextStyle _textStyleTitleApp = TextStyle(
   fontSize: 48
 );
 
+const TextStyle textStyleTitle = TextStyle(
+  fontWeight: FontWeight.bold,
+  fontFamily: 'Quicksand',
+  color: MyColors.textoSobreOscuro,
+  fontSize: 24
+);
+const TextStyle textStyleTitle2 = TextStyle(
+  fontWeight: FontWeight.bold,
+  fontFamily: 'Quicksand',
+  color: MyColors.textoSobreOscuro,
+  fontSize: 20
+);
+
 const TextStyle appBarStyle = TextStyle(
   fontWeight: FontWeight.bold,
   fontFamily: 'Quicksand',

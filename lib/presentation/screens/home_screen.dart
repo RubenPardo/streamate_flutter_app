@@ -17,6 +17,7 @@ import 'package:streamate_flutter_app/presentation/bloc/obs/obs_bloc.dart';
 import 'package:streamate_flutter_app/presentation/screens/chat_screen.dart';
 import 'package:streamate_flutter_app/presentation/screens/control_screen.dart';
 import 'package:streamate_flutter_app/presentation/screens/login/log_in_screen.dart';
+import 'package:streamate_flutter_app/presentation/screens/settings_screen.dart';
 import 'package:streamate_flutter_app/shared/colors.dart';
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart';
 import 'package:streamate_flutter_app/shared/widgets/app_bar.dart';
@@ -112,7 +113,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _tabsBottomNavigator = [
           [ OBSScreen(tokenData: _tokenData, user: _user),const Icon(Icons.grid_view_sharp), "OBS"],
           [ ChatScreen(token: _tokenData,user: _user,), const Icon(Icons.chat), "Chat"],
-          [ const Center(), const Icon(Icons.settings), "Ajustes"],
+          [ SettingsScreen(user: _user,), const Icon(Icons.settings), "Ajustes"],
           
       ];
 
