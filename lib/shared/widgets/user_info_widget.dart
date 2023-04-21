@@ -52,7 +52,6 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
 
   @override
   void didChangeDependencies() {
-    // TODO: implement didChangeDependencies
     super.didChangeDependencies();
     // al estar en un modal es preferible hacerlo aqui no en el dispose
     context.read<UserInfoBloc>().add(UserInfoEventClose());
@@ -71,7 +70,6 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
         }
 
         if(state is UserInfoStateLoaded){
-          print("USER -- llego: ${state.user}");
           return _buildWidget(state.user);
         }
         return const Center();
@@ -130,7 +128,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
             Expanded(
               child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              //mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 // nombre ------------------------------------
                 Text(user.displayName, style: textStyleChatUserNoticeTitleGiftMyster,),
@@ -160,7 +158,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
               _isBanned = true;
             });
           });
-        }, icon: const Icon(Icons.remove)),
+        }, icon: const Icon(Icons.remove_circle_outline_outlined)),
         IconButton(onPressed: (){
           // timeout ------------------------------------------------------------------------------------------------------------
           Utils.showConfirmDialog(context, texts.timeoutUserTitle.replaceFirst("{1}", widget.user.displayName), 
@@ -176,7 +174,7 @@ class _UserInfoWidgetState extends State<UserInfoWidget> {
               });
               }
             );// dialog ---------------
-            }, icon: const Icon(Icons.lock_clock)
+            }, icon: const Icon(Icons.timer_off_outlined)
           ),
       ],
     );
