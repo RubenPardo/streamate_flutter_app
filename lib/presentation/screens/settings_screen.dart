@@ -1,8 +1,15 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:streamate_flutter_app/data/model/stream_category.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
+import 'package:streamate_flutter_app/domain/repositories/twitch_channel_repository.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_event.dart';
+import 'package:streamate_flutter_app/presentation/bloc/settings/settings_bloc.dart';
+import 'package:streamate_flutter_app/presentation/bloc/settings/settings_event.dart';
+import 'package:streamate_flutter_app/presentation/bloc/settings/settings_state.dart';
 import 'package:streamate_flutter_app/shared/colors.dart';
 import 'package:streamate_flutter_app/shared/widgets/large_primary_button.dart';
 import 'package:streamate_flutter_app/shared/styles.dart' as styles;
@@ -20,6 +27,14 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
 
+  final TextEditingController _textEditingControllerTitle = TextEditingController();
+  final TextEditingController _textEditingControllerCategory = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    context.read<SettingBloc>().add(InitSettings(idBroadCaster: widget.user.id, fromMemory: context.read<SettingBloc>().channelInfo!=null));
+  }
    
   InputDecoration inputStyle = const InputDecoration(
             hintText: 'Introduce un título',
@@ -46,20 +61,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   // perfil ------------
                   _buildProfile(),
                   const SizedBox(height: 32,),
-                  // titulo ------------
-                  _buildStremTitle(),
-                  const SizedBox(height: 32,),
-                  // categoria ------------
-                  _buildCategory(),
+                  BlocConsumer<SettingBloc, SettingsState>(
+                    builder: (context, state) {
+                      if(state is SettingsLoading){
+                        return  const Center(child: CircularProgressIndicator(),);
+                      }else if(state is SettingsLoaded || state is SettingsError){
+                        return Column(
+                          children: [
+                            // titulo ------------
+                            _buildStremTitle(),
+                            const SizedBox(height: 32,),
+                            // categoria ------------
+                            _buildCategory(streamCategory: state is SettingsLoaded ? state.channelInfo.streamCategory : null),
+                          ],
+                        );
+                      }
+
+                      return const SizedBox();
+                    },
+                    listener: (context, state) {
+                      // actualizar los valores de los edit texts por sus controles 
+                      // con un set state en el listener del bloc
+                      if(state is SettingsLoaded){
+                        setState(() {
+                          _textEditingControllerTitle.text = state.channelInfo.title;
+                          _textEditingControllerCategory.text = state.channelInfo.streamCategory.gameName;
+                        });
+                      }
+                    },
+                  ),
                 ],
               ),
+
+              
               // cerrar sesión -----------
               Positioned(
                 bottom: 0,
                 child: LargeButton(
                   backgroundColor: MyColors.textoError,
-                  onPressed: (){
-                    context.read<AuthBloc>().add(LogOut());
+                  onPressed: () async{
+                    log((await TwitchChannelRepositoryImpl().getChannelInfo(widget.user.id)).toString());
+                    //context.read<AuthBloc>().add(LogOut());
                   }, 
                 child: const  Text('Cerrar sesión',style: styles.textStyleButton,)
                         ),
@@ -99,20 +141,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
           minLines: 5,
           maxLines: 5,
           decoration: inputStyle,
+          controller: _textEditingControllerTitle,
         )
       ],
     );
   }
 
   ///
-  Widget _buildCategory(){
+  Widget _buildCategory({StreamCategory? streamCategory}){
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text('Categoría',style: styles.textStyleTitle2,),
         const SizedBox(height: 8,),
         TextField(
-          
+          controller: _textEditingControllerCategory,
           decoration: inputStyle.copyWith(hintText: 'Buscar categoría',prefixIcon: const Icon(Icons.search)),
         )
       ],

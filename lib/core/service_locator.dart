@@ -5,6 +5,7 @@ import 'package:streamate_flutter_app/data/services/obs_service.dart';
 import 'package:streamate_flutter_app/data/services/twitch_api_service.dart';
 import 'package:streamate_flutter_app/data/services/twitch_irc_service.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_auth_repository.dart';
+import 'package:streamate_flutter_app/domain/repositories/twitch_channel_repository.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_chat_repository.dart';
 import 'package:streamate_flutter_app/domain/usecases/ban_user_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/check_session_use_case.dart';
@@ -47,6 +48,9 @@ Future<void> setUpServiceLocator() async {
       .registerFactory<TwitchAuthRepository>(() => TwitchAuthRepositoryImpl());
   serviceLocator
       .registerFactory<TwitchChatRepository>(() => TwitchChatRepositoryImpl());
+  
+  serviceLocator
+      .registerFactory<TwitchChannelRepository>(() => TwitchChannelRepositoryImpl());
       
 
   //external
