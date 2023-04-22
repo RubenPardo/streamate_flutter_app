@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:streamate_flutter_app/core/request.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
+import 'package:streamate_flutter_app/data/model/channel_info.dart';
 import 'package:streamate_flutter_app/shared/cambiarAEnv.dart';
 import 'package:streamate_flutter_app/shared/strings.dart';
 
@@ -21,6 +24,7 @@ abstract class TwitchApiService{
   Future<List<dynamic>> getChannelBadges(String idBroadcaster);
   Future<List<dynamic>> getGlobalEmotes();
   Future<List<dynamic>> getChannelEmotes(String idBroadcaster);
+  Future<Map<String, dynamic>> getChannelInfo(String idBroadCaster );
 
 }
 
@@ -130,7 +134,7 @@ class TwitchApiServiceImpl extends TwitchApiService{
       url+= "?id=";
       url+= ids.join('&id=');
     }
-    print("url: $url");
+    log("url: $url");
     // Envía la solicitud y procesa la respuesta
     var response = await serviceLocator<Request>().get(url,headers: headers);
     if (response.statusCode == 200) {
@@ -138,8 +142,8 @@ class TwitchApiServiceImpl extends TwitchApiService{
       
       return response.data['data'];
     } else {
-      print("ERROR DESDE obtenerUSUARIO: ");
-      print(response.data);
+      log("ERROR DESDE obtenerUSUARIO: ");
+      log(response.data);
       // Si la solicitud falla, lanza una excepción
       throw Exception('Error al obtener los datos del usuario');
     }
@@ -211,8 +215,8 @@ class TwitchApiServiceImpl extends TwitchApiService{
       
       return response.data['data'];
     } else {
-      print("ERROR DESDE getChannelBadges: ");
-      print(response.data);
+      log("ERROR DESDE getChannelBadges: ");
+      log(response.data);
       // Si la solicitud falla, lanza una excepción
       throw Exception('Error al obtener los emblemas del canal');
     }
@@ -231,8 +235,8 @@ class TwitchApiServiceImpl extends TwitchApiService{
       
       return response.data['data'];
     } else {
-      print("ERROR DESDE getGlobalBadges: ");
-      print(response.data);
+      log("ERROR DESDE getGlobalBadges: ");
+      log(response.data);
       // Si la solicitud falla, lanza una excepción
       throw Exception('Error al obtener los emblemas globales');
     }
@@ -251,8 +255,8 @@ class TwitchApiServiceImpl extends TwitchApiService{
       
       return response.data['data'];
     } else {
-      print("ERROR DESDE getChannelEmotes: ");
-      print(response.data);
+      log("ERROR DESDE getChannelEmotes: ");
+      log(response.data);
       // Si la solicitud falla, lanza una excepción
       throw Exception('Error al obtener los emotes del canal');
     }
@@ -271,8 +275,8 @@ class TwitchApiServiceImpl extends TwitchApiService{
       
       return response.data['data'];
     } else {
-      print("ERROR DESDE getGlobalEmotes: ");
-      print(response.data);
+      log("ERROR DESDE getGlobalEmotes: ");
+      log(response.data);
       // Si la solicitud falla, lanza una excepción
       throw Exception('Error al obtener los emotes globales');
     }
@@ -292,8 +296,8 @@ class TwitchApiServiceImpl extends TwitchApiService{
       
       return response.data['data'][0];
     } else {
-      print("ERROR DESDE getChatSettings: ");
-      print(response.data);
+      log("ERROR DESDE getChatSettings: ");
+      log(response.data);
       // Si la solicitud falla, lanza una excepción
       throw Exception('Error al obtener los ajustes del chat');
     }
@@ -321,7 +325,7 @@ class TwitchApiServiceImpl extends TwitchApiService{
         if (response.statusCode == 200) {
           return response.data['data'][0];
         } else {
-          print("CHATT -- error al actualizar");
+          log("CHATT -- error al actualizar");
           throw Exception('Failed to update chat setting');
         }
     }else{
@@ -345,14 +349,31 @@ class TwitchApiServiceImpl extends TwitchApiService{
       
       return response.data['data'][0]['color'];
     } else {
-      print("ERROR DESDE getUserColor: ");
-      print(response.data);
+      log("ERROR DESDE getUserColor: ");
+      log(response.data);
       // Si la solicitud falla, lanza una excepción
       throw Exception('Error al obtener el color del usuario con id: $idUser');
     }
   }
   
- 
+
+  /// Texto -> getChannelInfo() -> Map<String, dynamic>
+  /// Obtener la informacion asociada al canal del usario con id = [idBroadCaster]
+  @override
+  Future<Map<String, dynamic>> getChannelInfo(String idBroadCaster )async{
+    String url = '${baseUrlApi}helix/channels?broadcaster_id=$idBroadCaster';
+
+    // Envía la solicitud y procesa la respuesta
+    var response = await serviceLocator<Request>().get(url);
+    if (response.statusCode == 200) {
+      // Si la solicitud es exitosa, devuelve los datos del usuario
+      
+      return response.data['data'][0];
+    } else {
+      // Si la solicitud falla, lanza una excepción
+      throw Exception('Error al obtener el color del usuario con id: $idBroadCaster');
+    }
+  }
 
 
  
