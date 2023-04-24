@@ -6,6 +6,10 @@ class InitSettings extends SettingsEvent{
   InitSettings({required this.idBroadCaster, required this.fromMemory});
 }
 
-class ChangeStreamTitle extends SettingsEvent{}
+class ChangeStreamTitle extends SettingsEvent{
+  final String newTitle;
+  final String idBroadCaster;
+  ChangeStreamTitle({required this.newTitle, required this.idBroadCaster});
+}
 
 class ChangeStreamCategory extends SettingsEvent{}

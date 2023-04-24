@@ -2,7 +2,6 @@ import 'dart:developer';
 
 import 'package:streamate_flutter_app/core/request.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
-import 'package:streamate_flutter_app/data/model/channel_info.dart';
 import 'package:streamate_flutter_app/shared/cambiarAEnv.dart';
 import 'package:streamate_flutter_app/shared/strings.dart';
 
@@ -25,6 +24,7 @@ abstract class TwitchApiService{
   Future<List<dynamic>> getGlobalEmotes();
   Future<List<dynamic>> getChannelEmotes(String idBroadcaster);
   Future<Map<String, dynamic>> getChannelInfo(String idBroadCaster );
+  Future<bool> updateChannelInfo({String? newTitle, String? newGameId, required String idBroadCaster});
 
 }
 
@@ -366,12 +366,33 @@ class TwitchApiServiceImpl extends TwitchApiService{
     // Envía la solicitud y procesa la respuesta
     var response = await serviceLocator<Request>().get(url);
     if (response.statusCode == 200) {
-      // Si la solicitud es exitosa, devuelve los datos del usuario
+      // Si la solicitud es exitosa, devuelve los datos
       
       return response.data['data'][0];
     } else {
       // Si la solicitud falla, lanza una excepción
-      throw Exception('Error al obtener el color del usuario con id: $idBroadCaster');
+      throw Exception('Error al obtener la info del canal del usuario con id: $idBroadCaster');
+    }
+  }
+
+  /// Texto, Texto, Texto -> updateChannelInfo() -> T/F
+  /// Actualiza la informacion asociada al canal del usario con id = [idBroadCaster]
+  @override
+  Future<bool> updateChannelInfo({String? newTitle, String? newGameId, required String idBroadCaster})async{
+    String url = '${baseUrlApi}helix/channels?broadcaster_id=$idBroadCaster';
+
+    // Envía la solicitud y procesa la respuesta
+    var response = await serviceLocator<Request>().patch(url,
+    data: {
+      'title': newTitle,
+      'game_id':newGameId != null ? "-1" : newGameId
+    });
+    if (response.statusCode == 204) {
+      // Si la solicitud es exitosa, devuelve true
+      return true;
+    } else {
+      // Si la solicitud falla, lanza una excepción
+      throw Exception('Error al modificar la info del canal del usuario con id: $idBroadCaster');
     }
   }
 

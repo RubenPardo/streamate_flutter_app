@@ -42,8 +42,24 @@ class SettingBloc extends Bloc<SettingsEvent,SettingsState>{
     );
 
     on<ChangeStreamTitle>(
-      (event, emit) {
-        
+      (event, emit) async{
+          try{
+            
+            // obtener el titulo y la categoria del directo
+            emit(SettingsLoading());
+            String newTitle = event.newTitle;
+            bool valid = await _channelRepository.updateChannelInfo(newTitle: newTitle, idBroadCaster: event.idBroadCaster);
+            // si ha ido todo ok cambiar el channel info por los datos nuevos y volver a emitirlos
+            if(valid){
+              channelInfo!.title = newTitle;
+            }
+            emit(SettingsLoaded(channelInfo: channelInfo!));
+           
+
+            
+          }catch(e){
+            emit(SettingsError());
+          }
       },
     );
 

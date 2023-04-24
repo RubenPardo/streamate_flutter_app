@@ -35,6 +35,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.initState();
     context.read<SettingBloc>().add(InitSettings(idBroadCaster: widget.user.id, fromMemory: context.read<SettingBloc>().channelInfo!=null));
   }
+  @override
+  void dispose() {
+    super.dispose();
+    _textEditingControllerCategory.dispose();
+    _textEditingControllerTitle.dispose();
+  }
    
   InputDecoration inputStyle = const InputDecoration(
             hintText: 'Introduce un título',
@@ -99,9 +105,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 bottom: 0,
                 child: LargeButton(
                   backgroundColor: MyColors.textoError,
-                  onPressed: () async{
-                    log((await TwitchChannelRepositoryImpl().getChannelInfo(widget.user.id)).toString());
+                  onPressed: (){
+                    // TODO quitar
                     //context.read<AuthBloc>().add(LogOut());
+                    context.read<SettingBloc>().add(ChangeStreamTitle(idBroadCaster: widget.user.id, newTitle:_textEditingControllerTitle.text.toString() ));
                   }, 
                 child: const  Text('Cerrar sesión',style: styles.textStyleButton,)
                         ),
@@ -137,11 +144,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         const Text('Título del directo',style: styles.textStyleTitle2,),
         const SizedBox(height: 8,),
-        TextField(
-          minLines: 5,
-          maxLines: 5,
-          decoration: inputStyle,
-          controller: _textEditingControllerTitle,
+        Focus(
+          onFocusChange: (value) {
+            log(value ? "Tiene foco" : "No tiene foco");
+          },
+          child: TextField(
+            minLines: 5,
+            maxLines: 5,
+            decoration: inputStyle,
+            controller: _textEditingControllerTitle,
+          ),
         )
       ],
     );
