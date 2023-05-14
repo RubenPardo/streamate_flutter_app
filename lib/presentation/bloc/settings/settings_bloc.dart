@@ -1,6 +1,9 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/core/service_locator.dart';
 import 'package:streamate_flutter_app/data/model/channel_info.dart';
+import 'package:streamate_flutter_app/data/model/stream_category.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_channel_repository.dart';
 import 'package:streamate_flutter_app/presentation/bloc/settings/settings_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/settings/settings_state.dart';
@@ -36,8 +39,25 @@ class SettingBloc extends Bloc<SettingsEvent,SettingsState>{
     );
 
     on<ChangeStreamCategory>(
-      (event, emit) {
-        
+      (event, emit) async{
+        try{
+            
+            // obtener el titulo y la categoria del directo
+            emit(SettingsLoading());
+            StreamCategory newCategory = event.category;
+            log(newCategory.gameId);
+            bool valid = await _channelRepository.updateChannelInfo(newGameId: newCategory.gameId, idBroadCaster: event.idBroadCaster);
+            // si ha ido todo ok cambiar el channel info por los datos nuevos y volver a emitirlos
+            if(valid){
+              channelInfo!.streamCategory = newCategory;
+            }
+            emit(SettingsLoaded(channelInfo: channelInfo!));
+           
+
+            
+          }catch(e){
+            emit(SettingsError());
+          }
       },
     );
 

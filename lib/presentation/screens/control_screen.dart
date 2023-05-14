@@ -18,9 +18,9 @@ import 'package:streamate_flutter_app/shared/texto_para_localizar.dart' as texts
 import 'package:streamate_flutter_app/presentation/bloc/obs/obs_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/obs/obs_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/obs/obs_state.dart';
-import 'package:streamate_flutter_app/shared/widgets/large_primary_button.dart';
 import 'package:non_linear_slider/non_linear_slider.dart';
 import 'package:reactive_forms/reactive_forms.dart';
+import 'package:streamate_flutter_app/shared/widgets/large_primary_button.dart';
 
 class OBSScreen extends StatefulWidget {
 

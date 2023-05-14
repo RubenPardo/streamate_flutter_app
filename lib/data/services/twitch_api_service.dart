@@ -16,7 +16,6 @@ abstract class TwitchApiService{
   Future<bool> banUser(String idBroadCaster, String idUser, {int? duration});
   Future<bool> unBanUser(String idBroadCaster, String idUser);
   Future<bool> deleteMessage(String idBroadCaster, String idMessage);
-  Future<String> getUserColor( String idUser);// TODO quitar
   Future<Map<String, dynamic>> getChatSettings(String idBroadCaster);
   Future<Map<String, dynamic>> updateChatSetting(String idBroadCaster,List<String> setting, List<String> value);
   Future<List<dynamic>> getGlobalBadges();
@@ -25,6 +24,7 @@ abstract class TwitchApiService{
   Future<List<dynamic>> getChannelEmotes(String idBroadcaster);
   Future<Map<String, dynamic>> getChannelInfo(String idBroadCaster );
   Future<bool> updateChannelInfo({String? newTitle, String? newGameId, required String idBroadCaster});
+  Future<List<dynamic>> getCategoiresByGameName({required String gameName});
 
 }
 
@@ -381,18 +381,42 @@ class TwitchApiServiceImpl extends TwitchApiService{
   Future<bool> updateChannelInfo({String? newTitle, String? newGameId, required String idBroadCaster})async{
     String url = '${baseUrlApi}helix/channels?broadcaster_id=$idBroadCaster';
 
+    var data = {};
+    if(newGameId!=null){
+      data.addAll({'game_id':newGameId});
+    }
+    if(newTitle!=null){
+      data.addAll({'title':newTitle});
+    }
     // Envía la solicitud y procesa la respuesta
     var response = await serviceLocator<Request>().patch(url,
-    data: {
-      'title': newTitle,
-      'game_id':newGameId != null ? "-1" : newGameId
-    });
+    data: data);
     if (response.statusCode == 204) {
       // Si la solicitud es exitosa, devuelve true
       return true;
     } else {
       // Si la solicitud falla, lanza una excepción
       throw Exception('Error al modificar la info del canal del usuario con id: $idBroadCaster');
+    }
+  }
+
+  /// Texto -> updateChannelInfo() -> List<Map<String,dynamic>>
+  /// Obtener la lista de categorias por el nombre del juego
+  @override
+  Future<List<dynamic>> getCategoiresByGameName({required String gameName})async{
+    String url = '${baseUrlApi}helix/search/categories?query=$gameName';
+    String encodeURL = Uri.encodeFull(url);
+    // encode de uri porque si la query tiene espacio no lo detecta
+    // query = "algo a buscar" -> query = "algo%20a%20buscar"
+    log(encodeURL);
+    // Envía la solicitud y procesa la respuesta
+    var response = await serviceLocator<Request>().get(encodeURL);
+    if (response.statusCode == 200) {
+      // Si la solicitud es exitosa, devuelve true
+      return response.data['data'];
+    } else {
+      // Si la solicitud falla, lanza una excepción
+      throw Exception('Error al buscar categorias');
     }
   }
 

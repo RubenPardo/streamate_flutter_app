@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/auth_bloc.dart';
+import 'package:streamate_flutter_app/presentation/bloc/category/category_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/obs/obs_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/settings/settings_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/user_info_bloc/user_info_bloc.dart';
 import 'package:streamate_flutter_app/presentation/screens/login/log_in_screen.dart';
-import 'package:streamate_flutter_app/shared/colors.dart';
 import 'package:streamate_flutter_app/shared/styles.dart';
-import 'package:streamate_flutter_app/shared/widgets/user_info_widget.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -33,6 +32,10 @@ class App extends StatelessWidget {
         BlocProvider(
           create: (_) => SettingBloc(),
         ),
+        BlocProvider(
+          create: (_) => CattegoryBloc(),
+        ),
+
       ],
       child: MaterialApp(
         title: 'StreaMate',

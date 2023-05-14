@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:streamate_flutter_app/core/utils.dart';
 import 'package:streamate_flutter_app/data/model/stream_category.dart';
 import 'package:streamate_flutter_app/data/model/user.dart';
 import 'package:streamate_flutter_app/domain/repositories/twitch_channel_repository.dart';
@@ -11,6 +12,7 @@ import 'package:streamate_flutter_app/presentation/bloc/settings/settings_bloc.d
 import 'package:streamate_flutter_app/presentation/bloc/settings/settings_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/settings/settings_state.dart';
 import 'package:streamate_flutter_app/shared/colors.dart';
+import 'package:streamate_flutter_app/shared/widgets/category_list.dart';
 import 'package:streamate_flutter_app/shared/widgets/large_primary_button.dart';
 import 'package:streamate_flutter_app/shared/styles.dart' as styles;
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart' as texts;
@@ -103,15 +105,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
               // cerrar sesión -----------
               Positioned(
                 bottom: 0,
-                child: LargeButton(
-                  backgroundColor: MyColors.textoError,
-                  onPressed: (){
-                    // TODO quitar
-                    //context.read<AuthBloc>().add(LogOut());
-                    context.read<SettingBloc>().add(ChangeStreamTitle(idBroadCaster: widget.user.id, newTitle:_textEditingControllerTitle.text.toString() ));
-                  }, 
-                child: const  Text('Cerrar sesión',style: styles.textStyleButton,)
-                        ),
+                left: 0,
+                right: 0,
+                child: Align(
+                  alignment:Alignment.bottomCenter,
+                  child: LargeButton(
+                    backgroundColor: MyColors.textoError,
+                    onPressed: (){
+                      Utils.showConfirmDialog(
+                        context, 
+                        texts.logoutTitleDialog,
+                        const Text(texts.logoutContentDialog,style: TextStyle(color: MyColors.textoSobreClaro),), 
+                        () => context.read<AuthBloc>().add(LogOut()));
+                    }, 
+                  child: const  Text('Cerrar sesión',style: styles.textStyleButton,)
+                          ),
+                ),
               )
             ],
           ),
@@ -145,10 +154,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const Text('Título del directo',style: styles.textStyleTitle2,),
         const SizedBox(height: 8,),
         Focus(
-          onFocusChange: (value) {
-            log(value ? "Tiene foco" : "No tiene foco");
+          onFocusChange: (hasFocus) {
+            if(!hasFocus){
+              }
           },
           child: TextField(
+            onSubmitted: (value) {
+              context.read<SettingBloc>().add(ChangeStreamTitle(newTitle: value, idBroadCaster: widget.user.id));
+            },
             minLines: 5,
             maxLines: 5,
             decoration: inputStyle,
@@ -161,16 +174,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   ///
   Widget _buildCategory({StreamCategory? streamCategory}){
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Categoría',style: styles.textStyleTitle2,),
-        const SizedBox(height: 8,),
-        TextField(
-          controller: _textEditingControllerCategory,
-          decoration: inputStyle.copyWith(hintText: 'Buscar categoría',prefixIcon: const Icon(Icons.search)),
-        )
-      ],
+    return GestureDetector(
+      onTap: () {
+        Navigator.of(context).push(MaterialPageRoute(builder: (context) => CategoryList(initialCategory: streamCategory,user: widget.user,),));
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('Categoría',style: styles.textStyleTitle2,),
+          const SizedBox(height: 8,),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(6)),
+              color: MyColors.backgroundColorSecondary,
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.search),
+                const SizedBox(width: 8,),
+                Text(streamCategory?.gameName ?? 'Buscar categoría'),
+              ],
+            ),
+          ),
+          
+        ],
+      ),
     );
   }
 

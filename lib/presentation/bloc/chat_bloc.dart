@@ -24,11 +24,12 @@ import 'package:streamate_flutter_app/domain/usecases/get_emotes_use_case.dart';
 import 'package:streamate_flutter_app/domain/usecases/update_chat_setting_use_case.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_state.dart';
-import 'package:streamate_flutter_app/shared/widgets/twitch_chat_notice_message.dart';
-import 'package:streamate_flutter_app/shared/widgets/twitch_chat_private_message.dart';
+import 'package:streamate_flutter_app/shared/widgets/twitch_chat_items/twitch_chat_private_message.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:streamate_flutter_app/shared/widgets/twitch_chat_user_notice_message.dart';
 import 'package:streamate_flutter_app/shared/texto_para_localizar.dart' as texts;
+
+import '../../shared/widgets/twitch_chat_items/twitch_chat_notice_message.dart';
+import '../../shared/widgets/twitch_chat_items/twitch_chat_user_notice_message.dart';
 
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {

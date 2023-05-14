@@ -46,3 +46,5 @@ const followersOnlyTitle = 'Solo seguidores';
 const followersOnlyBody = 'Los usuarios pueden chatear en tu stream si han sido seguidores durante al menos:';
 const slowModeTitle = 'Modo lento';
 const slowModeBody = 'Haz que los usuarios tengan que esperar entre un mensaje y otro';
+const logoutTitleDialog = "Cerrar Sesión";
+const logoutContentDialog = "¿Estás seguro que quieres cerrar sesión?";

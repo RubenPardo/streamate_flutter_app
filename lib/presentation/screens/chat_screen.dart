@@ -8,8 +8,9 @@ import 'package:streamate_flutter_app/presentation/bloc/chat_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_event.dart';
 import 'package:streamate_flutter_app/presentation/bloc/chat_state.dart';
 import 'package:streamate_flutter_app/shared/colors.dart';
-import 'package:streamate_flutter_app/shared/widgets/chat_settings_widget.dart';
-import 'package:streamate_flutter_app/shared/widgets/twitch_chat_private_message.dart';
+import 'package:streamate_flutter_app/shared/widgets/twitch_chat_items/chat_settings_widget.dart';
+
+import '../../shared/widgets/twitch_chat_items/twitch_chat_private_message.dart';
 
 class ChatScreen extends StatefulWidget {
 

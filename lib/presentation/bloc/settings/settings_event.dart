@@ -1,3 +1,5 @@
+import 'package:streamate_flutter_app/data/model/stream_category.dart';
+
 abstract class SettingsEvent{}
 
 class InitSettings extends SettingsEvent{
@@ -12,4 +14,13 @@ class ChangeStreamTitle extends SettingsEvent{
   ChangeStreamTitle({required this.newTitle, required this.idBroadCaster});
 }
 
-class ChangeStreamCategory extends SettingsEvent{}
+class ChangeStreamCategory extends SettingsEvent{
+  final StreamCategory category;
+  final String idBroadCaster;
+  ChangeStreamCategory({required this.category, required this.idBroadCaster});
+}
+
+class SearchStreamCategory extends SettingsEvent{
+  final String category;
+  SearchStreamCategory({required this.category});
+}
