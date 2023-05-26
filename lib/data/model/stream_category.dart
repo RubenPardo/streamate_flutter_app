@@ -15,8 +15,16 @@ class StreamCategory{
     );
   }
 
+  
   @override
   String toString() {
     return 'StreamCategory: [gameId: $gameId, gameName: $gameName]';
   }
+
+  @override
+  bool operator ==(other) => other is StreamCategory && other.gameId == gameId;
+  @override
+  int get hashCode => Object.hash(gameName.hashCode, gameId.hashCode);
+
+  
 }

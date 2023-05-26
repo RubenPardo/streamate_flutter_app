@@ -31,12 +31,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   final TextEditingController _textEditingControllerTitle = TextEditingController();
   final TextEditingController _textEditingControllerCategory = TextEditingController();
+  
+  late String _lastTitleSaved;
+  late StreamCategory _lastCategorySaved;
+
+  String? _newTitleToSave;
+  StreamCategory? _newCategoryToSave;
+
+
 
   @override
   void initState() {
     super.initState();
     context.read<SettingBloc>().add(InitSettings(idBroadCaster: widget.user.id, fromMemory: context.read<SettingBloc>().channelInfo!=null));
-  }
+  } 
   @override
   void dispose() {
     super.dispose();
@@ -62,9 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           padding: const EdgeInsets.all(16),
           child: Stack(
             children: [
-              
               Column(
-      
                 children: [
                   // perfil ------------
                   _buildProfile(),
@@ -81,6 +87,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             const SizedBox(height: 32,),
                             // categoria ------------
                             _buildCategory(streamCategory: state is SettingsLoaded ? state.channelInfo.streamCategory : null),
+                            _canSaveSettings() ? Padding(
+                              padding: const EdgeInsets.only(top: 48.0),
+                              child: _buildSaveSettings(),
+                            ) : const SizedBox(),
                           ],
                         );
                       }
@@ -92,6 +102,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       // con un set state en el listener del bloc
                       if(state is SettingsLoaded){
                         setState(() {
+
+                          _lastTitleSaved = state.channelInfo.title;
+                          _lastCategorySaved = state.channelInfo.streamCategory;
+
+                          _newTitleToSave = state.channelInfo.title;
+                          _newCategoryToSave = state.channelInfo.streamCategory;
+
                           _textEditingControllerTitle.text = state.channelInfo.title;
                           _textEditingControllerCategory.text = state.channelInfo.streamCategory.gameName;
                         });
@@ -153,20 +170,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         const Text('Título del directo',style: styles.textStyleTitle2,),
         const SizedBox(height: 8,),
-        Focus(
-          onFocusChange: (hasFocus) {
-            if(!hasFocus){
-              }
+        TextField(
+          onChanged: (value) {
+            setState(() {
+              _newTitleToSave = value;
+            });
           },
-          child: TextField(
-            onSubmitted: (value) {
-              context.read<SettingBloc>().add(ChangeStreamTitle(newTitle: value, idBroadCaster: widget.user.id));
-            },
-            minLines: 5,
-            maxLines: 5,
-            decoration: inputStyle,
-            controller: _textEditingControllerTitle,
-          ),
+          minLines: 1,
+          maxLines: 5,
+          decoration: inputStyle,
+          controller: _textEditingControllerTitle,
         )
       ],
     );
@@ -175,8 +188,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
   ///
   Widget _buildCategory({StreamCategory? streamCategory}){
     return GestureDetector(
-      onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(builder: (context) => CategoryList(initialCategory: streamCategory,user: widget.user,),));
+      onTap: () async {
+       StreamCategory? category = await Navigator.of(context).push(MaterialPageRoute(builder: (context) => CategoryList(initialCategory: streamCategory,user: widget.user,),));
+       if(category!=null){
+        setState(() {
+          _newCategoryToSave = category;
+        });
+       }
+      
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -190,10 +209,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
               color: MyColors.backgroundColorSecondary,
             ),
             child: Row(
+              mainAxisSize: MainAxisSize.max,
               children: [
                 const Icon(Icons.search),
                 const SizedBox(width: 8,),
-                Text(streamCategory?.gameName ?? 'Buscar categoría'),
+                Text(_newCategoryToSave?.gameName ?? 'Buscar categoría',overflow: TextOverflow.ellipsis,softWrap: false,),
               ],
             ),
           ),
@@ -203,5 +223,32 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
+   ///
+  Widget _buildSaveSettings(){
+    return LargeButton(
+      onPressed: (){
+        if(_newCategoryToSave!=null){
+           context.read<SettingBloc>().add(ChangeStreamCategory(category: _newCategoryToSave!, idBroadCaster: widget.user.id));
+        }
+       if(_newTitleToSave!=null){
+          context.read<SettingBloc>().add(ChangeStreamTitle(newTitle: _newTitleToSave!, idBroadCaster: widget.user.id));
+       }
+      },
+      backgroundColor: MyColors.secondaryColor, 
+      child: const Text(texts.save,style: styles.textStyleButton),
+
+    );
+  }
+
+
+
+  /// canSaveSettings() -> T/F
+  /// devuelve true si la categoria o el titulo son diferentes
+  bool _canSaveSettings(){
+    if(_newTitleToSave == null || _newCategoryToSave==null){
+      return false;
+    }
+    return (_newTitleToSave != _lastTitleSaved) || (_newCategoryToSave != _lastCategorySaved);
+  }
 
 }

@@ -48,3 +48,4 @@ const slowModeTitle = 'Modo lento';
 const slowModeBody = 'Haz que los usuarios tengan que esperar entre un mensaje y otro';
 const logoutTitleDialog = "Cerrar Sesión";
 const logoutContentDialog = "¿Estás seguro que quieres cerrar sesión?";
+const save = "Guardar";

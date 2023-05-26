@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,7 +6,6 @@ import 'package:streamate_flutter_app/data/model/user.dart';
 import 'package:streamate_flutter_app/presentation/bloc/category/category_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/settings/settings_bloc.dart';
 import 'package:streamate_flutter_app/presentation/bloc/settings/settings_event.dart';
-import 'package:streamate_flutter_app/presentation/bloc/settings/settings_state.dart';
 import 'package:streamate_flutter_app/shared/widgets/category_list_item.dart';
 
 class CategoryList extends StatefulWidget {
@@ -83,8 +81,8 @@ class _CategoryListState extends State<CategoryList> {
       itemBuilder: (context, index) {
         return GestureDetector(
           onTap: () {
-            context.read<SettingBloc>().add(ChangeStreamCategory(category: categories[index], idBroadCaster: widget.user.id));
-            Navigator.of(context).pop();
+            
+            Navigator.of(context).pop(categories[index]);
           },
           child: CategoryListItem(category: categories[index]));
       },
