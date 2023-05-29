@@ -38,39 +38,19 @@ class SettingBloc extends Bloc<SettingsEvent,SettingsState>{
       },
     );
 
-    on<ChangeStreamCategory>(
+    on<ChangeStreamSettings>(
       (event, emit) async{
         try{
             
             // obtener el titulo y la categoria del directo
             emit(SettingsLoading());
             StreamCategory newCategory = event.category;
-            log(newCategory.gameId);
-            bool valid = await _channelRepository.updateChannelInfo(newGameId: newCategory.gameId, idBroadCaster: event.idBroadCaster);
+            String newTitle = event.newTitle;
+
+            bool valid = await _channelRepository.updateChannelInfo(newGameId: newCategory.gameId,newTitle: newTitle, idBroadCaster: event.idBroadCaster);
             // si ha ido todo ok cambiar el channel info por los datos nuevos y volver a emitirlos
             if(valid){
               channelInfo!.streamCategory = newCategory;
-            }
-            emit(SettingsLoaded(channelInfo: channelInfo!));
-           
-
-            
-          }catch(e){
-            emit(SettingsError());
-          }
-      },
-    );
-
-    on<ChangeStreamTitle>(
-      (event, emit) async{
-          try{
-            
-            // obtener el titulo y la categoria del directo
-            emit(SettingsLoading());
-            String newTitle = event.newTitle;
-            bool valid = await _channelRepository.updateChannelInfo(newTitle: newTitle, idBroadCaster: event.idBroadCaster);
-            // si ha ido todo ok cambiar el channel info por los datos nuevos y volver a emitirlos
-            if(valid){
               channelInfo!.title = newTitle;
             }
             emit(SettingsLoaded(channelInfo: channelInfo!));

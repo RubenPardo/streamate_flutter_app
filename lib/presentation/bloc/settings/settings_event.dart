@@ -8,16 +8,12 @@ class InitSettings extends SettingsEvent{
   InitSettings({required this.idBroadCaster, required this.fromMemory});
 }
 
-class ChangeStreamTitle extends SettingsEvent{
+
+class ChangeStreamSettings extends SettingsEvent{
+  final StreamCategory category;
   final String newTitle;
   final String idBroadCaster;
-  ChangeStreamTitle({required this.newTitle, required this.idBroadCaster});
-}
-
-class ChangeStreamCategory extends SettingsEvent{
-  final StreamCategory category;
-  final String idBroadCaster;
-  ChangeStreamCategory({required this.category, required this.idBroadCaster});
+  ChangeStreamSettings({required this.category,required this.newTitle , required this.idBroadCaster});
 }
 
 class SearchStreamCategory extends SettingsEvent{

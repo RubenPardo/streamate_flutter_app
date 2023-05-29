@@ -35,7 +35,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   late String _lastTitleSaved;
   late StreamCategory _lastCategorySaved;
 
-  String? _newTitleToSave;
   StreamCategory? _newCategoryToSave;
 
 
@@ -102,11 +101,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       // con un set state en el listener del bloc
                       if(state is SettingsLoaded){
                         setState(() {
-
                           _lastTitleSaved = state.channelInfo.title;
                           _lastCategorySaved = state.channelInfo.streamCategory;
 
-                          _newTitleToSave = state.channelInfo.title;
                           _newCategoryToSave = state.channelInfo.streamCategory;
 
                           _textEditingControllerTitle.text = state.channelInfo.title;
@@ -171,11 +168,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const Text('Título del directo',style: styles.textStyleTitle2,),
         const SizedBox(height: 8,),
         TextField(
-          onChanged: (value) {
-            setState(() {
-              _newTitleToSave = value;
-            });
-          },
           minLines: 1,
           maxLines: 5,
           decoration: inputStyle,
@@ -228,11 +220,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return LargeButton(
       onPressed: (){
         if(_newCategoryToSave!=null){
-           context.read<SettingBloc>().add(ChangeStreamCategory(category: _newCategoryToSave!, idBroadCaster: widget.user.id));
+           context.read<SettingBloc>().add(ChangeStreamSettings(category: _newCategoryToSave!,newTitle: _textEditingControllerTitle.text, idBroadCaster: widget.user.id));
         }
-       if(_newTitleToSave!=null){
-          context.read<SettingBloc>().add(ChangeStreamTitle(newTitle: _newTitleToSave!, idBroadCaster: widget.user.id));
-       }
       },
       backgroundColor: MyColors.secondaryColor, 
       child: const Text(texts.save,style: styles.textStyleButton),
@@ -245,10 +234,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
   /// canSaveSettings() -> T/F
   /// devuelve true si la categoria o el titulo son diferentes
   bool _canSaveSettings(){
-    if(_newTitleToSave == null || _newCategoryToSave==null){
+    if(_newCategoryToSave==null){
       return false;
     }
-    return (_newTitleToSave != _lastTitleSaved) || (_newCategoryToSave != _lastCategorySaved);
+    return (_textEditingControllerTitle.text != _lastTitleSaved) || (_newCategoryToSave != _lastCategorySaved);
   }
 
 }
