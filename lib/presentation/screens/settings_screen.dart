@@ -168,6 +168,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         const Text('Título del directo',style: styles.textStyleTitle2,),
         const SizedBox(height: 8,),
         TextField(
+          onChanged: (value) => setState(() {}),
           minLines: 1,
           maxLines: 5,
           decoration: inputStyle,
