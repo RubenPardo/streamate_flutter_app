@@ -150,7 +150,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       children: [
         Flexible(
           flex: 1,
-          child: Image.network(widget.user.profileImageUrl)),
+          child: Image.network(widget.user.profileImageUrl,cacheHeight: 190,)),
         const SizedBox(width: 16,),
         Flexible(
           flex: 4,

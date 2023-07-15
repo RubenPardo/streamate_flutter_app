@@ -88,8 +88,12 @@ class _OBSScreenState extends State<OBSScreen> {
                 ),
                _buildScenes(),
                const SizedBox(height: 8,),
-              const Expanded(child: Divider(color: Colors.white, thickness: 1, indent: 24,endIndent: 24,)),
-               const Padding( padding: EdgeInsets.all(16),
+                Column(
+                  children: const [
+                    Divider(color: Colors.white, thickness: 1, indent: 24,endIndent: 24,),
+                  ],
+                ),
+                const Padding( padding: EdgeInsets.all(16),
                 child: Text('Mezclador de audio',style: TextStyle(fontWeight: FontWeight.bold),)),
                _buildAudioTracks()
                ]
@@ -459,7 +463,7 @@ class _OBSScreenState extends State<OBSScreen> {
     );
   }
 
-  Widget _buildSceneItem(OBSScene scene){
+   Widget _buildSceneItem(OBSScene scene){
     return GestureDetector(
       onTap: () {
         context.read<OBSBloc>().add(OBSChangeScene(scene: scene));

@@ -36,6 +36,7 @@ class OBSServiceImpl implements OBSService {
       _obsWebSocket = await ObsWebSocket.connect(
         'ws://$address:$port', 
         password: password,
+        timeout: const Duration(seconds: 30)
       ).catchError((error, stackTrace){
         print(error);
         print(stackTrace);
