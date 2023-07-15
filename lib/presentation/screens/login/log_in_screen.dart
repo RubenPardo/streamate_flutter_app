@@ -102,7 +102,8 @@ class _LogInScreenState extends State<LogInScreen> {
     );
   }
 
-  Widget _buildBody(){
+  Widget _buildBody2(){
+    debugInvertOversizedImages = true;
     return Stack(
       children: [
         Align(
@@ -149,7 +150,10 @@ class _LogInScreenState extends State<LogInScreen> {
                   child: Stack(
                   alignment: Alignment.center,
                     children: const [
-                      Align(alignment: Alignment.centerLeft, child: Image(image: AssetImage('assets/images/logo_twitch_bw.png',),height: 48),),
+                      Align(alignment: Alignment.centerLeft, 
+                        child: Image(
+                          image: AssetImage('assets/images/logo_twitch_bw.png',),height: 48, ),),
+                          
                       Text(iniciarSesion, style: textStyleButton,),
                     ],
                   ),
@@ -165,5 +169,91 @@ class _LogInScreenState extends State<LogInScreen> {
       ],
     );
   }
+
+  Widget _buildBody() {
+    debugInvertOversizedImages = true;
+  return Stack(
+    children: [
+      Align(
+        alignment: Alignment.topLeft,
+        child: Stack(
+          children: [
+            // Titulo ------------------------------------------------------------------
+            const Image(image: AssetImage("assets/images/item_fondo.png")),
+            Padding(
+              padding: EdgeInsets.only(
+                top: MediaQuery.of(context).size.height / 11,
+                left: 32,
+              ),
+              child: Text(
+                appTitle,
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
+            ),
+          ],
+        ),
+      ),
+      Padding(
+        padding: EdgeInsets.only(
+          left: 32,
+          right: 32,
+          top: MediaQuery.of(context).size.height / 4,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.max,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Texto ----------------------------------------------
+            Container(
+              padding: const EdgeInsets.only(left: 8, right: 8, top: 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Text(
+                    loginDescription,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyLarge,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    loginBodyDescription,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 32),
+            // BOTON -----------------------------------------------------------------
+            LargeButton(
+              theresError: _isError,
+              messageError: _messageError,
+              onPressed: () {
+                context.read<AuthBloc>().add(Autorizarse()); // Empezar Login
+              },
+              child: Stack(
+                alignment: Alignment.center,
+                children:  [
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Image.asset('assets/images/logo_twitch_bw.png',cacheHeight: 48,),
+                  ),
+                 const Text(iniciarSesion, style: textStyleButton),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+      Align(
+        alignment: Alignment.bottomRight,
+        child: Image(
+          image: const AssetImage("assets/images/item_fondo_inferior.png"),
+          width: MediaQuery.of(context).size.width / 1.6,
+        ),
+      ),
+    ],
+  );
+}
 
 }

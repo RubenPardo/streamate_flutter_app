@@ -16,7 +16,3 @@ class ChangeStreamSettings extends SettingsEvent{
   ChangeStreamSettings({required this.category,required this.newTitle , required this.idBroadCaster});
 }
 
-class SearchStreamCategory extends SettingsEvent{
-  final String category;
-  SearchStreamCategory({required this.category});
-}
